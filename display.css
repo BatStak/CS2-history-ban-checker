@@ -1,3 +1,13 @@
+#banchecker-menu {
+  padding: 0 14px;
+}
+
+#status-bar,
+#stats-results {
+  margin: 8px 0;
+  white-space: pre-wrap;
+}
+
 .banchecker-red {
   color: #f00;
 }

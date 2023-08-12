@@ -1,14 +1,4 @@
-let continue_token = null;
-let sessionid = null;
-let profileURI = null;
-let tabURIparam = 'matchhistorycompetitive';
-
 const maxRetries = 3;
-
-let loadingWholeHistoryCounter = 0;
-let loadingWholeHistory = false;
-
-let apikey = '';
 
 const banStats = {
   vacBans: 0,
@@ -26,12 +16,19 @@ const funStats = {
   totalTime: 0
 };
 
+let profileURI = null;
+let tabURIparam = 'matchhistorycompetitive';
+let timerLoadMatchHistory = null;
+let mandatoryStatus = '';
+let apikey = '';
 let waitTimeRowIndex = 3;
 let timeRowIndex = 4;
 
-const getSteamID64 = minProfile => '76' + (parseInt(minProfile) + 561197960265728);
+function getSteamID64(minProfile) {
+  return '76' + (parseInt(minProfile) + 561197960265728);
+}
 
-const parseTime = time => {
+function parseTime(time) {
   let timeSecs = 0;
   if (time.includes(':')) {
     const i = time.indexOf(':');
@@ -41,8 +38,9 @@ const parseTime = time => {
     timeSecs += parseInt(time);
   }
   return timeSecs;
-};
-const timeString = time => {
+}
+
+function timeString(time) {
   let secs = time;
   const days = Math.floor(secs / (24 * 60 * 60));
   secs %= 86400;
@@ -59,21 +57,25 @@ const timeString = time => {
   let result = `${hours}:${mins}:${secs}`;
   if (days) result = `${days.toString()}d ${result}`;
   return result;
-};
+}
 
-const statusBar = document.createElement('div');
-statusBar.style.margin = '8px 0';
-statusBar.style.whiteSpace = 'pre-wrap';
+function updateResults(text, append) {
+  if (append) {
+    statsResults.innerHTML = statsResults.innerHTML + '<br />' + text;
+  } else {
+    statsResults.innerHTML = text;
+  }
+}
 
-const updateStatus = (text, append) => {
+function updateStatus(text, append) {
   if (append) {
     statusBar.textContent = statusBar.textContent + '\n' + text;
   } else {
     statusBar.textContent = (mandatoryStatus ? mandatoryStatus + '\n' : '') + text;
   }
-};
+}
 
-const initVariables = () => {
+function initVariables() {
   const profileAnchor = document.querySelector('#global_actions .user_avatar');
   if (!profileAnchor) {
     updateStatus('Error: .user_avatar element was not found');
@@ -87,7 +89,6 @@ const initVariables = () => {
   if (!matchContinueToken) {
     updateStatus('Error: g_sGcContinueToken was not found');
   }
-  continue_token = matchContinueToken[1];
   const scriptTags = document.querySelectorAll('script');
   let matchSessionID = false;
   for (const scriptTag of scriptTags) {
@@ -100,7 +101,6 @@ const initVariables = () => {
   if (!matchSessionID) {
     updateStatus('Error: g_sessionID was not found');
   }
-  sessionid = matchSessionID[1];
   const tabOnEl = document.querySelector('.tabOn');
   if (tabOnEl) {
     tabURIparam = tabOnEl.parentNode.id.split('_').pop();
@@ -112,12 +112,9 @@ const initVariables = () => {
   }
 
   if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
-};
+}
 
-const funStatsBar = document.createElement('div');
-funStatsBar.setAttribute('id', 'funstats-bar');
-
-const updateStats = () => {
+function updateStats() {
   if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') return;
   const profileURItrimmed = profileURI.replace(/\/$/, '');
   const myAnchors = document.querySelectorAll('.inner_name .playerAvatar ' + `a[href="${profileURItrimmed}"]:not(.banchecker-counted)`);
@@ -156,9 +153,9 @@ const updateStats = () => {
     `(K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}\n` +
     `Total wait time: ${timeString(funStats.totalWaitTime)}\n` +
     `Total match time: ${timeString(funStats.totalTime)}`;
-};
+}
 
-const formatMatchTables = () => {
+function formatMatchTables() {
   const daysSince = dateString => {
     const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
     let daysSinceMatch = -1;
@@ -202,9 +199,9 @@ const formatMatchTables = () => {
       table.classList.add('banchecker-formatted');
     });
   }
-};
+}
 
-const checkBans = players => {
+function checkBans(players) {
   const uniquePlayers = [...new Set(players)];
   let batches = uniquePlayers.reduce((arr, player, i) => {
     const batchIndex = Math.floor(i / 100);
@@ -307,9 +304,9 @@ const checkBans = players => {
   } else {
     bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
   }
-};
+}
 
-const checkLoadedMatchesForBans = () => {
+function checkLoadedMatchesForBans() {
   bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
   if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') {
     const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
@@ -356,29 +353,22 @@ const checkLoadedMatchesForBans = () => {
     playersArr.push(player.dataset.steamid64);
   });
   checkBans(playersArr);
-};
+}
 
-const menuTop = document.createElement('div');
-const extensionContainer = document.createElement('div');
-extensionContainer.style.padding = '0 14px';
-extensionContainer.id = 'banchecker-menu';
-extensionContainer.appendChild(menuTop);
-
-const createSteamButton = text => {
+function createSteamButton(text) {
   const button = document.createElement('button');
   button.setAttribute('type', 'button');
   button.classList.add('btn-default');
   const textNode = document.createTextNode(text);
   button.appendChild(textNode);
   return button;
-};
+}
 
-getMatches = () => {
+function getMatches() {
   return document.querySelectorAll('.csgo_scoreboard_root > tbody > tr');
-};
+}
 
-let timerLoadMatchHistory = null;
-loadMatchHisory = async () => {
+async function loadMatchHisory() {
   loadMatchHistoryStopButton.style.display = 'inline-block';
   bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
   const since = localStorage.getItem('banchecker-load-match-history-since');
@@ -422,120 +412,17 @@ loadMatchHisory = async () => {
   updateStatus(`${status} Done !`);
   bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
   loadMatchHistoryStopButton.style.display = 'none';
-};
+}
 
-let mandatoryStatus = '';
-
-const menuBottom = document.createElement('div');
-const statsResults = document.createElement('div');
-statsResults.style.margin = '8px 0';
-statsResults.style.whiteSpace = 'pre-wrap';
-extensionContainer.appendChild(statusBar);
-extensionContainer.appendChild(funStatsBar);
-extensionContainer.appendChild(menuBottom);
-extensionContainer.appendChild(statsResults);
-
-const updateResults = (text, append) => {
-  if (append) {
-    statsResults.innerHTML = statsResults.innerHTML + '<br />' + text;
-  } else {
-    statsResults.innerHTML = text;
-  }
-};
-
-document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
-
-initVariables();
-formatMatchTables();
-updateStats();
-
-const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
-const callback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.attributeName === 'style') {
-      if (loadMoreButton.style.display !== 'none') {
-        formatMatchTables();
-        updateStats();
-      }
-    }
-  }
-};
-const observer = new MutationObserver(callback);
-observer.observe(loadMoreButton, { attributes: true });
-
-const showSettings = () => {
+function showSettings() {
   optionsContainer.style.display = 'block';
-};
+}
 
 function saveSettings() {
   var yourapikey = document.getElementById('yourapikey').value;
   chrome.storage.sync.set({ yourapikey: yourapikey });
   optionsContainer.style.display = 'none';
 }
-
-const checkBansButton = createSteamButton('Check loaded matches for bans');
-checkBansButton.onclick = () => {
-  checkLoadedMatchesForBans();
-};
-
-const loadMatchHistoryButton = createSteamButton('Load match history since');
-loadMatchHistoryButton.onclick = () => {
-  localStorage.setItem('banchecker-load-match-history-since', document.getElementById('load-match-history-since')?.value);
-  loadMatchHisory();
-};
-const loadMatchHistoryStopButton = createSteamButton('Stop');
-loadMatchHistoryStopButton.style.display = 'none';
-loadMatchHistoryStopButton.onclick = () => {
-  if (timerLoadMatchHistory) {
-    clearInterval(timerLoadMatchHistory);
-    timerLoadMatchHistory = null;
-  }
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
-  loadMatchHistoryStopButton.style.display = 'none';
-};
-
-const dateSinceHistoryInput = document.createElement('input');
-dateSinceHistoryInput.setAttribute('type', 'text');
-dateSinceHistoryInput.setAttribute('id', 'load-match-history-since');
-dateSinceHistoryInput.style.width = '100px';
-let dateAsString = localStorage.getItem('banchecker-load-match-history-since');
-if (!dateAsString) {
-  const date = new Date();
-  date.setDate(date.getDate() - 500);
-  dateAsString = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
-}
-dateSinceHistoryInput.value = dateAsString;
-
-const dateSinceHistoryPlaceholder = document.createElement('div');
-dateSinceHistoryPlaceholder.style.display = 'inline-block';
-dateSinceHistoryPlaceholder.style.margin = '0 10px';
-dateSinceHistoryPlaceholder.innerHTML = '(YYYY-MM-DD)';
-
-const bancheckerSettingsButton = createSteamButton('Set API Key and options');
-bancheckerSettingsButton.onclick = () => showSettings();
-menuTop.appendChild(bancheckerSettingsButton);
-menuTop.appendChild(loadMatchHistoryButton);
-menuTop.appendChild(dateSinceHistoryInput);
-menuTop.appendChild(dateSinceHistoryPlaceholder);
-menuTop.appendChild(loadMatchHistoryStopButton);
-menuBottom.appendChild(checkBansButton);
-
-const optionsContainer = document.createElement('div');
-optionsContainer.setAttribute('id', 'banchecker-options');
-const optionsContainerInner = document.createElement('div');
-const optionsCloseButton = document.createElement('button');
-optionsCloseButton.innerText = 'Save';
-optionsCloseButton.setAttribute('type', 'button');
-optionsCloseButton.onclick = () => saveSettings();
-optionsContainerInner.innerHTML = `
-Your API key:
-<input type="text" id="yourapikey" size="35" />
-<br />
-<a href="http://steamcommunity.com/dev/apikey" target="_blank">Get your API Key here</a><br />
-`;
-optionsContainerInner.appendChild(optionsCloseButton);
-optionsContainer.appendChild(optionsContainerInner);
-extensionContainer.appendChild(optionsContainer);
 
 async function banstats() {
   const conf = banstatsConfig;
@@ -727,6 +614,114 @@ async function banstats() {
 
   bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
 }
+
+const extensionContainer = document.createElement('div');
+extensionContainer.setAttribute('id', 'banchecker-menu');
+
+const statusBar = document.createElement('div');
+statusBar.setAttribute('id', 'status-bar');
+
+const funStatsBar = document.createElement('div');
+funStatsBar.setAttribute('id', 'funstats-bar');
+
+const menuTop = document.createElement('div');
+
+const menuBottom = document.createElement('div');
+
+const statsResults = document.createElement('div');
+statsResults.setAttribute('id', 'stats-results');
+
+extensionContainer.appendChild(menuTop);
+extensionContainer.appendChild(statusBar);
+extensionContainer.appendChild(menuBottom);
+extensionContainer.appendChild(statsResults);
+extensionContainer.appendChild(funStatsBar);
+
+document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
+
+initVariables();
+formatMatchTables();
+updateStats();
+
+const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
+const callback = (mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.attributeName === 'style') {
+      if (loadMoreButton.style.display !== 'none') {
+        formatMatchTables();
+        updateStats();
+      }
+    }
+  }
+};
+const observer = new MutationObserver(callback);
+observer.observe(loadMoreButton, { attributes: true });
+
+const checkBansButton = createSteamButton('Check loaded matches for bans');
+checkBansButton.onclick = () => {
+  checkLoadedMatchesForBans();
+};
+
+const loadMatchHistoryButton = createSteamButton('Load match history since');
+loadMatchHistoryButton.onclick = () => {
+  localStorage.setItem('banchecker-load-match-history-since', document.getElementById('load-match-history-since')?.value);
+  loadMatchHisory();
+};
+
+const loadMatchHistoryStopButton = createSteamButton('Stop');
+loadMatchHistoryStopButton.style.display = 'none';
+loadMatchHistoryStopButton.onclick = () => {
+  if (timerLoadMatchHistory) {
+    clearInterval(timerLoadMatchHistory);
+    timerLoadMatchHistory = null;
+  }
+  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
+  loadMatchHistoryStopButton.style.display = 'none';
+};
+
+const dateSinceHistoryInput = document.createElement('input');
+dateSinceHistoryInput.setAttribute('type', 'text');
+dateSinceHistoryInput.setAttribute('id', 'load-match-history-since');
+dateSinceHistoryInput.style.width = '100px';
+let dateAsString = localStorage.getItem('banchecker-load-match-history-since');
+if (!dateAsString) {
+  const date = new Date();
+  date.setDate(date.getDate() - 500);
+  dateAsString = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
+}
+dateSinceHistoryInput.value = dateAsString;
+
+const dateSinceHistoryPlaceholder = document.createElement('div');
+dateSinceHistoryPlaceholder.style.display = 'inline-block';
+dateSinceHistoryPlaceholder.style.margin = '0 10px';
+dateSinceHistoryPlaceholder.innerHTML = '(YYYY-MM-DD)';
+
+const bancheckerSettingsButton = createSteamButton('Set API Key and options');
+bancheckerSettingsButton.onclick = () => showSettings();
+
+menuTop.appendChild(bancheckerSettingsButton);
+menuTop.appendChild(loadMatchHistoryButton);
+menuTop.appendChild(dateSinceHistoryInput);
+menuTop.appendChild(dateSinceHistoryPlaceholder);
+menuTop.appendChild(loadMatchHistoryStopButton);
+menuBottom.appendChild(checkBansButton);
+
+const optionsContainer = document.createElement('div');
+optionsContainer.setAttribute('id', 'banchecker-options');
+const optionsContainerInner = document.createElement('div');
+const optionsCloseButton = document.createElement('button');
+optionsCloseButton.innerText = 'Save';
+optionsCloseButton.setAttribute('type', 'button');
+optionsCloseButton.onclick = () => saveSettings();
+optionsContainerInner.innerHTML = `
+Your API key:
+<input type="text" id="yourapikey" size="35" />
+<br />
+<a href="http://steamcommunity.com/dev/apikey" target="_blank">Get your API Key here</a><br />
+`;
+optionsContainerInner.appendChild(optionsCloseButton);
+optionsContainer.appendChild(optionsContainerInner);
+extensionContainer.appendChild(optionsContainer);
 
 const banstatsConfig = {
   displayOnlyGamesWithBanAfterWhenFinished: false, // to remove in DOM matches with no red ban

@@ -46,13 +46,7 @@ function gameTimeStamp(steamTime) {
       var minutes = match[2];
       if (match[3] == 'PM') hours = (parseInt(hours) + 12) % 24;
       var now = new Date();
-      var gameTime = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        hours,
-        minutes
-      );
+      var gameTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
       return Number(gameTime);
     }
   }
@@ -68,38 +62,25 @@ function scanPage(gamesArray) {
       var parser = new DOMParser();
       htmlDOM = parser.parseFromString(htmlString, 'text/html');
       htmlDOM.querySelectorAll('.coplayGroup').forEach(function (coplayGroup) {
-        var gameTime = gameTimeStamp(
-          coplayGroup.querySelector('.gameListRowItem').textContent
-        );
+        var gameTime = gameTimeStamp(coplayGroup.querySelector('.gameListRowItem').textContent);
         if (gameTime <= lastRecordedGameTime) {
           thisPageHasOldGames = true; // this game must have been scanned already, skipping
           return;
         } else {
-          var steamAppLink = coplayGroup
-            .querySelector('.gameLogo > a')
-            .getAttribute('href');
-          var steamAppID = steamAppLink.substring(
-            steamAppLink.lastIndexOf('/') + 1,
-            steamAppLink.length
-          ); // Game.appid
+          var steamAppLink = coplayGroup.querySelector('.gameLogo > a').getAttribute('href');
+          var steamAppID = steamAppLink.substring(steamAppLink.lastIndexOf('/') + 1, steamAppLink.length); // Game.appid
           var players = []; // Game.players
 
-          coplayGroup
-            .querySelectorAll('.persona')
-            .forEach(function (playerBlock) {
-              var miniprofile = playerBlock.dataset.miniprofile;
-              var steamid = playerBlock.dataset.steamid;
-              var name = playerBlock
-                .querySelector(':nth-child(4)')
-                .firstChild.nodeValue.trim();
-              if (
-                players.filter(e => e.miniprofile == miniprofile).length == 0
-              ) {
-                // Sometimes if player reconnected during a match he is shown twice in
-                // recently played page, we add only unique ones
-                players.push(new Player(miniprofile, steamid, name, false));
-              }
-            });
+          coplayGroup.querySelectorAll('.persona').forEach(function (playerBlock) {
+            var miniprofile = playerBlock.dataset.miniprofile;
+            var steamid = playerBlock.dataset.steamid;
+            var name = playerBlock.querySelector(':nth-child(4)').firstChild.nodeValue.trim();
+            if (players.filter(e => e.miniprofile == miniprofile).length == 0) {
+              // Sometimes if player reconnected during a match he is shown twice in
+              // recently played page, we add only unique ones
+              players.push(new Player(miniprofile, steamid, name, false));
+            }
+          });
 
           var thisGame = new Game(gameTime, steamAppID, players);
           gamesArray.push(thisGame);
@@ -123,12 +104,7 @@ function doneScanning(gamesArray) {
     allRecordedGames = gamesArray.concat(allRecordedGames);
   }
   chrome.storage.local.set({ games: allRecordedGames }, function () {
-    console.log(
-      'Saved ' +
-        gamesArray.length +
-        ' new game' +
-        (gamesArray.length == 1 ? '.' : 's.')
-    );
+    console.log('Saved ' + gamesArray.length + ' new game' + (gamesArray.length == 1 ? '.' : 's.'));
     console.log('Now start checking recorded profiles for bans...');
     banCheckProfiles();
   });
@@ -138,10 +114,7 @@ function startScanningRoutine() {
   chrome.storage.local.get('games', function (data) {
     allRecordedGames = data.games;
     console.log(allRecordedGames);
-    if (
-      typeof allRecordedGames === 'undefined' ||
-      allRecordedGames.length === 0
-    ) {
+    if (typeof allRecordedGames === 'undefined' || allRecordedGames.length === 0) {
       emptyStorage = true;
     } else {
       emptyStorage = false; // important!
@@ -163,11 +136,7 @@ function scanGames(players, games, apikey, iteration) {
     if (i >= players.length) break;
     listOfSteamID64.push(players[i].steamid);
   }
-  fetchURL =
-    'https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' +
-    apikey +
-    '&steamids=' +
-    listOfSteamID64.join(',');
+  fetchURL = 'https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' + apikey + '&steamids=' + listOfSteamID64.join(',');
   fetch(fetchURL)
     .then(response => response.json())
     .then(function (response) {
@@ -188,12 +157,7 @@ function scanGames(players, games, apikey, iteration) {
                 gameRecordedTime = game.time;
                 if (timeLastBan > gameRecordedTime) {
                   // Busted!
-                  Busted(
-                    gamePlayer,
-                    player.NumberOfVACBans,
-                    player.NumberOfGameBans,
-                    timeLastBan
-                  );
+                  Busted(gamePlayer, player.NumberOfVACBans, player.NumberOfGameBans, timeLastBan);
                 }
               }
             });
@@ -225,12 +189,9 @@ function scanGames(players, games, apikey, iteration) {
         });
         console.log(allRecordedGames);
         console.log('Updated time for scanned games');
-        chrome.storage.local.set(
-          { lastTimeScanned: rightNow, games: allRecordedGames },
-          function () {
-            console.log('Done for now.');
-          }
-        );
+        chrome.storage.local.set({ lastTimeScanned: rightNow, games: allRecordedGames }, function () {
+          console.log('Done for now.');
+        });
       }
     });
 }
@@ -269,13 +230,8 @@ function BanNotification(player, game, vacBans, gameBans) {
     function (notificationsGranted) {
       if (notificationsGranted) {
         chrome.storage.sync.get(['notificationsSetting'], function (data) {
-          if (
-            typeof data['notificationsSetting'] == 'undefined' ||
-            data.notificationsSetting == 'false'
-          ) {
-            console.log(
-              'We have notifications permissions but settings were disabled.'
-            );
+          if (typeof data['notificationsSetting'] == 'undefined' || data.notificationsSetting == 'false') {
+            console.log('We have notifications permissions but settings were disabled.');
           } else {
             var name = player.name;
             var lastTimePlayed = new Date(game.time);
@@ -289,32 +245,18 @@ function BanNotification(player, game, vacBans, gameBans) {
             } else if (gameBans == 0) {
               banType = 'VAC banned';
             }
-            var text =
-              'Player ' +
-              name +
-              ' got ' +
-              banType +
-              '. Last time you played together: ' +
-              lastTimePlayed +
-              '.';
-            chrome.notifications.clear(
-              'banchecker_ban_notification',
-              function () {
-                var notificationObj = {
-                  type: 'basic',
-                  title: 'Ban Checker for Steam',
-                  message: text,
-                  iconUrl: 'ow128.png'
-                };
-                chrome.notifications.create(
-                  'banchecker_ban_notification',
-                  notificationObj,
-                  function () {
-                    console.log('Notification sent.');
-                  }
-                );
-              }
-            );
+            var text = 'Player ' + name + ' got ' + banType + '. Last time you played together: ' + lastTimePlayed + '.';
+            chrome.notifications.clear('banchecker_ban_notification', function () {
+              var notificationObj = {
+                type: 'basic',
+                title: 'Ban Checker for Steam',
+                message: text,
+                iconUrl: 'ow128.png'
+              };
+              chrome.notifications.create('banchecker_ban_notification', notificationObj, function () {
+                console.log('Notification sent.');
+              });
+            });
           }
         });
       } else {
@@ -348,11 +290,7 @@ function banCheckProfiles() {
 
   chrome.storage.sync.get(['customapikey'], function (data) {
     if (typeof data['customapikey'] == 'undefined') {
-      var defaultkeys = [
-        '5DA40A4A4699DEE30C1C9A7BCE84C914',
-        '5970533AA2A0651E9105E706D0F8EDDC',
-        '2B3382EBA9E8C1B58054BD5C5EE1C36A'
-      ];
+      var defaultkeys = ['5DA40A4A4699DEE30C1C9A7BCE84C914', '5970533AA2A0651E9105E706D0F8EDDC', '2B3382EBA9E8C1B58054BD5C5EE1C36A'];
       var apikey = defaultkeys[Math.floor(Math.random() * 3)];
     } else {
       providedCustomAPIKey = true;
@@ -360,64 +298,46 @@ function banCheckProfiles() {
     }
 
     if (!providedCustomAPIKey) {
-      chrome.storage.local.get(
-        ['lastTimeScanned'],
-        function (lastTimeScannedData) {
-          console.log(
-            'Last time scanned: ' +
-              new Date(lastTimeScannedData.lastTimeScanned)
-          );
-          var rightNow = Number(new Date());
-          var yesterdaySameTime = rightNow - 24 * 60 * 60 * 1000;
-          if (
-            lastTimeScannedData.lastTimeScanned > yesterdaySameTime &&
-            lastTimeScannedData.lastTimeScanned != undefined
-          ) {
-            console.log(
-              'No custom API key provided and not enough time passed since last scan.'
-            );
-            return;
+      chrome.storage.local.get(['lastTimeScanned'], function (lastTimeScannedData) {
+        console.log('Last time scanned: ' + new Date(lastTimeScannedData.lastTimeScanned));
+        var rightNow = Number(new Date());
+        var yesterdaySameTime = rightNow - 24 * 60 * 60 * 1000;
+        if (lastTimeScannedData.lastTimeScanned > yesterdaySameTime && lastTimeScannedData.lastTimeScanned != undefined) {
+          console.log('No custom API key provided and not enough time passed since last scan.');
+          return;
+        } else {
+          if (lastTimeScannedData.lastTimeScanned == undefined) lastTimeScannedData.lastTimeScanned = 0;
+          // get latest games with hundred players or less to scan
+          if (typeof allRecordedGames === 'undefined' || allRecordedGames.length === 0) {
+            console.log('Nothing to scan, storage is empty.');
           } else {
-            if (lastTimeScannedData.lastTimeScanned == undefined)
-              lastTimeScannedData.lastTimeScanned = 0;
-            // get latest games with hundred players or less to scan
-            if (
-              typeof allRecordedGames === 'undefined' ||
-              allRecordedGames.length === 0
-            ) {
-              console.log('Nothing to scan, storage is empty.');
-            } else {
-              var gamesToScan = [];
-              var playersToScan = [];
-              allRecordedGames.forEach(function (game) {
-                if (playersToScan.length > 99) return;
-                game.players.forEach(function (player) {
-                  if (playersToScan.length > 99) {
-                    return;
-                  } else {
-                    playersToScan.push(player);
-                  }
-                });
-                gamesToScan.push(game);
+            var gamesToScan = [];
+            var playersToScan = [];
+            allRecordedGames.forEach(function (game) {
+              if (playersToScan.length > 99) return;
+              game.players.forEach(function (player) {
+                if (playersToScan.length > 99) {
+                  return;
+                } else {
+                  playersToScan.push(player);
+                }
               });
-              console.log('These players will be scanned now:');
-              console.log(playersToScan);
-              console.log('From these games:');
-              console.log(gamesToScan);
-              scanGames(playersToScan, gamesToScan, apikey, 0);
-            }
+              gamesToScan.push(game);
+            });
+            console.log('These players will be scanned now:');
+            console.log(playersToScan);
+            console.log('From these games:');
+            console.log(gamesToScan);
+            scanGames(playersToScan, gamesToScan, apikey, 0);
           }
         }
-      );
+      });
     } else {
       // For people with their own API key we'll scan every recorded game in a loop.
       // Each routine cycle we'll scan latest 200 players (to give priority to the most recent games)
       // and 800 older ones, keeping track on the latest scanned game so we continue from that point.
       // That's 10 API calls, Dota 2 dev forums suggest to have 1 second delay between each call.
-      if (
-        typeof allRecordedGames === 'undefined' ||
-        allRecordedGames.length === 0
-      ) {
+      if (typeof allRecordedGames === 'undefined' || allRecordedGames.length === 0) {
         console.log('Nothing to scan, storage is empty.');
       } else {
         // This array will store 10 arrays (or less if not enough games recorded).
@@ -447,9 +367,7 @@ function banCheckProfiles() {
             lastScannedGameTime = gamesToScan[gamesToScan.length - 1].time;
           } else {
             lastScannedGameTime = dataL.lastScannedGameTime;
-            if (
-              gamesToScan[gamesToScan.length - 1].time < lastScannedGameTime
-            ) {
+            if (gamesToScan[gamesToScan.length - 1].time < lastScannedGameTime) {
               lastScannedGameTime = gamesToScan[gamesToScan.length - 1].time;
             }
           }
@@ -473,16 +391,13 @@ function banCheckProfiles() {
             gamesToScan.push(game);
             lastScannedGameTime = game.time;
           });
-          chrome.storage.local.set(
-            { lastScannedGameTime: lastScannedGameTime },
-            function () {
-              console.log('These players will be scanned now:');
-              console.log(playersToScan);
-              console.log('From these games:');
-              console.log(gamesToScan);
-              scanGames(playersToScan, gamesToScan, apikey, 0);
-            }
-          );
+          chrome.storage.local.set({ lastScannedGameTime: lastScannedGameTime }, function () {
+            console.log('These players will be scanned now:');
+            console.log(playersToScan);
+            console.log('From these games:');
+            console.log(gamesToScan);
+            scanGames(playersToScan, gamesToScan, apikey, 0);
+          });
         });
       }
     }

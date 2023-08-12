@@ -30,8 +30,7 @@ const funStats = {
 let waitTimeRowIndex = 3;
 let timeRowIndex = 4;
 
-const getSteamID64 = minProfile =>
-  '76' + (parseInt(minProfile) + 561197960265728);
+const getSteamID64 = minProfile => '76' + (parseInt(minProfile) + 561197960265728);
 
 const parseTime = time => {
   let timeSecs = 0;
@@ -66,11 +65,11 @@ const timeString = time => {
 const statusBar = document.createElement('div');
 statusBar.style.margin = '8px 0';
 statusBar.style.whiteSpace = 'pre-wrap';
-const updateStatus = (text, accumulate) => {
-  if (accumulate) {
+const updateStatus = (text, append) => {
+  if (append) {
     statusBar.textContent = statusBar.textContent + '\n' + text;
   } else {
-    statusBar.textContent = text;
+    statusBar.textContent = (mandatoryStatus ? mandatoryStatus + '\n' : '') + text;
   }
 };
 
@@ -81,16 +80,10 @@ const initVariables = () => {
   }
   profileURI = profileAnchor.href;
   if (!document.querySelector('#load_more_button')) {
-    updateStatus(
-      'No "LOAD MORE HISTORY" button is present, seems like there are no more matches'
-    );
+    updateStatus('No "LOAD MORE HISTORY" button is present, seems like there are no more matches');
   }
-  const steamContinueScript = document.querySelector(
-    '#personaldata_elements_container+script'
-  );
-  const matchContinueToken = steamContinueScript.text.match(
-    /g_sGcContinueToken = '(\d+)'/
-  );
+  const steamContinueScript = document.querySelector('#personaldata_elements_container+script');
+  const matchContinueToken = steamContinueScript.text.match(/g_sGcContinueToken = '(\d+)'/);
   if (!matchContinueToken) {
     updateStatus('Error: g_sGcContinueToken was not found');
   }
@@ -134,13 +127,9 @@ funStatsBar.style.margin = '4px';
 funStatsBar.style.zIndex = '9';
 
 const updateStats = () => {
-  if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends')
-    return;
+  if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') return;
   const profileURItrimmed = profileURI.replace(/\/$/, '');
-  const myAnchors = document.querySelectorAll(
-    '.inner_name .playerAvatar ' +
-      `a[href="${profileURItrimmed}"]:not(.banchecker-counted)`
-  );
+  const myAnchors = document.querySelectorAll('.inner_name .playerAvatar ' + `a[href="${profileURItrimmed}"]:not(.banchecker-counted)`);
   myAnchors.forEach(anchorEl => {
     myMatchStats = anchorEl.closest('tr').querySelectorAll('td');
     funStats.totalKills += parseInt(myMatchStats[2].textContent, 10);
@@ -148,9 +137,7 @@ const updateStats = () => {
     funStats.totalDeaths += parseInt(myMatchStats[4].textContent, 10);
     anchorEl.classList.add('banchecker-counted');
   });
-  const matchesData = document.querySelectorAll(
-    '.val_left:not(.banchecker-counted)'
-  );
+  const matchesData = document.querySelectorAll('.val_left:not(.banchecker-counted)');
   funStats.numberOfMatches += matchesData.length;
   matchesData.forEach(matchData => {
     matchData.querySelectorAll('td').forEach((dataEl, index) => {
@@ -175,19 +162,14 @@ const updateStats = () => {
     `Total assists: ${funStats.totalAssists}\n` +
     `Total deaths: ${funStats.totalDeaths}\n` +
     `K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)} | ` +
-    `(K+A)/D: ${(
-      (funStats.totalKills + funStats.totalAssists) /
-      funStats.totalDeaths
-    ).toFixed(3)}\n` +
+    `(K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}\n` +
     `Total wait time: ${timeString(funStats.totalWaitTime)}\n` +
     `Total match time: ${timeString(funStats.totalTime)}`;
 };
 
 const formatMatchTables = () => {
   const daysSince = dateString => {
-    const matchDate = dateString.match(
-      /(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/
-    );
+    const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
     let daysSinceMatch = -1;
     if (matchDate.length > 6) {
       const year = parseInt(matchDate[1], 10);
@@ -205,61 +187,30 @@ const formatMatchTables = () => {
     return daysSinceMatch;
   };
   if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') {
-    document
-      .querySelectorAll(
-        '.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)'
-      )
-      .forEach(report => {
-        const dateEl = report.querySelector('td:first-child');
-        const daysSinceMatch = daysSince(dateEl.textContent);
-        const minProfile =
-          report.querySelector('.linkTitle').dataset.miniprofile;
-        report.dataset.steamid64 = getSteamID64(minProfile);
-        report.dataset.dayssince = daysSinceMatch;
-        report.classList.add('banchecker-profile');
-        report.classList.add('banchecker-formatted');
-      });
+    document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)').forEach(report => {
+      const dateEl = report.querySelector('td:first-child');
+      const daysSinceMatch = daysSince(dateEl.textContent);
+      const minProfile = report.querySelector('.linkTitle').dataset.miniprofile;
+      report.dataset.steamid64 = getSteamID64(minProfile);
+      report.dataset.dayssince = daysSinceMatch;
+      report.classList.add('banchecker-profile');
+      report.classList.add('banchecker-formatted');
+    });
   } else {
-    document
-      .querySelectorAll(
-        '.csgo_scoreboard_inner_right:not(.banchecker-formatted)'
-      )
-      .forEach(table => {
-        const leftColumn = table.parentElement.parentElement.querySelector(
-          '.csgo_scoreboard_inner_left'
-        );
-        const daysSinceMatch = daysSince(leftColumn.textContent);
-        table.querySelectorAll('tbody > tr').forEach((tr, i) => {
-          if (i === 0 || tr.childElementCount < 3) return;
-          const minProfile = tr.querySelector('.linkTitle').dataset.miniprofile;
-          const steamID64 = getSteamID64(minProfile);
-          tr.dataset.steamid64 = steamID64;
-          tr.dataset.dayssince = daysSinceMatch;
-          tr.classList.add('banchecker-profile');
-        });
-        table.classList.add('banchecker-formatted');
+    document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)').forEach(table => {
+      const leftColumn = table.parentElement.parentElement.querySelector('.csgo_scoreboard_inner_left');
+      const daysSinceMatch = daysSince(leftColumn.textContent);
+      table.querySelectorAll('tbody > tr').forEach((tr, i) => {
+        if (i === 0 || tr.childElementCount < 3) return;
+        const minProfile = tr.querySelector('.linkTitle').dataset.miniprofile;
+        const steamID64 = getSteamID64(minProfile);
+        tr.dataset.steamid64 = steamID64;
+        tr.dataset.dayssince = daysSinceMatch;
+        tr.classList.add('banchecker-profile');
       });
+      table.classList.add('banchecker-formatted');
+    });
   }
-};
-
-const fetchMatchHistory = () => {
-  updateStatus('Loading Match history...');
-  loadingWholeHistory = true;
-  const continueTextEl = document.querySelector(
-    '#load_more_button_continue_text'
-  );
-  const callback = (mutationList, observer) => {
-    for (const mutation of mutationList) {
-      if (mutation.attributeName === 'style') {
-        if (loadMoreButton.style.display === 'none') {
-          updateStatus('Looks like we fetched all available matches!', true);
-        }
-      }
-    }
-  };
-  const continueTextObserver = new MutationObserver(callback);
-  continueTextObserver.observe(continueTextEl, { attributes: true });
-  document.querySelector('#load_more_button').click();
 };
 
 const checkBans = players => {
@@ -304,13 +255,8 @@ const checkBans = players => {
           return;
         }
         json.players.forEach(player => {
-          const playerEls = document.querySelectorAll(
-            `tr[data-steamid64="${player.SteamId}"]`
-          );
-          const daySinceLastMatch = parseInt(
-            playerEls[0].dataset.dayssince,
-            10
-          );
+          const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
+          const daySinceLastMatch = parseInt(playerEls[0].dataset.dayssince, 10);
           let verdict = '';
           if (player.NumberOfVACBans > 0) {
             verdict += 'VAC';
@@ -373,18 +319,14 @@ const checkBans = players => {
 
 const checkLoadedMatchesForBans = () => {
   if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') {
-    const tableHeader = document.querySelector(
-      '.generic_kv_table > tbody > tr:first-child'
-    );
+    const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
     if (!tableHeader.classList.contains('banchecker-withcolumn')) {
       tableHeader.classList.add('banchecker-withcolumn');
       const bansHeader = document.createElement('th');
       bansHeader.textContent = 'Ban';
       tableHeader.appendChild(bansHeader);
     }
-    const uncheckedPlayers = document.querySelectorAll(
-      '.generic_kv_table > tbody > tr:not(.banchecker-withcolumn)'
-    );
+    const uncheckedPlayers = document.querySelectorAll('.generic_kv_table > tbody > tr:not(.banchecker-withcolumn)');
     uncheckedPlayers.forEach(tr => {
       tr.classList.add('banchecker-withcolumn');
       const bansPlaceholder = document.createElement('td');
@@ -393,9 +335,7 @@ const checkLoadedMatchesForBans = () => {
       tr.appendChild(bansPlaceholder);
     });
   } else {
-    const tables = document.querySelectorAll(
-      '.banchecker-formatted:not(.banchecker-withcolumn)'
-    );
+    const tables = document.querySelectorAll('.banchecker-formatted:not(.banchecker-withcolumn)');
     tables.forEach(table => {
       table.classList.add('banchecker-withcolumn');
       table.querySelectorAll('tr').forEach((tr, i) => {
@@ -416,9 +356,7 @@ const checkLoadedMatchesForBans = () => {
       });
     });
   }
-  const playersEl = document.querySelectorAll(
-    '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)'
-  );
+  const playersEl = document.querySelectorAll('.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)');
   let playersArr = [];
   playersEl.forEach(player => {
     player.classList.add('banchecker-checking');
@@ -472,37 +410,62 @@ const createSteamButton = (text, iconURI) => {
   return button;
 };
 
-const fetchButton = createSteamButton('Load whole match history');
-fetchButton.onclick = () => {
-  fetchMatchHistory();
-  fetchButton.onclick = () => {
-    updateStatus(
-      'This button was already pressed. Reload the page if you want to start over.'
-    );
-  };
+getMatches = () => {
+  return document.querySelectorAll('.csgo_scoreboard_root > tbody > tr');
 };
-menu.appendChild(fetchButton);
 
-const checkBansButton = createSteamButton('Check loaded matches for bans');
-checkBansButton.onclick = () => {
-  checkLoadedMatchesForBans();
-  if (!providedCustomAPIKey) checkBansButton.onclick = null;
+loadMatchHisory = async since => {
+  let status = '';
+  if (since) {
+    status = `Loading match history since ${since} !`;
+  } else {
+    status = `Loading all match history !`;
+  }
+  updateStatus(status);
+  await new Promise(resolve => {
+    let numberOfMatches = 0;
+    let attemptsToLoadMoreMatches = 0;
+    const moreButton = document.getElementById('load_more_button');
+    const timer = setInterval(() => {
+      if (moreButton.offsetParent !== null) {
+        const newNumberOfMatches = getMatches().length;
+        if (newNumberOfMatches === numberOfMatches) {
+          if (attemptsToLoadMoreMatches < 3) {
+            attemptsToLoadMoreMatches++;
+          } else {
+            clearInterval(timer);
+            resolve();
+          }
+        }
+
+        if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
+          const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
+          updateStatus(`${status} ... loading since ${lastDate} ...`);
+          if (since >= lastDate) {
+            clearInterval(timer);
+            resolve();
+          } else {
+            numberOfMatches = newNumberOfMatches;
+            moreButton.click();
+          }
+        }
+      }
+    }, 800);
+  });
+  updateStatus(`${status} Done !`);
 };
+
+let mandatoryStatus = '';
 chrome.storage.sync.get(['customapikey'], data => {
   if (typeof data.customapikey === 'undefined') {
-    const defaultkeys = [
-      '5DA40A4A4699DEE30C1C9A7BCE84C914',
-      '5970533AA2A0651E9105E706D0F8EDDC',
-      '2B3382EBA9E8C1B58054BD5C5EE1C36A'
-    ];
+    const defaultkeys = ['5DA40A4A4699DEE30C1C9A7BCE84C914', '5970533AA2A0651E9105E706D0F8EDDC', '2B3382EBA9E8C1B58054BD5C5EE1C36A'];
     apikey = defaultkeys[Math.floor(Math.random() * 3)];
-    statusBar.textContent =
-      'Only 100 players from the most recent matches will be scanned without providing your own API key!';
+    mandatoryStatus = 'Only 100 players from the most recent matches will be scanned without providing your own API key!';
+    updateStatus('');
   } else {
     providedCustomAPIKey = true;
     apikey = data.customapikey;
   }
-  fetchButton.insertAdjacentElement('afterend', checkBansButton);
 });
 
 menu.appendChild(statusBar);
@@ -514,9 +477,7 @@ initVariables();
 formatMatchTables();
 updateStats();
 
-const loadMoreButton = document.querySelector(
-  '.load_more_history_area #load_more_clickable'
-);
+const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
 const callback = (mutationList, observer) => {
   for (const mutation of mutationList) {
     if (mutation.attributeName === 'style') {
@@ -525,9 +486,7 @@ const callback = (mutationList, observer) => {
         updateStats();
         if (loadingWholeHistory) {
           loadingWholeHistoryCounter++;
-          updateStatus(
-            `Loading Match history... Pages loaded: ${loadingWholeHistoryCounter}`
-          );
+          updateStatus(`Loading Match history... Pages loaded: ${loadingWholeHistoryCounter}`);
           loadMoreButton.click();
         }
       }
@@ -576,6 +535,36 @@ const hideSettings = () => {
     }
   });
 };
+
+const checkBansButton = createSteamButton('Check loaded matches for bans');
+checkBansButton.onclick = () => {
+  checkLoadedMatchesForBans();
+  if (!providedCustomAPIKey) checkBansButton.onclick = null;
+};
+
+const loadHistory = createSteamButton('Load history since (blank to load all history)');
+loadHistory.onclick = () => {
+  loadMatchHisory(document.getElementById('load-match-history-since')?.value);
+};
+
+const dateSinceHistory = document.createElement('input');
+dateSinceHistory.setAttribute('type', 'text');
+dateSinceHistory.setAttribute('id', 'load-match-history-since');
+dateSinceHistory.style.width = '100px';
+const date = new Date();
+date.setDate(date.getDate() - 500);
+dateSinceHistory.value = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${
+  date.getDate() < 10 ? '0' : ''
+}${date.getDate()}`;
+const dateSinceHistoryLabel = document.createElement('div');
+dateSinceHistoryLabel.style.padding = '0 5px';
+dateSinceHistoryLabel.style.display = 'inline';
+dateSinceHistoryLabel.innerHTML = '(format YYYY-MM-DD)';
+
 const bancheckerSettingsButton = createSteamButton('Set Steam API key');
 bancheckerSettingsButton.onclick = () => showSettings();
 statusBar.insertAdjacentElement('beforeBegin', bancheckerSettingsButton);
+statusBar.insertAdjacentElement('beforeBegin', loadHistory);
+statusBar.insertAdjacentElement('beforeBegin', dateSinceHistory);
+statusBar.insertAdjacentElement('beforeBegin', dateSinceHistoryLabel);
+statusBar.insertAdjacentElement('beforeBegin', checkBansButton);

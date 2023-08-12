@@ -10,8 +10,7 @@ if (chrome) {
 }
 
 const actions = {
-  'csgo-matches':
-    'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
+  'csgo-matches': 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
   'community-friends': 'https://steamcommunity.com/my/friends/',
   'community-groups': 'https://steamcommunity.com/my/groups/',
   github: 'https://github.com/ge-ku/Ban-Checker-for-Steam',

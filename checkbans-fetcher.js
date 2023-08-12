@@ -1,10 +1,6 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action == 'fetchBans') {
-    fetch(
-      `https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${
-        request.apikey
-      }&steamids=${request.batch.join(',')}`
-    )
+    fetch(`https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${request.apikey}&steamids=${request.batch.join(',')}`)
       .then(res => {
         if (res.ok) {
           return res.json();

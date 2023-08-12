@@ -3,10 +3,7 @@ var gamesShowingIndex = 0; // Index of a last game shown
 
 // Add links to Ban Checker page
 var banCheckerButton = document.createElement('a');
-banCheckerButton.setAttribute(
-  'href',
-  '//steamcommunity.com/my/friends/banchecker'
-);
+banCheckerButton.setAttribute('href', '//steamcommunity.com/my/friends/banchecker');
 banCheckerButton.className = 'icon_item icon_all_groups banchecker';
 banCheckerButton.dataset.navid = 'banchecker';
 var banCheckerButtonText = document.createElement('span');
@@ -25,11 +22,7 @@ window.onpopstate = event => {
 banCheckerButton.addEventListener('click', e => {
   document.querySelector('.friends_nav .active').classList.remove('active');
   document.querySelector('.friends_nav .banchecker').classList.add('active');
-  history.pushState(
-    { banchecker: true },
-    'Ban Checker',
-    '/my/friends/banchecker'
-  );
+  history.pushState({ banchecker: true }, 'Ban Checker', '/my/friends/banchecker');
   e.preventDefault();
   renderBanCheker();
 });
@@ -81,9 +74,7 @@ if (window.location.pathname.split('/').pop() == 'banchecker') {
   banCheckerButton.classList.add('active');
   renderBanCheker();
 }
-document
-  .querySelector('.friends_nav')
-  .insertAdjacentElement('beforeend', banCheckerButton);
+document.querySelector('.friends_nav').insertAdjacentElement('beforeend', banCheckerButton);
 
 // This function returns DOM element which contains info about one player
 // It's called from createGameElement function for each player of a game
@@ -97,10 +88,7 @@ function createPlayerElement(player) {
   var selectableOverlay = document.createElement('a');
   selectableOverlay.className = 'selectable_overlay';
   selectableOverlay.dataset.container = '#fr_' + player.miniprofile;
-  selectableOverlay.setAttribute(
-    'href',
-    '//steamcommunity.com/profiles/' + player.steamid
-  );
+  selectableOverlay.setAttribute('href', '//steamcommunity.com/profiles/' + player.steamid);
   playerBody.appendChild(selectableOverlay);
   var avatar = document.createElement('div');
   avatar.className = 'player_avatar friend_block_link_overlay';
@@ -113,8 +101,7 @@ function createPlayerElement(player) {
       if (avatarURLs != null) {
         var avatarURL = avatarURLs[0];
       } else {
-        avatarURL =
-          'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg';
+        avatarURL = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg';
       }
       avatarImgTag = document.createElement('img');
       avatarImgTag.src = avatarURL;
@@ -136,10 +123,8 @@ function createPlayerElement(player) {
   name.appendChild(playerStatus);
   if (player.bannedAfterRecording) {
     playerBody.style.backgroundColor = 'rgba(230,0,0,0.3)';
-    var daysSinceLastBan =
-      (Date.now() - player.lastBanTime) / (1000 * 60 * 60 * 24);
-    var daysSinceLastBanMessage =
-      'Banned ' + Math.round(daysSinceLastBan) + ' days ago.';
+    var daysSinceLastBan = (Date.now() - player.lastBanTime) / (1000 * 60 * 60 * 24);
+    var daysSinceLastBanMessage = 'Banned ' + Math.round(daysSinceLastBan) + ' days ago.';
     playerStatus.appendChild(document.createTextNode(daysSinceLastBanMessage));
   }
   playerBody.appendChild(name);
@@ -165,8 +150,7 @@ function createGameElement(game) {
   var logoLink = document.createElement('a');
   logoLink.href = '//steamcommunity.com/app/' + game.appid;
   var logoImg = document.createElement('img');
-  logoImg.src =
-    '//steamcdn-a.akamaihd.net/steam/apps/' + game.appid + '/header.jpg';
+  logoImg.src = '//steamcdn-a.akamaihd.net/steam/apps/' + game.appid + '/header.jpg';
   logoLink.appendChild(logoImg);
   gameLogo.appendChild(logoLink);
   gameLogoHolder_default.appendChild(gameLogo);
@@ -180,15 +164,10 @@ function createGameElement(game) {
   gameAbout.appendChild(gameAboutAppName);
   gameAbout.appendChild(document.createElement('br'));
 
-  var textNodePlayed = document.createTextNode(
-    'Played: ' + new Date(game.time)
-  );
+  var textNodePlayed = document.createTextNode('Played: ' + new Date(game.time));
   gameAbout.appendChild(textNodePlayed);
   gameAbout.appendChild(document.createElement('br'));
-  var textNodeScanned = document.createTextNode(
-    'Last Time Scanned: ' +
-      (game.lastScanTime == 0 ? 'Never' : new Date(game.lastScanTime))
-  );
+  var textNodeScanned = document.createTextNode('Last Time Scanned: ' + (game.lastScanTime == 0 ? 'Never' : new Date(game.lastScanTime)));
   gameAbout.appendChild(textNodeScanned);
 
   gameInfo.appendChild(gameImage);
@@ -230,17 +209,9 @@ function gamesRendering(div, appid, bannedOnly, tenPlayers, allPages) {
       } else {
         lastGameToShowThisCycle = gamesShowingIndex + loadMoreValue;
       }
-      for (
-        var i = gamesShowingIndex;
-        i < lastGameToShowThisCycle && i < data.games.length;
-        i++
-      ) {
+      for (var i = gamesShowingIndex; i < lastGameToShowThisCycle && i < data.games.length; i++) {
         var game = data.games[i];
-        if (
-          (appid == 0 || game.appid == appid) &&
-          (tenPlayers == false ||
-            (tenPlayers == true && game.players.length == 9))
-        ) {
+        if ((appid == 0 || game.appid == appid) && (tenPlayers == false || (tenPlayers == true && game.players.length == 9))) {
           if (bannedOnly) {
             var showThis = false;
             game.players.forEach(function (player) {
@@ -381,17 +352,11 @@ function renderBanCheker() {
     loadMore(true);
   });
 
-  document
-    .querySelector('#gamesAvailable')
-    .addEventListener('change', applyFilter);
-  document
-    .querySelector('#appidFilter')
-    .addEventListener('change', applyFilter);
+  document.querySelector('#gamesAvailable').addEventListener('change', applyFilter);
+  document.querySelector('#appidFilter').addEventListener('change', applyFilter);
   document.querySelector('#checkbox').addEventListener('change', applyFilter);
 
-  document
-    .querySelector('.openSettings')
-    .addEventListener('click', showSettings);
+  document.querySelector('.openSettings').addEventListener('click', showSettings);
 
   initiateGamesRendering(main, 0, false, false);
 }

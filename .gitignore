@@ -1,2 +1,3 @@
 # Ignore compiled zip files
-Banchecker_*.zip
+chrome-output
+firefox-output

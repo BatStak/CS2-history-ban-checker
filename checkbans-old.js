@@ -44,11 +44,7 @@ function getId(friend) {
   return add(steam64identifier, miniProfileId);
 }
 
-var friends = [].slice.call(
-  document.querySelectorAll(
-    '#memberList .member_block, #memberManageList .member_block, .friendHolder, .friendBlock '
-  )
-);
+var friends = [].slice.call(document.querySelectorAll('#memberList .member_block, #memberManageList .member_block, .friendHolder, .friendBlock '));
 var lookup = {};
 
 friends.forEach(function (friend) {
@@ -70,35 +66,20 @@ function setVacation(player) {
 
     if (inGameText) {
       var inGameTextSeparator = document.createTextNode(' - ');
-      inGameText.replaceChild(
-        inGameTextSeparator,
-        inGameText.querySelector('br')
-      );
+      inGameText.replaceChild(inGameTextSeparator, inGameText.querySelector('br'));
     }
 
     if (player.NumberOfVACBans || player.NumberOfGameBans) {
       var text = '';
 
       if (player.NumberOfGameBans) {
-        text +=
-          player.NumberOfGameBans +
-          ' OW ban' +
-          (player.NumberOfGameBans > 1 ? 's' : '');
+        text += player.NumberOfGameBans + ' OW ban' + (player.NumberOfGameBans > 1 ? 's' : '');
       }
 
       if (player.NumberOfVACBans) {
-        text +=
-          (text === '' ? '' : ', ') +
-          player.NumberOfVACBans +
-          ' VAC ban' +
-          (player.NumberOfVACBans > 1 ? 's' : '');
+        text += (text === '' ? '' : ', ') + player.NumberOfVACBans + ' VAC ban' + (player.NumberOfVACBans > 1 ? 's' : '');
       }
-      text +=
-        ' ' +
-        player.DaysSinceLastBan +
-        ' day' +
-        (player.DaysSinceLastBan > 1 ? 's' : '') +
-        ' ago.';
+      text += ' ' + player.DaysSinceLastBan + ' day' + (player.DaysSinceLastBan > 1 ? 's' : '') + ' ago.';
 
       span.style.color = 'rgb(255, 73, 73)';
       span.textContent = text;
@@ -121,10 +102,7 @@ function onData(xmlHttp) {
 function makeApiCall(ids, apikey) {
   var xmlHttp = new XMLHttpRequest();
   //API only allows 100 steam ids at once.
-  var endpointRoot =
-    'https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' +
-    apikey +
-    '&steamids=';
+  var endpointRoot = 'https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' + apikey + '&steamids=';
   var endpoint = endpointRoot + ids.join(',');
 
   xmlHttp.onreadystatechange = function () {
@@ -134,11 +112,7 @@ function makeApiCall(ids, apikey) {
   xmlHttp.send();
 }
 
-var defaultkeys = [
-  '5DA40A4A4699DEE30C1C9A7BCE84C914',
-  '5970533AA2A0651E9105E706D0F8EDDC',
-  '2B3382EBA9E8C1B58054BD5C5EE1C36A'
-];
+var defaultkeys = ['5DA40A4A4699DEE30C1C9A7BCE84C914', '5970533AA2A0651E9105E706D0F8EDDC', '2B3382EBA9E8C1B58054BD5C5EE1C36A'];
 var greentext = true;
 chrome.storage.sync.get(['customapikey', 'greentext'], function (data) {
   if (typeof data['greentext'] == 'undefined') {

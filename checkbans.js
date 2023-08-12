@@ -20,9 +20,7 @@ checkBans = () => {
   }, []);
 
   const doPlayer = player => {
-    playerEls = document.querySelectorAll(
-      `.friends_content .persona[data-steamid="${player.SteamId}"`
-    );
+    playerEls = document.querySelectorAll(`.friends_content .persona[data-steamid="${player.SteamId}"`);
     playerEls.forEach(playerEl => {
       let verdict = '';
       let verdictEl = document.createElement('div');
@@ -32,23 +30,11 @@ checkBans = () => {
         verdictEl.classList.add('banned');
         icon = 'banned.svg';
         verdict =
-          `${
-            player.NumberOfVACBans > 0 ? `${player.NumberOfVACBans} VAC` : ''
-          }` +
-          `${
-            player.NumberOfVACBans > 0 && player.NumberOfGameBans > 0
-              ? ' & '
-              : ''
-          }` +
-          `${
-            player.NumberOfGameBans > 0 ? `${player.NumberOfGameBans} Game` : ''
-          }` +
-          ` ban${
-            player.NumberOfVACBans + player.NumberOfGameBans > 1 ? 's' : ''
-          } on record\n` +
-          `Last ban occured ${player.DaysSinceLastBan} day${
-            player.DaysSinceLastBan > 1 ? 's' : ''
-          } ago`;
+          `${player.NumberOfVACBans > 0 ? `${player.NumberOfVACBans} VAC` : ''}` +
+          `${player.NumberOfVACBans > 0 && player.NumberOfGameBans > 0 ? ' & ' : ''}` +
+          `${player.NumberOfGameBans > 0 ? `${player.NumberOfGameBans} Game` : ''}` +
+          ` ban${player.NumberOfVACBans + player.NumberOfGameBans > 1 ? 's' : ''} on record\n` +
+          `Last ban occured ${player.DaysSinceLastBan} day${player.DaysSinceLastBan > 1 ? 's' : ''} ago`;
       }
       if (!verdict) {
         verdictEl.classList.add('clean');
@@ -85,9 +71,7 @@ checkBans = () => {
             `Error while scanning players for bans:\n${error}` +
               `${
                 retryCount !== undefined && retryCount > 0
-                  ? `\n\nRetrying to scan... ${
-                      maxRetries - retryCount
-                    }/${maxRetries}`
+                  ? `\n\nRetrying to scan... ${maxRetries - retryCount}/${maxRetries}`
                   : `\n\nCouldn't scan for bans after ${maxRetries} retries :(`
               }`
           );
@@ -109,11 +93,7 @@ checkBans = () => {
   fetchBatch(0, maxRetries);
 };
 
-const defaultkeys = [
-  '5DA40A4A4699DEE30C1C9A7BCE84C914',
-  '5970533AA2A0651E9105E706D0F8EDDC',
-  '2B3382EBA9E8C1B58054BD5C5EE1C36A'
-];
+const defaultkeys = ['5DA40A4A4699DEE30C1C9A7BCE84C914', '5970533AA2A0651E9105E706D0F8EDDC', '2B3382EBA9E8C1B58054BD5C5EE1C36A'];
 
 chrome.storage.sync.get(['customapikey', 'greentext'], data => {
   if (typeof data['greentext'] == 'undefined') {

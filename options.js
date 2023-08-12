@@ -3,35 +3,26 @@ function saveOptions() {
   if (document.getElementById('radioCustom').checked && customapikey != '') {
     //use custom key
     chrome.storage.sync.set({ customapikey: customapikey }, function () {
-      chrome.storage.sync.set(
-        { greentext: !document.getElementById('chkGreentext').checked },
-        function () {
-          var status = document.getElementById('statusSaved');
-          status.style.visibility = 'visible';
-          setTimeout(function () {
-            status.style.visibility = 'hidden';
-          }, 750);
-        }
-      );
+      chrome.storage.sync.set({ greentext: !document.getElementById('chkGreentext').checked }, function () {
+        var status = document.getElementById('statusSaved');
+        status.style.visibility = 'visible';
+        setTimeout(function () {
+          status.style.visibility = 'hidden';
+        }, 750);
+      });
     });
-  } else if (
-    document.getElementById('radioDefault').checked ||
-    customapikey == ''
-  ) {
+  } else if (document.getElementById('radioDefault').checked || customapikey == '') {
     //use default key
     chrome.storage.sync.remove('customapikey', function () {
-      chrome.storage.sync.set(
-        { greentext: !document.getElementById('chkGreentext').checked },
-        function () {
-          var status = document.getElementById('statusSaved');
-          status.style.visibility = 'visible';
-          document.getElementById('radioDefault').checked = true;
-          document.getElementById('customapikey').value = '';
-          setTimeout(function () {
-            status.style.visibility = 'hidden';
-          }, 750);
-        }
-      );
+      chrome.storage.sync.set({ greentext: !document.getElementById('chkGreentext').checked }, function () {
+        var status = document.getElementById('statusSaved');
+        status.style.visibility = 'visible';
+        document.getElementById('radioDefault').checked = true;
+        document.getElementById('customapikey').value = '';
+        setTimeout(function () {
+          status.style.visibility = 'hidden';
+        }, 750);
+      });
     });
   }
 }
@@ -55,9 +46,6 @@ function initOptions() {
   document.getElementById('save').addEventListener('click', saveOptions);
 }
 
-if (
-  document.location.protocol != 'http:' &&
-  document.location.protocol != 'https:'
-) {
+if (document.location.protocol != 'http:' && document.location.protocol != 'https:') {
   document.addEventListener('DOMContentLoaded', initOptions);
 }

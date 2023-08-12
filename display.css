@@ -13,18 +13,22 @@
   background: white;
   z-index: 8000;
 }
+
 #settingsDiv input[type='checkbox'],
 #settingsDiv input[type='radio'] {
   width: 13px;
   height: 13px;
-  margin-right: 0.6em; /* As in the chrome://settings page */
+  margin-right: 0.6em;
+  /* As in the chrome://settings page */
   margin-top: -3px;
   vertical-align: middle;
 }
+
 #settingsDiv label {
   display: inline-block;
   color: rgb(48, 57, 66);
 }
+
 #settingsDiv input[type='text'] {
   box-sizing: border-box;
   color: rgb(68, 68, 68);
@@ -35,6 +39,7 @@
   font: inherit;
   padding: 3px;
 }
+
 #settingsDiv button {
   background-image: -webkit-linear-gradient(#ededed, #ededed 38%, #dedede);
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -47,11 +52,13 @@
   outline: none;
   text-shadow: 0 1px 0 rgb(240, 240, 240);
 }
+
 #settingsDiv a {
   vertical-align: middle;
   text-decoration: none;
   color: rgb(17, 85, 204);
 }
+
 #settingsDiv button:hover {
   background-image: -webkit-linear-gradient(#f0f0f0, #f0f0f0 38%, #e0e0e0);
   border-color: rgba(0, 0, 0, 0.3);
@@ -59,6 +66,7 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.95);
   color: black;
 }
+
 #settingsShade {
   z-index: 7999;
   visibility: hidden;
@@ -84,6 +92,7 @@
     opacity: 0;
     visibility: visible;
   }
+
   100% {
     opacity: 1;
     visibility: visible;
@@ -95,10 +104,12 @@
     opacity: 1;
     visibility: visible;
   }
+
   99% {
     opacity: 0;
     visibility: visible;
   }
+
   100% {
     opacity: 0;
     visibility: hidden;
@@ -159,12 +170,15 @@
 .banchecker-verdict.banned {
   background-color: rgba(255, 0, 0, 0.4);
 }
+
 .banchecker-verdict.banned:hover {
   background-color: rgba(255, 0, 0, 0.9);
 }
+
 .banchecker-verdict.clean {
   background-color: rgba(0, 255, 0, 0.2);
 }
+
 .banchecker-verdict.clean:hover {
   background-color: rgba(0, 150, 0, 0.9);
 }

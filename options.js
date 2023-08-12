@@ -2,13 +2,13 @@ function saveOptions() {
   var customapikey = document.getElementById('customapikey').value;
   if (document.getElementById('radioCustom').checked && customapikey != '') {
     //use custom key
-    chrome.storage.sync.set({ customapikey: customapikey }, function() {
+    chrome.storage.sync.set({ customapikey: customapikey }, function () {
       chrome.storage.sync.set(
         { greentext: !document.getElementById('chkGreentext').checked },
-        function() {
+        function () {
           var status = document.getElementById('statusSaved');
           status.style.visibility = 'visible';
-          setTimeout(function() {
+          setTimeout(function () {
             status.style.visibility = 'hidden';
           }, 750);
         }
@@ -19,15 +19,15 @@ function saveOptions() {
     customapikey == ''
   ) {
     //use default key
-    chrome.storage.sync.remove('customapikey', function() {
+    chrome.storage.sync.remove('customapikey', function () {
       chrome.storage.sync.set(
         { greentext: !document.getElementById('chkGreentext').checked },
-        function() {
+        function () {
           var status = document.getElementById('statusSaved');
           status.style.visibility = 'visible';
           document.getElementById('radioDefault').checked = true;
           document.getElementById('customapikey').value = '';
-          setTimeout(function() {
+          setTimeout(function () {
             status.style.visibility = 'hidden';
           }, 750);
         }
@@ -37,7 +37,7 @@ function saveOptions() {
 }
 
 function restoreOptions() {
-  chrome.storage.sync.get(['customapikey', 'greentext'], function(data) {
+  chrome.storage.sync.get(['customapikey', 'greentext'], function (data) {
     if (typeof data['customapikey'] == 'undefined') {
     } else {
       document.getElementById('customapikey').value = data['customapikey'];

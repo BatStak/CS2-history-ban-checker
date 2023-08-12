@@ -51,7 +51,7 @@ var friends = [].slice.call(
 );
 var lookup = {};
 
-friends.forEach(function(friend) {
+friends.forEach(function (friend) {
   var id = getId(friend);
   if (!lookup[id]) {
     lookup[id] = [];
@@ -62,7 +62,7 @@ friends.forEach(function(friend) {
 function setVacation(player) {
   var friendElements = lookup[player.SteamId];
 
-  friendElements.forEach(function(friend) {
+  friendElements.forEach(function (friend) {
     var inGameText = friend.querySelector('.linkFriend_in-game');
     var span = document.createElement('span');
     span.style.fontWeight = 'bold';
@@ -127,7 +127,7 @@ function makeApiCall(ids, apikey) {
     '&steamids=';
   var endpoint = endpointRoot + ids.join(',');
 
-  xmlHttp.onreadystatechange = function() {
+  xmlHttp.onreadystatechange = function () {
     onData(xmlHttp);
   };
   xmlHttp.open('GET', endpoint, true);
@@ -140,7 +140,7 @@ var defaultkeys = [
   '2B3382EBA9E8C1B58054BD5C5EE1C36A'
 ];
 var greentext = true;
-chrome.storage.sync.get(['customapikey', 'greentext'], function(data) {
+chrome.storage.sync.get(['customapikey', 'greentext'], function (data) {
   if (typeof data['greentext'] == 'undefined') {
     chrome.storage.sync.set({
       greentext: true

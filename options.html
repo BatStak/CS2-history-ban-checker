@@ -1,34 +1,44 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Set Custom API Key for Ban Checker</title>
+    <style>
+      #settingsBody {
+        padding: 1em;
+      }
 
-<head>
-  <title>Set Custom API Key for Ban Checker</title>
-  <style>
-    #settingsBody {
-      padding: 1em;
-    }
-    #statusSaved {
-      visibility: hidden;
-    }
-  </style>
-</head>
+      #statusSaved {
+        visibility: hidden;
+      }
+    </style>
+  </head>
 
-<body id="settingsBody">
-  Custom API key:
-  <input type="text" id="customapikey" size="35">
-  <form>
-    <label><input type="radio" name="usecustom" id="radioCustom">Use custom API Key</label>
-    <br>
-    <label><input type="radio" name="usecustom" id="radioDefault" checked>Use default API Key</label>
-  </form>
-  <a href="http://steamcommunity.com/dev/apikey" target="_blank">Get API Key here</a>
-  <br><br>
-  <label><input type="checkbox" id="chkGreentext">Do not write green text ("No Bans for this player.")</label>
-  <div id="statusSaved">Options saved.</div>
-  <div style="text-align:center;">
-    <button id="save">Save</button>
-  </div>
-  <script src="options.js"></script>
-</body>
-
+  <body id="settingsBody">
+    Custom API key:
+    <input type="text" id="customapikey" size="35" />
+    <form>
+      <label
+        ><input type="radio" name="usecustom" id="radioCustom" />Use custom API
+        Key</label
+      >
+      <br />
+      <label
+        ><input type="radio" name="usecustom" id="radioDefault" checked />Use
+        default API Key</label
+      >
+    </form>
+    <a href="http://steamcommunity.com/dev/apikey" target="_blank"
+      >Get API Key here</a
+    >
+    <br /><br />
+    <label
+      ><input type="checkbox" id="chkGreentext" />Do not write green text ("No
+      Bans for this player.")</label
+    >
+    <div id="statusSaved">Options saved.</div>
+    <div style="text-align: center">
+      <button id="save">Save</button>
+    </div>
+    <script src="options.js"></script>
+  </body>
 </html>

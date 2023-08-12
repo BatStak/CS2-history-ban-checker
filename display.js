@@ -53,7 +53,7 @@ function showSettings() {
     settingsInjected = true;
     fetch(chrome.extension.getURL('/options.html'))
       .then(resp => resp.text())
-      .then(function(settingsHTML) {
+      .then(function (settingsHTML) {
         var settingsDiv = document.createElement('div');
         settingsDiv.id = 'settingsDiv';
         settingsDiv.innerHTML = settingsHTML;
@@ -107,7 +107,7 @@ function createPlayerElement(player) {
   // We'll load avatars like this so we don't waste Steam API calls
   fetch('//steamcommunity.com/profiles/' + player.steamid + '?xml=1')
     .then(response => response.text())
-    .then(function(xml) {
+    .then(function (xml) {
       var regex = /http(?:s)?:\/\/(.+)_medium.jpg/;
       var avatarURLs = xml.match(regex);
       if (avatarURLs != null) {
@@ -120,7 +120,7 @@ function createPlayerElement(player) {
       avatarImgTag.src = avatarURL;
       avatar.appendChild(avatarImgTag);
       var thisPlayer = document.querySelectorAll('#fr_' + player.miniprofile);
-      thisPlayer.forEach(function(thisOne) {
+      thisPlayer.forEach(function (thisOne) {
         if (thisOne.querySelector('.player_avatar') == null) {
           thisOne.insertAdjacentElement('afterbegin', avatar);
         }
@@ -198,7 +198,7 @@ function createGameElement(game) {
   playersBody = document.createElement('div');
   playersBody.className = 'profile_friends responsive_friendblocks';
 
-  game.players.forEach(function(player) {
+  game.players.forEach(function (player) {
     playersBody.appendChild(createPlayerElement(player));
   });
 
@@ -211,14 +211,14 @@ function createGameElement(game) {
 // This function renders games that correspond to selected filters
 // and continues to render next batches of games when needed
 function gamesRendering(div, appid, bannedOnly, tenPlayers, allPages) {
-  chrome.storage.local.get('games', function(data) {
+  chrome.storage.local.get('games', function (data) {
     if (typeof data.games === 'undefined' || data.games.length === 0) {
       div.innerHTML = 'No recorded games yet.';
     } else {
       if (gamesShowingIndex == data.games.length) {
         var message = document.querySelector('#paginationNoMore');
         message.style.visibility = 'visible';
-        setTimeout(function() {
+        setTimeout(function () {
           message.style.visibility = 'hidden';
         }, 500);
         return;
@@ -243,7 +243,7 @@ function gamesRendering(div, appid, bannedOnly, tenPlayers, allPages) {
         ) {
           if (bannedOnly) {
             var showThis = false;
-            game.players.forEach(function(player) {
+            game.players.forEach(function (player) {
               if (player.bannedAfterRecording) showThis = true;
             });
             if (showThis) {
@@ -374,10 +374,10 @@ function renderBanCheker() {
                           <input id="loadAll" type="button" value="Load all games (may lag)">
                           <div id="paginationNoMore" style="visibility:hidden; padding-top:.5em">No more games to load</div>`;
   historyContainer.appendChild(pagination);
-  document.querySelector('#loadMore').addEventListener('click', function() {
+  document.querySelector('#loadMore').addEventListener('click', function () {
     loadMore(false);
   });
-  document.querySelector('#loadAll').addEventListener('click', function() {
+  document.querySelector('#loadAll').addEventListener('click', function () {
     loadMore(true);
   });
 

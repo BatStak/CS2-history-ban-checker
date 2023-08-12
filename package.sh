@@ -9,7 +9,7 @@
 VERSION=$(grep '"version":' manifest-chrome.json | sed 's/^.*: //;s/"//g' | tr -d ',\r\n');
 echo "Ban Checker version in manifest.json: $VERSION. This script will pack everything into chrome-output and firefox-output";
 
-echo "Creating temp folder that will hold files.";
+echo "Creating output folders";
 
 rm -rf chrome-output;
 rm -rf firefox-output;
@@ -19,7 +19,7 @@ mkdir firefox-output;
 cp *.js chrome-output;
 cp *.js firefox-output;
 
-echo "Moving all other files into temp folder...";
+echo "Moving files into output folders...";
 cp -a icons chrome-output/icons;
 cp display.css chrome-output;
 cp options.html chrome-output;

@@ -306,7 +306,9 @@ const checkBans = players => {
         } else {
           updateResults(
             `Looks like we're done.<br /><br />` +
+              (banStats.recentBans ? `<span class="banchecker-red">` : '') +
               `There were ${banStats.recentBans} players who got banned after playing with you!<br /><br />` +
+              (banStats.recentBans ? `</span>` : '') +
               `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} ` +
               `Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)<br />` +
               `Total amount of unique players encountered: ${uniquePlayers.length}` +

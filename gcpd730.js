@@ -464,6 +464,20 @@ initVariables();
 formatMatchTables();
 updateStats();
 
+const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
+const callback = (mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.attributeName === 'style') {
+      if (loadMoreButton.style.display !== 'none') {
+        formatMatchTables();
+        updateStats();
+      }
+    }
+  }
+};
+const observer = new MutationObserver(callback);
+observer.observe(loadMoreButton, { attributes: true });
+
 const showSettings = () => {
   chrome.runtime.sendMessage({ action: 'options' });
   updateStatus('If you modify your API key, you must reload the page');

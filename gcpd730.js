@@ -115,16 +115,7 @@ const initVariables = () => {
 };
 
 const funStatsBar = document.createElement('div');
-funStatsBar.style.whiteSpace = 'pre-wrap';
-funStatsBar.style.backgroundColor = 'rgba(17, 25, 35, .9)';
-funStatsBar.style.borderRadius = '5px';
-funStatsBar.style.border = '1px solid #000';
-funStatsBar.style.padding = '14px';
-funStatsBar.style.position = 'fixed';
-funStatsBar.style.left = '0';
-funStatsBar.style.bottom = '0';
-funStatsBar.style.margin = '4px';
-funStatsBar.style.zIndex = '9';
+funStatsBar.setAttribute('id', 'funstats-bar');
 
 const updateStats = () => {
   if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') return;
@@ -376,13 +367,7 @@ extensionContainer.appendChild(menuTop);
 const createSteamButton = text => {
   const button = document.createElement('button');
   button.setAttribute('type', 'button');
-  button.style.display = 'inline-block';
-  button.style.border = '0';
-  button.style.cursor = 'pointer';
-  button.style.marginRight = '10px';
-  button.style.padding = '3px 10px';
-  button.style.color = '#FFF';
-  button.style.background = 'rgb(60 65 78)';
+  button.classList.add('btn-default');
   const textNode = document.createTextNode(text);
   button.appendChild(textNode);
   return button;
@@ -479,9 +464,14 @@ const observer = new MutationObserver(callback);
 observer.observe(loadMoreButton, { attributes: true });
 
 const showSettings = () => {
-  chrome.runtime.sendMessage({ action: 'options' });
-  updateStatus('If you modify your API key, you must reload the page');
+  optionsContainer.style.display = 'block';
 };
+
+function saveSettings() {
+  var yourapikey = document.getElementById('yourapikey').value;
+  chrome.storage.sync.set({ yourapikey: yourapikey });
+  optionsContainer.style.display = 'none';
+}
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');
 checkBansButton.onclick = () => {
@@ -521,7 +511,7 @@ dateSinceHistoryPlaceholder.style.display = 'inline-block';
 dateSinceHistoryPlaceholder.style.margin = '0 10px';
 dateSinceHistoryPlaceholder.innerHTML = '(YYYY-MM-DD)';
 
-const bancheckerSettingsButton = createSteamButton('Set your API Key');
+const bancheckerSettingsButton = createSteamButton('Set API Key and options');
 bancheckerSettingsButton.onclick = () => showSettings();
 menuTop.appendChild(bancheckerSettingsButton);
 menuTop.appendChild(loadMatchHistoryButton);
@@ -529,6 +519,23 @@ menuTop.appendChild(dateSinceHistoryInput);
 menuTop.appendChild(dateSinceHistoryPlaceholder);
 menuTop.appendChild(loadMatchHistoryStopButton);
 menuBottom.appendChild(checkBansButton);
+
+const optionsContainer = document.createElement('div');
+optionsContainer.setAttribute('id', 'banchecker-options');
+const optionsContainerInner = document.createElement('div');
+const optionsCloseButton = document.createElement('button');
+optionsCloseButton.innerText = 'Save';
+optionsCloseButton.setAttribute('type', 'button');
+optionsCloseButton.onclick = () => saveSettings();
+optionsContainerInner.innerHTML = `
+Your API key:
+<input type="text" id="yourapikey" size="35" />
+<br />
+<a href="http://steamcommunity.com/dev/apikey" target="_blank">Get your API Key here</a><br />
+`;
+optionsContainerInner.appendChild(optionsCloseButton);
+optionsContainer.appendChild(optionsContainerInner);
+extensionContainer.appendChild(optionsContainer);
 
 async function banstats() {
   const conf = banstatsConfig;
@@ -722,7 +729,7 @@ async function banstats() {
 }
 
 const banstatsConfig = {
-  displayOnlyGamesWithBanAfterWhenFinished: true, // to remove in DOM matches with no red ban
+  displayOnlyGamesWithBanAfterWhenFinished: false, // to remove in DOM matches with no red ban
   ignoreBansBefore: 5 * 365, // we ignore grey bans older than this number (in days)
   mysteamid: '', // if we want winrate calculation, me : 76561197962198400, my friend : 76561197985267551.
   filterGames: '', // 'SHORT' or 'LONG' to filter games
@@ -735,5 +742,7 @@ chrome.storage.sync.get(['yourapikey'], data => {
   if (!apikey) {
     loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
     updateResults(`<span class="banchecker-warning">You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !</span>`);
+  } else {
+    document.getElementById('yourapikey').value = apikey;
   }
 });

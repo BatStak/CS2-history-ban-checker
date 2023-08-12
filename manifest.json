@@ -5,21 +5,18 @@
   "permissions": ["storage", "contextMenus"],
   "host_permissions": ["*://steamcommunity.com/*", "https://api.steampowered.com/*"],
   "optional_host_permissions": ["*://*/*"],
-  "options_ui": {
-    "page": "options.html"
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
   },
   "background": {
     "service_worker": "service_worker.js"
   },
-  "web_accessible_resources": [
-    {
-      "resources": ["options.html"],
-      "matches": ["*://*/*"]
-    }
-  ],
   "content_scripts": [
     {
-      "js": ["options.js", "gcpd730.js"],
+      "js": ["gcpd730.js"],
       "css": ["display.css"],
       "run_at": "document_end",
       "matches": [

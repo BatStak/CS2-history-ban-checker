@@ -42,14 +42,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then(data => sendResponse(data))
         .catch(error => sendResponse(undefined, error));
       break;
-    case 'options':
-      chrome.windows.create({
-        url: chrome.runtime.getURL('options.html'),
-        type: 'popup',
-        width: 400,
-        height: 250
-      });
-      break;
   }
   return true;
 });

@@ -15,10 +15,10 @@ rm -rf output;
 mkdir output;
 
 cp *.js output;
+cp *.png output;
 
 echo "Moving files into output folders...";
 cp display.css output;
-cp options.html output;
 cp manifest.json output;
 
 echo "Done!";

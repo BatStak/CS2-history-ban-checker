@@ -184,3 +184,7 @@
 .banchecker-red {
   color: #f00;
 }
+
+.banchecker-warning {
+  color: rgb(255, 115, 0);
+}

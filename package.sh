@@ -17,7 +17,6 @@ mkdir output;
 cp *.js output;
 
 echo "Moving files into output folders...";
-cp -a icons output/icons;
 cp display.css output;
 cp options.html output;
 cp manifest.json output;

@@ -8,7 +8,6 @@ const maxRetries = 3;
 let loadingWholeHistoryCounter = 0;
 let loadingWholeHistory = false;
 
-let providedCustomAPIKey = false;
 let apikey = '';
 
 const banStats = {
@@ -294,15 +293,8 @@ const checkBans = players => {
             }
           });
         });
-        if (batches.length > i + 1 && providedCustomAPIKey) {
+        if (batches.length > i + 1) {
           setTimeout(() => fetchBatch(i + 1), 1000);
-        } else if (batches.length > i + 1 && !providedCustomAPIKey) {
-          updateResults(
-            `Looks like we're done.<br /><br />` +
-              `Loaded unchecked matches contain ${uniquePlayers.length} players.\n` +
-              'You did not provide your own Steam API key, only 100 players were scanned!'
-          );
-          banstats();
         } else {
           updateResults(
             `Looks like we're done.<br /><br />` +
@@ -448,17 +440,6 @@ loadMatchHisory = async () => {
 };
 
 let mandatoryStatus = '';
-chrome.storage.sync.get(['customapikey'], data => {
-  if (typeof data.customapikey === 'undefined') {
-    const defaultkeys = ['5DA40A4A4699DEE30C1C9A7BCE84C914', '5970533AA2A0651E9105E706D0F8EDDC', '2B3382EBA9E8C1B58054BD5C5EE1C36A'];
-    apikey = defaultkeys[Math.floor(Math.random() * 3)];
-    mandatoryStatus = 'Only 100 players from the most recent matches will be scanned without providing your own API key!';
-    updateStatus('');
-  } else {
-    providedCustomAPIKey = true;
-    apikey = data.customapikey;
-  }
-});
 
 const menuBottom = document.createElement('div');
 const statsResults = document.createElement('div');
@@ -483,69 +464,14 @@ initVariables();
 formatMatchTables();
 updateStats();
 
-const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
-const callback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.attributeName === 'style') {
-      if (loadMoreButton.style.display !== 'none') {
-        formatMatchTables();
-        updateStats();
-        if (loadingWholeHistory) {
-          loadingWholeHistoryCounter++;
-          updateStatus(`Loading Match history... Pages loaded: ${loadingWholeHistoryCounter}`);
-          loadMoreButton.click();
-        }
-      }
-    }
-  }
-};
-const observer = new MutationObserver(callback);
-observer.observe(loadMoreButton, { attributes: true });
-
-// embed settings
-let settingsInjected = false;
 const showSettings = () => {
-  if (settingsInjected) {
-    const settingsShade = document.getElementById('settingsShade');
-    const settingsDiv = document.getElementById('settingsDiv');
-    settingsShade.className = 'fadeIn';
-    settingsDiv.className = 'fadeIn';
-  } else {
-    settingsInjected = true;
-    fetch(chrome.extension.getURL('/options.html'))
-      .then(resp => resp.text())
-      .then(settingsHTML => {
-        const settingsDiv = document.createElement('div');
-        settingsDiv.id = 'settingsDiv';
-        settingsDiv.innerHTML = settingsHTML;
-        document.body.appendChild(settingsDiv);
-        const settingsShade = document.createElement('div');
-        settingsShade.id = 'settingsShade';
-        settingsShade.addEventListener('click', hideSettings);
-        document.body.appendChild(settingsShade);
-        initOptions();
-        showSettings();
-      });
-  }
-};
-const hideSettings = () => {
-  const settingsShade = document.getElementById('settingsShade');
-  const settingsDiv = document.getElementById('settingsDiv');
-  settingsShade.className = 'fadeOut';
-  settingsDiv.className = 'fadeOut';
-  chrome.storage.sync.get(['customapikey'], data => {
-    if (typeof data.customapikey !== 'undefined' && !providedCustomAPIKey) {
-      location.reload();
-    } else {
-      updateStatus('Reload the page if you changed API key!');
-    }
-  });
+  chrome.runtime.sendMessage({ action: 'options' });
+  updateStatus('If you modify your API key, you must reload the page');
 };
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');
 checkBansButton.onclick = () => {
   checkLoadedMatchesForBans();
-  if (!providedCustomAPIKey) checkBansButton.onclick = null;
 };
 
 const loadMatchHistoryButton = createSteamButton('Load match history since');
@@ -581,7 +507,7 @@ dateSinceHistoryPlaceholder.style.display = 'inline-block';
 dateSinceHistoryPlaceholder.style.margin = '0 10px';
 dateSinceHistoryPlaceholder.innerHTML = '(YYYY-MM-DD)';
 
-const bancheckerSettingsButton = createSteamButton('Set Steam API key');
+const bancheckerSettingsButton = createSteamButton('Set your API Key');
 bancheckerSettingsButton.onclick = () => showSettings();
 menuTop.appendChild(bancheckerSettingsButton);
 menuTop.appendChild(loadMatchHistoryButton);
@@ -721,7 +647,7 @@ async function banstats() {
 
   let results = '';
   if (conf.displayOnlyGamesWithBanAfterWhenFinished) {
-    results += `<br /><span class="banchecker-red">We have removed all matches on the page with no ban occured after playing with you!</span><br />`;
+    results += `<br />We have removed all matches on the page with no ban occured after playing with you!<br />`;
   }
   results += `<br />Results on the period : ${startDate.substring(0, 10)} => ${endDate.substring(0, 10)}<br />`;
   if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch || conf.ignoreBansBefore) {
@@ -789,3 +715,11 @@ const banstatsConfig = {
   ignoreRecentPeriodWithNoBanAfterTheMatch: false, // ignore recent period with no red ban (banned after the game)
   filterGamesWithSteamId: [] // to only focus on games with specific steam id
 };
+
+chrome.storage.sync.get(['yourapikey'], data => {
+  apikey = data?.yourapikey;
+  if (!apikey) {
+    loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
+    updateResults(`<span class="banchecker-warning">You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !</span>`);
+  }
+});

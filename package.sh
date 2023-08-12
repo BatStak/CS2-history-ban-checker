@@ -6,28 +6,20 @@
 
 # Use "Bash on Ubuntu on Windows" if you're on Windows 10 or cygwin to run on Windows.
 
-VERSION=$(grep '"version":' manifest-chrome.json | sed 's/^.*: //;s/"//g' | tr -d ',\r\n');
-echo "Ban Checker version in manifest.json: $VERSION. This script will pack everything into chrome-output and firefox-output";
+VERSION=$(grep '"version":' manifest.json | sed 's/^.*: //;s/"//g' | tr -d ',\r\n');
+echo "Ban Checker version in manifest.json: $VERSION. This script will pack everything into output folder";
 
-echo "Creating output folders";
+echo "Creating output folder";
 
-rm -rf chrome-output;
-rm -rf firefox-output;
-mkdir chrome-output;
-mkdir firefox-output;
+rm -rf output;
+mkdir output;
 
-cp *.js chrome-output;
-cp *.js firefox-output;
+cp *.js output;
 
 echo "Moving files into output folders...";
-cp -a icons chrome-output/icons;
-cp display.css chrome-output;
-cp options.html chrome-output;
-cp manifest-chrome.json chrome-output/manifest.json;
-
-cp -a icons firefox-output/icons;
-cp display.css firefox-output;
-cp options.html firefox-output;
-cp manifest-firefox.json firefox-output/manifest.json;
+cp -a icons output/icons;
+cp display.css output;
+cp options.html output;
+cp manifest.json output;
 
 echo "Done!";

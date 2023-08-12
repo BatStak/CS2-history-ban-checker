@@ -1,3 +1,2 @@
 # Ignore compiled zip files
-chrome-output
-firefox-output
+output

@@ -10,11 +10,11 @@ if (chrome) {
 }
 
 const actions = {
-  'csgo-matches': 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
   'community-friends': 'https://steamcommunity.com/my/friends/',
   'community-groups': 'https://steamcommunity.com/my/groups/',
-  github: 'https://github.com/BatStak/Ban-Checker-for-Steam-With-Stats',
-  'community-recently': 'https://steamcommunity.com/my/friends/coplay/'
+  'community-recently': 'https://steamcommunity.com/my/friends/coplay/',
+  'csgo-matches': 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
+  github: 'https://github.com/BatStak/Ban-Checker-for-Steam-With-Stats'
 };
 const context_listener = (info, tab) => {
   if (info.menuItemId in actions) {

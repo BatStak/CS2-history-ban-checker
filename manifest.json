@@ -7,13 +7,18 @@
     "48": "icons/ow48.png",
     "128": "icons/ow128.png"
   },
-  "permissions": ["storage", "alarms", "contextMenus", "*://steamcommunity.com/*", "https://api.steampowered.com/*"],
-  "optional_permissions": ["notifications"],
+  "permissions": ["contextMenus"],
+  "host_permissions": ["*://steamcommunity.com/*", "https://api.steampowered.com/*"],
+  "optional_host_permissions": ["*://*/*"],
   "options_ui": {
-    "page": "options.html",
-    "chrome_style": true
+    "page": "options.html"
   },
-  "web_accessible_resources": ["options.html", "icons/*.svg"],
+  "web_accessible_resources": [
+    {
+      "resources": ["options.html", "icons/*"],
+      "matches": ["*://*/*"]
+    }
+  ],
   "content_scripts": [
     {
       "js": ["checkbans.js", "options.js", "display.js"],
@@ -58,15 +63,5 @@
       ]
     }
   ],
-  "background": {
-    "scripts": ["history.js", "contextmenus.js", "checkbans-fetcher.js"],
-    "persistent": false
-  },
-  "manifest_version": 2,
-  "applications": {
-    "gecko": {
-      "id": "baptistemenadier@proton.me",
-      "strict_min_version": "48.0"
-    }
-  }
+  "manifest_version": 3
 }

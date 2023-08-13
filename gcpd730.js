@@ -142,7 +142,7 @@ function formatMatchTables() {
     return daysSinceMatch;
   };
   if (isCommendOrReportsSection()) {
-    document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)').forEach((report) => {
+    for (let report of document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)')) {
       const dateEl = report.querySelector('td:first-child');
       const daysSinceMatch = daysSince(dateEl.textContent);
       const minProfile = report.querySelector('.linkTitle').dataset.miniprofile;
@@ -150,9 +150,9 @@ function formatMatchTables() {
       report.dataset.dayssince = daysSinceMatch;
       report.classList.add('banchecker-profile');
       report.classList.add('banchecker-formatted');
-    });
+    }
   } else {
-    document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)').forEach((table) => {
+    for (let table of document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)')) {
       const leftColumn = table.parentElement.parentElement.querySelector('.csgo_scoreboard_inner_left');
       const daysSinceMatch = daysSince(leftColumn.textContent);
       table.querySelectorAll('tbody > tr').forEach((tr, i) => {
@@ -164,7 +164,7 @@ function formatMatchTables() {
         tr.classList.add('banchecker-profile');
       });
       table.classList.add('banchecker-formatted');
-    });
+    }
   }
 }
 
@@ -209,7 +209,7 @@ function checkBans(players) {
           }
           return;
         }
-        json.players.forEach((player) => {
+        for (let player of json.players) {
           const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
           const daySinceLastMatch = parseInt(playerEls[0].dataset.dayssince, 10);
           let verdict = '';
@@ -231,7 +231,7 @@ function checkBans(players) {
               verdict += daysAfter;
             }
           }
-          playerEls.forEach((playerEl) => {
+          for (let playerEl of playerEls) {
             playerEl.classList.add('banchecker-checked');
             verdictEl = playerEl.querySelector('.banchecker-bans');
             if (verdict) {
@@ -246,8 +246,8 @@ function checkBans(players) {
             } else {
               verdictEl.textContent = '';
             }
-          });
-        });
+          }
+        }
         if (batches.length > i + 1) {
           setTimeout(() => fetchBatch(i + 1), 1000);
         } else {
@@ -291,17 +291,16 @@ function checkLoadedMatchesForBans() {
       bansHeader.textContent = 'Ban';
       tableHeader.appendChild(bansHeader);
     }
-    const playersRowsWithoutBanColumn = document.querySelectorAll('.generic_kv_table > tbody > tr:not(.ban-column-added)');
-    playersRowsWithoutBanColumn.forEach((tr) => {
+    for (let tr of document.querySelectorAll('.generic_kv_table > tbody > tr:not(.ban-column-added)')) {
       tr.classList.add('ban-column-added');
       const bansPlaceholder = document.createElement('td');
       bansPlaceholder.classList.add('banchecker-bans');
       bansPlaceholder.textContent = '?';
       tr.appendChild(bansPlaceholder);
-    });
+    }
   } else {
     const tables = document.querySelectorAll('.banchecker-formatted:not(.ban-column-added)');
-    tables.forEach((table) => {
+    for (let table of document.querySelectorAll('.banchecker-formatted:not(.ban-column-added)')) {
       table.classList.add('ban-column-added');
       table.querySelectorAll('tr').forEach((tr, i) => {
         if (i === 0) {
@@ -319,14 +318,13 @@ function checkLoadedMatchesForBans() {
           if (scoreboard) scoreboard.setAttribute('colspan', '9');
         }
       });
-    });
+    }
   }
-  const playersEl = document.querySelectorAll('.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)');
   let playersArr = [];
-  playersEl.forEach((player) => {
+  for (let player of document.querySelectorAll('.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)')) {
     player.classList.add('banchecker-checking');
     playersArr.push(player.dataset.steamid64);
-  });
+  }
   checkBans(playersArr);
 }
 
@@ -430,7 +428,7 @@ async function banstats() {
   }
 
   // pour chaque match
-  domMatchesParts.forEach((domPart) => {
+  for (let domPart of domMatchesParts) {
     const scoreboardRows = domPart.querySelectorAll('.csgo_scoreboard_inner_right > tbody > tr');
     const playerRows = domPart.querySelectorAll('tr[data-steamid64]');
 
@@ -467,7 +465,7 @@ async function banstats() {
         const playersOfTheMatchWeDontKnowYet = [];
 
         // pour chaque joueur
-        playerRows.forEach((player) => {
+        for (let player of playerRows) {
           const steamId = player.attributes['data-steamid64'].value;
           const banStatus = player.querySelector('.banchecker-bans');
 
@@ -502,7 +500,7 @@ async function banstats() {
               }
             }
           }
-        });
+        }
 
         // si on doit exclure la période récente sans ban after (on suppose qu'il manque des ban waves)
         if (!conf.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
@@ -530,7 +528,7 @@ async function banstats() {
         }
       }
     }
-  });
+  }
 
   let results = '';
   if (conf.displayOnlyGamesWithBanAfterWhenFinished) {

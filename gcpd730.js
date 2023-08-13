@@ -289,6 +289,9 @@ function checkBans(players) {
             if (verdict) {
               if (daySinceLastMatch > player.DaysSinceLastBan) {
                 verdictEl.style.color = 'red';
+                if (!isCommendOrReportsSection()) {
+                  playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
+                }
               } else {
                 if (banstatsConfig.ignoreBansBefore && player.DaysSinceLastBan > banstatsConfig.ignoreBansBefore) {
                   verdictEl.style.color = 'grey';
@@ -552,17 +555,10 @@ async function banstats() {
 
           startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
         }
-
-        if (!matchHasPlayerBannedAfter && conf.displayOnlyGamesWithBanAfterWhenFinished) {
-          domPart.parentNode.removeChild(domPart);
-        }
       }
     }
   }
 
-  if (conf.displayOnlyGamesWithBanAfterWhenFinished) {
-    updateResults([{ text: '' }, { text: `We have removed all matches on the page with no ban occured after playing with you!` }, { text: '' }], true);
-  }
   updateResults([{ text: '' }, { text: `Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}` }], true);
   if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch) {
     updateResults(`- we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).`, true);
@@ -749,7 +745,6 @@ const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
 const banstatsConfig = {
-  displayOnlyGamesWithBanAfterWhenFinished: false, // to remove in DOM matches with no red ban
   ignoreBansBefore: 5 * 365, // we ignore grey bans older than this number (in days)
   filterGames: '', // 'SHORT' or 'LONG' to filter games
   ignoreRecentPeriodWithNoBanAfterTheMatch: false, // ignore recent period with no red ban (banned after the game)

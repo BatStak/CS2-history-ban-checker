@@ -50,8 +50,8 @@
 #banchecker-options {
   z-index: 501;
   top: calc(50% - 115px);
-  left: calc(50% - 215px);
-  width: 400px;
+  left: calc(50% - 315px);
+  width: 600px;
   height: 200px;
   background: #fff;
   display: none;

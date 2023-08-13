@@ -21,10 +21,13 @@ const funStats = {
 
 const config = {
   apikey: '',
-}
+  ignoreBansBefore: 5 * 365,
+  gameType: 'all',
+  ignoreRecentPeriodWithNoBanAfterTheMatch: false,
+};
 
 let profileURI = null;
-let section = null;
+let section = new URLSearchParams(window.location.search).get('tab');
 
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
@@ -100,7 +103,6 @@ function initVariables() {
 
   hasLoadMoreButton = !!document.querySelector('#load_more_button');
   profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
-  section = new URLSearchParams(window.location.search).get('tab');
 
   return hasLoadMoreButton && !!profileURI && !!section;
 }
@@ -290,7 +292,7 @@ function checkBans(players) {
                   playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
                 }
               } else {
-                if (banstatsConfig.ignoreBansBefore && player.DaysSinceLastBan > banstatsConfig.ignoreBansBefore) {
+                if (config.ignoreBansBefore && config.ignoreBansBefore > 0 && player.DaysSinceLastBan > config.ignoreBansBefore) {
                   verdictEl.style.color = 'grey';
                   playerEl.classList.add('banchecker-old');
                 } else {
@@ -455,44 +457,107 @@ function showSettings() {
 }
 
 function saveSettings() {
-  var yourapikey = document.getElementById('yourapikey').value;
-  chrome.storage.sync.set({ yourapikey: yourapikey });
-  optionsContainer.style.display = 'none';
+  config.yourapikey = document.getElementById('yourapikey').value;
+  config.gameType = document.getElementById('gameType-all').checked ? 'all' : document.getElementById('gameType-long').checked ? 'long' : 'short';
+  const ignoreBanBefore = document.getElementById('ignoreBansBefore').value;
+  if (!isNaN(ignoreBanBefore) && parseInt(ignoreBanBefore, 10) >= 0) {
+    config.ignoreBanBefore = parseInt(ignoreBanBefore, 10);
+  }
 
+  // save
+  chrome.storage.sync.set({ yourapikey: config.yourapikey, gameType: config:gameType, ignoreBanBefore: config.ignoreBansBefore });
+  
   statusBar.textContent = statsResults.textContent = '';
-  if (yourapikey) {
+  if (config.yourapikey) {
     toggleDisableAllButtons(false);
   } else {
     updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
     toggleDisableAllButtons(true);
     bancheckerSettingsButton.disabled = false;
   }
+
+  // close
+  optionsContainer.style.display = 'none';
 }
 
 function createOptionsContainer() {
   const optionsContainer = create('div', 'banchecker-options');
   const inner = create('div');
   optionsContainer.appendChild(inner);
-  
+
   const saveButton = create('button');
   saveButton.innerText = 'Save';
   saveButton.setAttribute('type', 'button');
   saveButton.onclick = () => saveSettings();
 
-  const spanApiKey = create('span');
-  spanApiKey.textContent = 'Your API key:';
-  const inputApiKey = create('input','yourapikey');
-  inner.appendChild(spanApiKey);
-  inner.appendChild(inputApiKey);
+  const apiKeyInputLabel = create('span');
+  apiKeyInputLabel.textContent = 'Your API key : ';
+  const apiKeyInput = create('input', 'yourapikey');
+  apiKeyInput.style.width = '300px';
+  inner.appendChild(apiKeyInputLabel);
+  inner.appendChild(apiKeyInput);
 
   inner.appendChild(create('br'));
 
-  const link = create('a');
-  link.target = '_blank';
-  link.href = 'https://steamcommunity.com/dev/apikey';
-  link.textContent = 'Get your API Key here';
-  inner.appendChild(link);
+  const linkForApiKey = create('a');
+  linkForApiKey.target = '_blank';
+  linkForApiKey.href = 'https://steamcommunity.com/dev/apikey';
+  linkForApiKey.textContent = 'Get your API Key here';
+  inner.appendChild(linkForApiKey);
 
+  inner.appendChild(create('br'));
+  inner.appendChild(create('br'));
+
+  const oldBanInputLabel = create('span');
+  oldBanInputLabel.textContent = 'Ignore bans which occured before the games older than (in days) : ';
+  const oldBanInput = create('input', 'ignoreBansBefore');
+  oldBanInput.type = 'number';
+  oldBanInput.style.width = '60px';
+  oldBanInput.value = 0;
+  inner.appendChild(oldBanInputLabel);
+  inner.appendChild(oldBanInput);
+
+  if (section === 'matchhistorycompetitive') {
+    inner.appendChild(create('br'));
+    inner.appendChild(create('br'));
+
+    const ignoreGamesLabel = create('span');
+    ignoreGamesLabel.textContent = 'Filter games by type : ';
+    inner.appendChild(ignoreGamesLabel);
+    const ignoreGamesRadioAll = create('input');
+    ignoreGamesRadioAll.type = 'radio';
+    ignoreGamesRadioAll.name = 'gameType';
+    ignoreGamesRadioAll.value = 'all';
+    ignoreGamesRadioAll.id = 'gameType-all';
+    ignoreGamesRadioAll.checked = true;
+    const ignoreGamesRadioAllLabel = create('label');
+    ignoreGamesRadioAllLabel.setAttribute('for', 'gameType-all');
+    ignoreGamesRadioAllLabel.textContent = 'all games (no filter)';
+    inner.appendChild(ignoreGamesRadioAll);
+    inner.appendChild(ignoreGamesRadioAllLabel);
+    const ignoreGamesRadioLong = create('input');
+    ignoreGamesRadioLong.type = 'radio';
+    ignoreGamesRadioLong.name = 'gameType';
+    ignoreGamesRadioLong.value = 'long';
+    ignoreGamesRadioLong.id = 'gameType-long';
+    const ignoreGamesRadioLongLabel = create('label');
+    ignoreGamesRadioLongLabel.setAttribute('for', 'gameType-long');
+    ignoreGamesRadioLongLabel.textContent = 'long games only';
+    inner.appendChild(ignoreGamesRadioLong);
+    inner.appendChild(ignoreGamesRadioLongLabel);
+    const ignoreGamesRadioShort = create('input');
+    ignoreGamesRadioShort.type = 'radio';
+    ignoreGamesRadioShort.name = 'gameType';
+    ignoreGamesRadioShort.value = 'short';
+    ignoreGamesRadioShort.id = 'gameType-short';
+    const ignoreGamesRadioShortLabel = create('label');
+    ignoreGamesRadioShortLabel.setAttribute('for', 'gameType-short');
+    ignoreGamesRadioShortLabel.textContent = 'short games only';
+    inner.appendChild(ignoreGamesRadioShort);
+    inner.appendChild(ignoreGamesRadioShortLabel);
+  }
+
+  inner.appendChild(create('br'));
   inner.appendChild(create('br'));
 
   inner.appendChild(saveButton);
@@ -502,9 +567,6 @@ function createOptionsContainer() {
 
 async function banstats() {
   const playersWithOldBan = new Set([...document.querySelectorAll('.banchecker-old')].map((e) => e.dataset.steamid64)).size;
-
-  const conf = banstatsConfig;
-
   const players = [];
   const playersBanned = [];
   const playersBannedAfter = [];
@@ -533,7 +595,7 @@ async function banstats() {
       const isLong = scoreLeft + scoreRight > 16;
 
       // if we wish to filter games on types (short or long)
-      if (!conf.filterGames || (conf.filterGames === 'LONG' && isLong) || (conf.filterGames === 'SHORT' && !isLong)) {
+      if (config.gameType === 'all' || (config.gameType === 'long' && isLong) || (config.gameType === 'short' && !isLong)) {
         let matchHasPlayerBanned = false;
         let matchHasPlayerBannedAfter = false;
         const playersOfTheMatchWeDontKnowYet = [];
@@ -569,7 +631,7 @@ async function banstats() {
         }
 
         // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
-        if (!conf.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
+        if (!config.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
           if (!endDate) {
             endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
           }
@@ -593,12 +655,12 @@ async function banstats() {
   }
 
   updateResults([{ text: '' }, { text: `Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}` }], true);
-  if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch) {
+  if (config.ignoreRecentPeriodWithNoBanAfterTheMatch) {
     updateResults(`- we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).`, true);
   }
-  if (conf.ignoreBansBefore) {
+  if (config.ignoreBansBefore) {
     updateResults(
-      `- ignoring bans occured before playing with you older than ${conf.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${
+      `- ignoring bans occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${
         Math.round((playersWithOldBan / players.length) * 10000) / 100
       } %)`,
       true
@@ -746,22 +808,31 @@ menuBottom.appendChild(checkBansButton);
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
-const banstatsConfig = {
-  ignoreBansBefore: 5 * 365, // we ignore grey bans older than this number (in days)
-  filterGames: '', // 'SHORT' or 'LONG' to filter games
-  ignoreRecentPeriodWithNoBanAfterTheMatch: false, // ignore recent period with no red ban (banned after the game)
-};
-
 if (initVariables()) {
   updateUI();
 
-  chrome.storage.sync.get(['yourapikey'], (data) => {
+  chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore'], (data) => {
     config.apikey = data?.yourapikey;
+    if (data?.ignoreBansBefore || data?.ignoreBansBefore === 0) {
+      config.ignoreBansBefore = data?.ignoreBansBefore;
+    }
+    if (data?.gameType) {
+      config.gameType = data?.gameType;
+    }
     if (!config.apikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
       updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
     } else {
       document.getElementById('yourapikey').value = config.apikey;
+    }
+    document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
+    switch (config.gameType) {
+      case 'long':
+        document.getElementById('gameType-long').checked = true;
+        break;
+      case 'short':
+        document.getElementById('gameType-short').checked = true;
+        break;
     }
   });
 } else {

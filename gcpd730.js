@@ -423,27 +423,27 @@ async function banstats() {
 
   let domMatchesParts = [...getResultsNodeList()];
   if (conf.filterGamesWithSteamId.length > 0) {
-    // on filtre les matchs contenant les steamID en paramètre
+    // to filter matches on specific steamids
     domMatchesParts = domMatchesParts.filter((domPart) => conf.filterGamesWithSteamId.some((steamId) => domPart.innerHTML.includes(steamId)));
   }
 
-  // pour chaque match
+  // for each match
   for (let domPart of domMatchesParts) {
     const scoreboardRows = domPart.querySelectorAll('.csgo_scoreboard_inner_right > tbody > tr');
     const playerRows = domPart.querySelectorAll('tr[data-steamid64]');
 
-    // normalement impossible
+    // guard but impossible
     if (playerRows.length > 0) {
-      // calcul des scores
+      // scores
       const scoreIndex = scoreboardRows.length / 2;
       const scoreValues = scoreboardRows[scoreIndex].innerText.split(':');
       const scoreLeft = parseInt(scoreValues[0].trim(), 10);
       const scoreRight = parseInt(scoreValues[1].trim(), 10);
       const isLong = scoreLeft + scoreRight > 16;
 
-      // filtre des games selon le type (courte ou longue)
+      // if we wish to filter games on types (short or long)
       if (!conf.filterGames || (conf.filterGames === 'LONG' && isLong) || (conf.filterGames === 'SHORT' && !isLong)) {
-        // si j'ai un steamid en paramètre, je calcule le winrate
+        // TODO : remove this parameter and use profilURI
         if (conf.mysteamid) {
           let playerIndex = 0;
           scoreboardRows.forEach((row, index) => {
@@ -464,17 +464,17 @@ async function banstats() {
         let matchHasPlayerBannedAfter = false;
         const playersOfTheMatchWeDontKnowYet = [];
 
-        // pour chaque joueur
+        //  for each player
         for (let player of playerRows) {
           const steamId = player.attributes['data-steamid64'].value;
           const banStatus = player.querySelector('.banchecker-bans');
 
-          // on ajoute les joueurs que l'on connait pas à la liste
+          // we store players we don't know yet
           if (!players.some((p) => p === steamId)) {
             playersOfTheMatchWeDontKnowYet.push(steamId);
           }
 
-          // on a du texte dans la colonne "ban"
+          // we have a ban
           const banLabel = banStatus.innerText.trim();
           if (banLabel != '') {
             const isAnOldBan = conf.ignoreBansBefore && parseInt(banStatus.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10) > conf.ignoreBansBefore;
@@ -486,23 +486,21 @@ async function banstats() {
                 playersBanned.push(steamId);
               }
 
-              // on a un ban dans la game
               matchHasPlayerBanned = true;
 
-              // c'est rouge, ça veut dire que le ban a eu lieu après la game
+              // ban occured after playing with him
               if (banStatus.style.color === 'red') {
                 if (!playersBannedAfter.some((p) => p === steamId)) {
                   playersBannedAfter.push(steamId);
                 }
 
-                // on a un ban qui a eu lieu après la game
                 matchHasPlayerBannedAfter = true;
               }
             }
           }
         }
 
-        // si on doit exclure la période récente sans ban after (on suppose qu'il manque des ban waves)
+        // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
         if (!conf.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
           if (!endDate) {
             endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
@@ -564,7 +562,7 @@ async function banstats() {
     results += `loserate : ${Math.round((loses / matchesCount) * 10000) / 100} %`;
   }
 
-  // banned players
+  // we list the banned players
   let bannedPlayersInfo = [];
   const bannedPlayersDomElements = [...document.querySelectorAll('.banchecker-bans')].filter((p) => window.getComputedStyle(p).color === 'rgb(255, 0, 0)');
   if (bannedPlayersDomElements.length > 0) {

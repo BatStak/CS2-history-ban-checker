@@ -240,19 +240,15 @@ function checkBans(players) {
         batch: batches[i],
       },
       (json, error) => {
-        if (error !== undefined) {
+        if (error || !json) {
           updateResults(
             [
-              { text: `Error while scanning players for bans:` },
-              { text: `` },
-              { text: `` },
               {
-                text: `${
-                  retryCount !== undefined && retryCount > 0 ? `Retrying to scan... ${maxRetries - retryCount}/3` : `Couldn't scan for bans after ${maxRetries} retries :(`
+                text: `Error while scanning players for bans: ${
+                  retryCount > 0 ? `Retrying to scan... ${maxRetries - retryCount + 1}/3` : `Couldn't scan for bans after ${maxRetries} retries. Are your sure you set a valid API key ?`
                 }`,
+                important: true,
               },
-              { text: `` },
-              { text: `` },
             ],
             true
           );
@@ -309,7 +305,7 @@ function checkBans(players) {
           }
         }
         if (batches.length > i + 1) {
-          setTimeout(() => checkBansOnApi(i + 1), 1000);
+          setTimeout(() => checkBansOnApi(i + 1, maxRetries), 1000);
         } else {
           updateResults([
             { text: `Looks like we're done.` },
@@ -758,7 +754,7 @@ if (initVariables()) {
     apikey = data?.yourapikey;
     if (!apikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !`, important: true }]);
+      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
     } else {
       document.getElementById('yourapikey').value = apikey;
     }

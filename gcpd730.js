@@ -14,17 +14,22 @@ const funStats = {
   totalWins: 0,
   totalWaitTime: 0,
   totalTime: 0,
+  wins: 0,
+  loses: 0,
+  draws: 0,
 };
 
 let profileURI = null;
 let section = null;
 let apikey = '';
+let mysteamid = '';
 
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
+const scoreRegex = /(\d+) : (\d+)/;
 
-function getSteamID64(minProfile) {
-  return '76' + (parseInt(minProfile) + 561197960265728);
+function getSteamID64(minProfileId) {
+  return '76' + (parseInt(minProfileId) + 561197960265728);
 }
 
 function parseTime(minutes, seconds) {
@@ -83,12 +88,25 @@ function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
   // we find the links on our profil to get the statistics of the match
-  const myProfileLinks = document.querySelectorAll(`.inner_name .playerAvatar a[href="${profileURI.replace(/\/$/, '')}"]:not(.personal-stats-checked)`);
+  const myProfileLinks = document.querySelectorAll(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`);
   for (let link of myProfileLinks) {
-    myMatchStats = link.closest('tr').querySelectorAll('td');
+    const playerRow = link.closest('tr');
+    const myMatchStats = playerRow.querySelectorAll('td');
     funStats.totalKills += parseInt(myMatchStats[2].textContent, 10);
     funStats.totalAssists += parseInt(myMatchStats[3].textContent, 10);
     funStats.totalDeaths += parseInt(myMatchStats[4].textContent, 10);
+    const score = playerRow.parentNode.querySelector('.csgo_scoreboard_score').textContent.match(scoreRegex);
+    const rowsCount = playerRow.parentNode.children.length;
+    const playerIndex = Array.from(playerRow.parentNode.children).indexOf(playerRow);
+    const isFirstTeamWin = parseInt(score[1], 10) > parseInt(score[2], 10);
+    const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
+    if (score[1] === score[2]) {
+      funStats.draws++;
+    } else if (isPlayerInFirstTeam && isFirstTeamWin) {
+      funStats.wins++;
+    } else {
+      funStats.loses++;
+    }
     link.classList.add('personal-stats-checked');
   }
 
@@ -118,7 +136,13 @@ function updateFunStats() {
     K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)}<br />
     (K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}<br />
     Total wait time: ${timeString(funStats.totalWaitTime)}<br />
-    Total match time: ${timeString(funStats.totalTime)}
+    Total match time: ${timeString(funStats.totalTime)}<br />
+    Wins: ${funStats.wins}<br />
+    Draws: ${funStats.draws}<br />
+    Loses: ${funStats.loses}<br />
+    Winrate: ${Math.round((funStats.wins / funStats.numberOfMatches) * 10000) / 100} %<br />
+    Winrate with draws: ${Math.round(((funStats.wins + funStats.draws) / funStats.numberOfMatches) * 10000) / 100} %<br />
+    Loserate: ${Math.round((funStats.loses / funStats.numberOfMatches) * 10000) / 100} %
   `;
 }
 
@@ -145,8 +169,8 @@ function formatMatchTables() {
     for (let report of document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)')) {
       const dateEl = report.querySelector('td:first-child');
       const daysSinceMatch = daysSince(dateEl.textContent);
-      const minProfile = report.querySelector('.linkTitle').dataset.miniprofile;
-      report.dataset.steamid64 = getSteamID64(minProfile);
+      const minProfileId = report.querySelector('.linkTitle').dataset.miniprofile;
+      report.dataset.steamid64 = getSteamID64(minProfileId);
       report.dataset.dayssince = daysSinceMatch;
       report.classList.add('banchecker-profile');
       report.classList.add('banchecker-formatted');
@@ -157,10 +181,14 @@ function formatMatchTables() {
       const daysSinceMatch = daysSince(leftColumn.textContent);
       table.querySelectorAll('tbody > tr').forEach((tr, i) => {
         if (i === 0 || tr.childElementCount < 3) return;
-        const minProfile = tr.querySelector('.linkTitle').dataset.miniprofile;
-        const steamID64 = getSteamID64(minProfile);
-        tr.dataset.steamid64 = steamID64;
+        const profileLink = tr.querySelector('.linkTitle');
+        const minProfileId = profileLink.dataset.miniprofile;
+        const steamid64 = getSteamID64(minProfileId);
+        tr.dataset.steamid64 = steamid64;
         tr.dataset.dayssince = daysSinceMatch;
+        if (profileLink.href === profileURI && !mysteamid) {
+          mysteamid = steamid64;
+        }
         tr.classList.add('banchecker-profile');
       });
       table.classList.add('banchecker-formatted');
@@ -374,7 +402,7 @@ async function loadMatchHisory() {
         }
 
         if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
-          const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
+          const lastDate = document.getElementById('load_more_button_continue_text').textContent.trim();
           updateStatus(`${status} ... loading since ${lastDate} ...`);
           if (since >= lastDate) {
             clearInterval(timerLoadMatchHistory);
@@ -417,10 +445,6 @@ async function banstats() {
   let startDate = '';
   let endDate = '';
 
-  let wins = 0;
-  let loses = 0;
-  let draws = 0;
-
   let domMatchesParts = [...getResultsNodeList()];
   if (conf.filterGamesWithSteamId.length > 0) {
     // to filter matches on specific steamids
@@ -436,30 +460,13 @@ async function banstats() {
     if (playerRows.length > 0) {
       // scores
       const scoreIndex = scoreboardRows.length / 2;
-      const scoreValues = scoreboardRows[scoreIndex].innerText.split(':');
+      const scoreValues = scoreboardRows[scoreIndex].textContent.split(':');
       const scoreLeft = parseInt(scoreValues[0].trim(), 10);
       const scoreRight = parseInt(scoreValues[1].trim(), 10);
       const isLong = scoreLeft + scoreRight > 16;
 
       // if we wish to filter games on types (short or long)
       if (!conf.filterGames || (conf.filterGames === 'LONG' && isLong) || (conf.filterGames === 'SHORT' && !isLong)) {
-        // TODO : remove this parameter and use profilURI
-        if (conf.mysteamid) {
-          let playerIndex = 0;
-          scoreboardRows.forEach((row, index) => {
-            if (row.attributes['data-steamid64']?.value === conf.mysteamid) {
-              playerIndex = index;
-            }
-          });
-          if ((playerIndex < scoreIndex && scoreLeft > scoreRight) || (playerIndex > scoreIndex && scoreRight > scoreLeft)) {
-            wins++;
-          } else if (scoreLeft === scoreRight) {
-            draws++;
-          } else {
-            loses++;
-          }
-        }
-
         let matchHasPlayerBanned = false;
         let matchHasPlayerBannedAfter = false;
         const playersOfTheMatchWeDontKnowYet = [];
@@ -475,7 +482,7 @@ async function banstats() {
           }
 
           // we have a ban
-          const banLabel = banStatus.innerText.trim();
+          const banLabel = banStatus.textContent.trim();
           if (banLabel != '') {
             const isAnOldBan = conf.ignoreBansBefore && parseInt(banStatus.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10) > conf.ignoreBansBefore;
 
@@ -503,7 +510,7 @@ async function banstats() {
         // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
         if (!conf.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
           if (!endDate) {
-            endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
+            endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].textContent;
           }
 
           players.push(...playersOfTheMatchWeDontKnowYet);
@@ -518,7 +525,7 @@ async function banstats() {
             matchesCountWithPlayerBannedAfter++;
           }
 
-          startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
+          startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].textContent;
         }
 
         if (!matchHasPlayerBannedAfter && conf.displayOnlyGamesWithBanAfterWhenFinished) {
@@ -556,11 +563,6 @@ async function banstats() {
   results += `Unique players : ${players.length}`;
   results += `<ul><li>banned : ${playersBanned.length} (${Math.round((playersBanned.length / players.length) * 10000) / 100} %)</li>`;
   results += `<li>banned after playing with you : ${playersBannedAfter.length} (${Math.round((playersBannedAfter.length / players.length) * 10000) / 100} %)</li></ul>`;
-  if (conf.mysteamid) {
-    results += `wins : ${wins}, loses: ${loses}, draws: ${draws}`;
-    results += `winrate : ${Math.round((wins / matchesCount) * 10000) / 100} %, including draws : ${Math.round(((wins + draws) / matchesCount) * 10000) / 100} %`;
-    results += `loserate : ${Math.round((loses / matchesCount) * 10000) / 100} %`;
-  }
 
   // we list the banned players
   let bannedPlayersInfo = [];
@@ -677,7 +679,7 @@ const optionsContainer = document.createElement('div');
 optionsContainer.setAttribute('id', 'banchecker-options');
 const optionsContainerInner = document.createElement('div');
 const optionsCloseButton = document.createElement('button');
-optionsCloseButton.innerText = 'Save';
+optionsCloseButton.textContent = 'Save';
 optionsCloseButton.setAttribute('type', 'button');
 optionsCloseButton.onclick = () => saveSettings();
 optionsContainerInner.innerHTML = `
@@ -693,7 +695,6 @@ extensionContainer.appendChild(optionsContainer);
 const banstatsConfig = {
   displayOnlyGamesWithBanAfterWhenFinished: false, // to remove in DOM matches with no red ban
   ignoreBansBefore: 5 * 365, // we ignore grey bans older than this number (in days)
-  mysteamid: '', // if we want winrate calculation, me : 76561197962198400, my friend : 76561197985267551.
   filterGames: '', // 'SHORT' or 'LONG' to filter games
   ignoreRecentPeriodWithNoBanAfterTheMatch: false, // ignore recent period with no red ban (banned after the game)
   filterGamesWithSteamId: [], // to only focus on games with specific steam id

@@ -17,26 +17,20 @@ const funStats = {
 };
 
 let profileURI = null;
-let tabURIparam = 'matchhistorycompetitive';
-let timerLoadMatchHistory = null;
-let mandatoryStatus = '';
+let section = null;
 let apikey = '';
-let waitTimeRowIndex = 3;
-let timeRowIndex = 4;
+
+const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
+const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
 
 function getSteamID64(minProfile) {
   return '76' + (parseInt(minProfile) + 561197960265728);
 }
 
-function parseTime(time) {
+function parseTime(minutes, seconds) {
   let timeSecs = 0;
-  if (time.includes(':')) {
-    const i = time.indexOf(':');
-    timeSecs += parseInt(time.substr(0, i)) * 60;
-    timeSecs += parseInt(time.substr(i + 1));
-  } else {
-    timeSecs += parseInt(time);
-  }
+  timeSecs += parseInt(minutes) * 60;
+  timeSecs += parseInt(seconds);
   return timeSecs;
 }
 
@@ -69,90 +63,63 @@ function updateResults(text, append) {
 
 function updateStatus(text, append) {
   if (append) {
-    statusBar.textContent = statusBar.textContent + '\n' + text;
+    statusBar.innerHTML = statusBar.textContent + '<br />' + text;
   } else {
-    statusBar.textContent = (mandatoryStatus ? mandatoryStatus + '\n' : '') + text;
+    statusBar.innerHTML = text;
   }
 }
 
 function initVariables() {
-  const profileAnchor = document.querySelector('#global_actions .user_avatar');
-  if (!profileAnchor) {
-    updateStatus('Error: .user_avatar element was not found');
-  }
-  profileURI = profileAnchor.href;
-  if (!document.querySelector('#load_more_button')) {
-    updateStatus('No "LOAD MORE HISTORY" button is present, seems like there are no more matches');
-  }
-  const steamContinueScript = document.querySelector('#personaldata_elements_container+script');
-  const matchContinueToken = steamContinueScript.text.match(/g_sGcContinueToken = '(\d+)'/);
-  if (!matchContinueToken) {
-    updateStatus('Error: g_sGcContinueToken was not found');
-  }
-  const scriptTags = document.querySelectorAll('script');
-  let matchSessionID = false;
-  for (const scriptTag of scriptTags) {
-    let g_sessionID = scriptTag.text.match(/g_sessionID = "(.+)"/);
-    if (g_sessionID != null) {
-      matchSessionID = g_sessionID;
-      break;
-    }
-  }
-  if (!matchSessionID) {
-    updateStatus('Error: g_sessionID was not found');
-  }
-  const tabOnEl = document.querySelector('.tabOn');
-  if (tabOnEl) {
-    tabURIparam = tabOnEl.parentNode.id.split('_').pop();
-  }
-
-  if (tabURIparam === 'matchhistoryscrimmage') {
-    waitTimeRowIndex = 2;
-    timeRowIndex = 3;
-  }
-
   if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
+
+  hasLoadMoreButton = !!document.querySelector('#load_more_button');
+  profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
+  section = new URLSearchParams(window.location.search).get('tab');
+
+  return hasLoadMoreButton && !!profileURI && !!section;
 }
 
-function updateStats() {
-  if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') return;
-  const profileURItrimmed = profileURI.replace(/\/$/, '');
-  const myAnchors = document.querySelectorAll('.inner_name .playerAvatar ' + `a[href="${profileURItrimmed}"]:not(.banchecker-counted)`);
-  myAnchors.forEach((anchorEl) => {
-    myMatchStats = anchorEl.closest('tr').querySelectorAll('td');
+function updateFunStats() {
+  if (isCommendOrReportsSection()) return;
+
+  // we find the links on our profil to get the statistics of the match
+  const myProfileLinks = document.querySelectorAll(`.inner_name .playerAvatar a[href="${profileURI.replace(/\/$/, '')}"]:not(.personal-stats-checked)`);
+  for (let link of myProfileLinks) {
+    myMatchStats = link.closest('tr').querySelectorAll('td');
     funStats.totalKills += parseInt(myMatchStats[2].textContent, 10);
     funStats.totalAssists += parseInt(myMatchStats[3].textContent, 10);
     funStats.totalDeaths += parseInt(myMatchStats[4].textContent, 10);
-    anchorEl.classList.add('banchecker-counted');
-  });
-  const matchesData = document.querySelectorAll('.val_left:not(.banchecker-counted)');
-  funStats.numberOfMatches += matchesData.length;
-  matchesData.forEach((matchData) => {
-    matchData.querySelectorAll('td').forEach((dataEl, index) => {
-      if (index < 2) return;
-      const data = dataEl.innerText.trim();
-      if (data.includes(':')) {
-        const i = data.indexOf(':');
-        const value = data.substr(i + 1);
-        if (index === waitTimeRowIndex) {
-          funStats.totalWaitTime += parseTime(value);
-        } else if (index === timeRowIndex) {
-          funStats.totalTime += parseTime(value);
-        }
+    link.classList.add('personal-stats-checked');
+  }
+
+  // to add to waiting time and match duration, we check the left panels
+  const leftPanels = document.querySelectorAll('.val_left:not(.personal-stats-checked)');
+  funStats.numberOfMatches += leftPanels.length;
+  for (let leftPanel of leftPanels) {
+    for (let td of leftPanel.querySelectorAll('td')) {
+      const textContent = td.textContent.trim();
+      if (waitTimeRegex.test(textContent)) {
+        const hoursAndMinues = textContent.match(waitTimeRegex);
+        funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
+      } else if (matchTimeRegex.test(textContent)) {
+        const hoursAndMinues = textContent.match(matchTimeRegex);
+        funStats.totalTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
       }
-    });
-    matchData.classList.add('banchecker-counted');
-  });
-  funStatsBar.textContent =
-    'Some fun stats for loaded matches:\n' +
-    `Number of matches: ${funStats.numberOfMatches}\n` +
-    `Total kills: ${funStats.totalKills}\n` +
-    `Total assists: ${funStats.totalAssists}\n` +
-    `Total deaths: ${funStats.totalDeaths}\n` +
-    `K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)} | ` +
-    `(K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}\n` +
-    `Total wait time: ${timeString(funStats.totalWaitTime)}\n` +
-    `Total match time: ${timeString(funStats.totalTime)}`;
+    }
+    leftPanel.classList.add('personal-stats-checked');
+  }
+
+  funStatsBar.innerHTML = `
+    Some fun stats for loaded matches:<br />
+    Number of matches: ${funStats.numberOfMatches}<br />
+    Total kills: ${funStats.totalKills}<br />
+    Total assists: ${funStats.totalAssists}<br />
+    Total deaths: ${funStats.totalDeaths}<br />
+    K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)}<br />
+    (K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}<br />
+    Total wait time: ${timeString(funStats.totalWaitTime)}<br />
+    Total match time: ${timeString(funStats.totalTime)}
+  `;
 }
 
 function formatMatchTables() {
@@ -174,7 +141,7 @@ function formatMatchTables() {
     }
     return daysSinceMatch;
   };
-  if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') {
+  if (isCommendOrReportsSection()) {
     document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)').forEach((report) => {
       const dateEl = report.querySelector('td:first-child');
       const daysSinceMatch = daysSince(dateEl.textContent);
@@ -302,32 +269,40 @@ function checkBans(players) {
   if (uniquePlayers.length > 0) {
     fetchBatch(0, maxRetries);
   } else {
-    bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
+    toggleDisableAllButtons(false);
   }
 }
 
+function toggleDisableAllButtons(value) {
+  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = value;
+}
+
+function isCommendOrReportsSection() {
+  return ['playerreports', 'playercommends'].includes(section);
+}
+
 function checkLoadedMatchesForBans() {
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-  if (tabURIparam === 'playerreports' || tabURIparam === 'playercommends') {
+  toggleDisableAllButtons(true);
+  if (isCommendOrReportsSection()) {
     const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
-    if (!tableHeader.classList.contains('banchecker-withcolumn')) {
-      tableHeader.classList.add('banchecker-withcolumn');
+    if (!tableHeader.classList.contains('ban-column-added')) {
+      tableHeader.classList.add('ban-column-added');
       const bansHeader = document.createElement('th');
       bansHeader.textContent = 'Ban';
       tableHeader.appendChild(bansHeader);
     }
-    const uncheckedPlayers = document.querySelectorAll('.generic_kv_table > tbody > tr:not(.banchecker-withcolumn)');
-    uncheckedPlayers.forEach((tr) => {
-      tr.classList.add('banchecker-withcolumn');
+    const playersRowsWithoutBanColumn = document.querySelectorAll('.generic_kv_table > tbody > tr:not(.ban-column-added)');
+    playersRowsWithoutBanColumn.forEach((tr) => {
+      tr.classList.add('ban-column-added');
       const bansPlaceholder = document.createElement('td');
       bansPlaceholder.classList.add('banchecker-bans');
       bansPlaceholder.textContent = '?';
       tr.appendChild(bansPlaceholder);
     });
   } else {
-    const tables = document.querySelectorAll('.banchecker-formatted:not(.banchecker-withcolumn)');
+    const tables = document.querySelectorAll('.banchecker-formatted:not(.ban-column-added)');
     tables.forEach((table) => {
-      table.classList.add('banchecker-withcolumn');
+      table.classList.add('ban-column-added');
       table.querySelectorAll('tr').forEach((tr, i) => {
         if (i === 0) {
           const bansHeader = document.createElement('th');
@@ -364,13 +339,18 @@ function createSteamButton(text) {
   return button;
 }
 
-function getMatches() {
-  return document.querySelectorAll('.csgo_scoreboard_root > tbody > tr');
+function getResultsNodeList() {
+  let selector = '.csgo_scoreboard_root > tbody > tr';
+  if (isCommendOrReportsSection()) {
+    selector = '.banchecker-profile';
+  }
+  return document.querySelectorAll(selector);
 }
 
+let timerLoadMatchHistory = null;
 async function loadMatchHisory() {
   loadMatchHistoryStopButton.style.display = 'inline-block';
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
+  toggleDisableAllButtons(true);
   const since = localStorage.getItem('banchecker-load-match-history-since');
   let status = '';
   if (since) {
@@ -385,7 +365,7 @@ async function loadMatchHisory() {
     const moreButton = document.getElementById('load_more_button');
     timerLoadMatchHistory = setInterval(() => {
       if (moreButton.offsetParent !== null) {
-        const newNumberOfMatches = getMatches().length;
+        const newNumberOfMatches = getResultsNodeList().length;
         if (newNumberOfMatches === numberOfMatches) {
           if (attemptsToLoadMoreMatches < 3) {
             attemptsToLoadMoreMatches++;
@@ -410,7 +390,7 @@ async function loadMatchHisory() {
     }, 800);
   });
   updateStatus(`${status} Done !`);
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
+  toggleDisableAllButtons(false);
   loadMatchHistoryStopButton.style.display = 'none';
 }
 
@@ -443,7 +423,7 @@ async function banstats() {
   let loses = 0;
   let draws = 0;
 
-  let domMatchesParts = [...getMatches()];
+  let domMatchesParts = [...getResultsNodeList()];
   if (conf.filterGamesWithSteamId.length > 0) {
     // on filtre les matchs contenant les steamID en paramètre
     domMatchesParts = domMatchesParts.filter((domPart) => conf.filterGamesWithSteamId.some((steamId) => domPart.innerHTML.includes(steamId)));
@@ -499,8 +479,7 @@ async function banstats() {
           // on a du texte dans la colonne "ban"
           const banLabel = banStatus.innerText.trim();
           if (banLabel != '') {
-            const daysBannedBeforeTheGame = /.*\-(\d+)$/.exec(banLabel);
-            const isAnOldBan = daysBannedBeforeTheGame && conf.ignoreBansBefore && parseInt(daysBannedBeforeTheGame[1], 10) < conf.ignoreBansBefore;
+            const isAnOldBan = conf.ignoreBansBefore && parseInt(banStatus.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10) > conf.ignoreBansBefore;
 
             if (isAnOldBan) {
               playersWithOldBan++;
@@ -612,7 +591,7 @@ async function banstats() {
 
   updateResults(results, true);
 
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
+  toggleDisableAllButtons(false);
 }
 
 const extensionContainer = document.createElement('div');
@@ -639,17 +618,13 @@ extensionContainer.appendChild(funStatsBar);
 
 document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
 
-initVariables();
-formatMatchTables();
-updateStats();
-
 const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
 const callback = (mutationList, observer) => {
   for (const mutation of mutationList) {
     if (mutation.attributeName === 'style') {
       if (loadMoreButton.style.display !== 'none') {
         formatMatchTables();
-        updateStats();
+        updateFunStats();
       }
     }
   }
@@ -675,7 +650,7 @@ loadMatchHistoryStopButton.onclick = () => {
     clearInterval(timerLoadMatchHistory);
     timerLoadMatchHistory = null;
   }
-  bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = false;
+  toggleDisableAllButtons(false);
   loadMatchHistoryStopButton.style.display = 'none';
 };
 
@@ -732,12 +707,22 @@ const banstatsConfig = {
   filterGamesWithSteamId: [], // to only focus on games with specific steam id
 };
 
-chrome.storage.sync.get(['yourapikey'], (data) => {
-  apikey = data?.yourapikey;
-  if (!apikey) {
-    loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-    updateResults(`<span class="banchecker-warning">You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !</span>`);
-  } else {
-    document.getElementById('yourapikey').value = apikey;
-  }
-});
+if (initVariables()) {
+  formatMatchTables();
+  updateFunStats();
+
+  chrome.storage.sync.get(['yourapikey'], (data) => {
+    apikey = data?.yourapikey;
+    if (!apikey) {
+      loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
+      updateResults(`<span class="banchecker-warning">You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !</span>`);
+    } else {
+      document.getElementById('yourapikey').value = apikey;
+    }
+  });
+} else {
+  updateStatus(
+    `<span class="banchecker-red">This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on <a href="https://github.com/BatStak/CSGO-match-history-ban-checker" target="_blank">github.</a></span>`
+  );
+  toggleDisableAllButtons(true);
+}

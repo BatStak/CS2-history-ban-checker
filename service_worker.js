@@ -22,7 +22,7 @@ if (chrome.runtime.onInstalled) {
         break;
       case 'github':
         chrome.tabs.create({
-          url: 'https://github.com/BatStak/Ban-Checker-for-Steam-With-Stats',
+          url: 'https://github.com/BatStak/CSGO-history-ban-checker',
         });
         break;
     }

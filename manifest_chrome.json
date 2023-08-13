@@ -1,6 +1,6 @@
 {
-  "name": "CSGO match history ban checker",
-  "description": "Check bans on your CSGO match history page",
+  "name": "CSGO history ban checker",
+  "description": "Check players bans on your CSGO match history page and on commends or reports.",
   "version": "1.0.0",
   "permissions": ["storage", "contextMenus"],
   "host_permissions": ["*://steamcommunity.com/*", "https://api.steampowered.com/*"],

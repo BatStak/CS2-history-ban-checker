@@ -773,7 +773,7 @@ if (initVariables()) {
 } else {
   updateStatus([
     {
-      text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-match-history-ban-checker`,
+      text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
       important: true,
     },
   ]);

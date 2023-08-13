@@ -1,3 +1,18 @@
+function genericOnClick(info) {
+  switch (info.menuItemId) {
+    case 'match-history':
+      chrome.tabs.create({
+        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
+      });
+      break;
+    case 'github':
+      chrome.tabs.create({
+        url: 'https://github.com/BatStak/CSGO-history-ban-checker',
+      });
+      break;
+  }
+}
+
 // chrome only
 if (chrome.runtime.onInstalled) {
   chrome.runtime.onInstalled.addListener(function () {
@@ -13,20 +28,6 @@ if (chrome.runtime.onInstalled) {
     });
   });
 
-  function genericOnClick(info) {
-    switch (info.menuItemId) {
-      case 'match-history':
-        chrome.tabs.create({
-          url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
-        });
-        break;
-      case 'github':
-        chrome.tabs.create({
-          url: 'https://github.com/BatStak/CSGO-history-ban-checker',
-        });
-        break;
-    }
-  }
 
   chrome.contextMenus.onClicked.addListener(genericOnClick);
 } else {
@@ -36,11 +37,13 @@ if (chrome.runtime.onInstalled) {
     title: 'Access to matchmaking history',
     contexts: ['all'],
   });
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: 'github',
     title: 'Github page',
     contexts: ['all'],
   });
+
+  browser.contextMenus.onClicked.addListener(genericOnClick);
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

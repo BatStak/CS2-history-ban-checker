@@ -102,7 +102,7 @@ function updateFunStats() {
     const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
     if (score[1] === score[2]) {
       funStats.draws++;
-    } else if (isPlayerInFirstTeam && isFirstTeamWin) {
+    } else if (isPlayerInFirstTeam === isFirstTeamWin) {
       funStats.wins++;
     } else {
       funStats.loses++;
@@ -542,7 +542,7 @@ async function banstats() {
   if (conf.displayOnlyGamesWithBanAfterWhenFinished) {
     results += `<br />We have removed all matches on the page with no ban occured after playing with you!<br />`;
   }
-  results += `<br />Results on the period : ${startDate.substring(0, 10)} => ${endDate.substring(0, 10)}<br />`;
+  results += `<br />Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}<br />`;
   if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch || conf.ignoreBansBefore) {
     results += '<ul>';
   }

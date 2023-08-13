@@ -7,6 +7,11 @@
   margin: 8px 0;
 }
 
+#status-bar > div,
+#stats-results > div {
+  min-height: 20px;
+}
+
 .banchecker-red {
   color: #f00;
 }
@@ -39,6 +44,7 @@
 #funstats-bar {
   bottom: 4px;
   left: 4px;
+  white-space: pre-wrap;
 }
 
 #banchecker-options {

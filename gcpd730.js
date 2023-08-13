@@ -59,10 +59,29 @@ function timeString(time) {
 }
 
 function updateTextContent(element, text, append) {
-  if (append) {
-    element.innerHTML = element.innerHTML + '<br />' + text;
+  if (!append) {
+    element.textContent = '';
+  }
+  const format = (text, important, link) => {
+    const textDiv = createDiv();
+    textDiv.textContent = text;
+    if (important) {
+      textDiv.classList.add('banchecker-red');
+    }
+    if (link) {
+      textDiv.textContent = '';
+      const linkElement = document.createElement('a');
+      linkElement.target = '_blank';
+      linkElement.href = link;
+      linkElement.textContent = text;
+      textDiv.appendChild(linkElement);
+    }
+    element.appendChild(textDiv);
+  };
+  if (text instanceof Array) {
+    text.forEach((value) => format(value.text, value.important, value.link));
   } else {
-    element.innerHTML = text;
+    format(text, false, false);
   }
 }
 
@@ -127,23 +146,21 @@ function updateFunStats() {
     leftPanel.classList.add('personal-stats-checked');
   }
 
-  funStatsBar.innerHTML = `
-    Some fun stats for loaded matches:<br />
-    Number of matches: ${funStats.numberOfMatches}<br />
-    Total kills: ${funStats.totalKills}<br />
-    Total assists: ${funStats.totalAssists}<br />
-    Total deaths: ${funStats.totalDeaths}<br />
-    K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)}<br />
-    (K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}<br />
-    Total wait time: ${timeString(funStats.totalWaitTime)}<br />
-    Total match time: ${timeString(funStats.totalTime)}<br />
-    Wins: ${funStats.wins}<br />
-    Draws: ${funStats.draws}<br />
-    Loses: ${funStats.loses}<br />
-    Winrate: ${Math.round((funStats.wins / funStats.numberOfMatches) * 10000) / 100} %<br />
-    Winrate with draws: ${Math.round(((funStats.wins + funStats.draws) / funStats.numberOfMatches) * 10000) / 100} %<br />
-    Loserate: ${Math.round((funStats.loses / funStats.numberOfMatches) * 10000) / 100} %
-  `;
+  funStatsBar.textContent = `Some fun stats for loaded matches:
+Number of matches: ${funStats.numberOfMatches}
+Total kills: ${funStats.totalKills}
+Total assists: ${funStats.totalAssists}
+Total deaths: ${funStats.totalDeaths}
+K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)}
+(K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}
+Total wait time: ${timeString(funStats.totalWaitTime)}
+Total match time: ${timeString(funStats.totalTime)}
+Wins: ${funStats.wins}
+Draws: ${funStats.draws}
+Loses: ${funStats.loses}
+Winrate: ${Math.round((funStats.wins / funStats.numberOfMatches) * 10000) / 100} %
+Winrate with draws: ${Math.round(((funStats.wins + funStats.draws) / funStats.numberOfMatches) * 10000) / 100} %
+Loserate: ${Math.round((funStats.loses / funStats.numberOfMatches) * 10000) / 100} %`;
 }
 
 function formatMatchsTable() {
@@ -209,12 +226,11 @@ function checkBans(players) {
     return arr;
   }, []);
   const checkBansOnApi = (i, retryCount) => {
-    updateResults(
-      `Loaded unchecked matches contain ${uniquePlayers.length} players.<br />` +
-        `We can scan 100 players at a time so we're sending ${batches.length} ` +
-        `request${batches.length > 1 ? 's' : ''}.<br />` +
-        `${i} successful request${i === 1 ? '' : 's'} so far...`
-    );
+    updateResults([
+      { text: `Loaded unchecked matches contain ${uniquePlayers.length} players.` },
+      { text: `We can scan 100 players at a time so we're sending ${batches.length} request${batches.length > 1 ? 's' : ''}` },
+      { text: `${i} successful request${i === 1 ? '' : 's'} so far...` },
+    ]);
 
     chrome.runtime.sendMessage(
       chrome.runtime.id,
@@ -226,12 +242,19 @@ function checkBans(players) {
       (json, error) => {
         if (error !== undefined) {
           updateResults(
-            `Error while scanning players for bans:<br />${error}` +
-              `${
-                retryCount !== undefined && retryCount > 0
-                  ? `<br /><br />Retrying to scan... ${maxRetries - retryCount}/3`
-                  : `<br /><br />Couldn't scan for bans after ${maxRetries} retries :(`
-              }`
+            [
+              { text: `Error while scanning players for bans:` },
+              { text: `` },
+              { text: `` },
+              {
+                text: `${
+                  retryCount !== undefined && retryCount > 0 ? `Retrying to scan... ${maxRetries - retryCount}/3` : `Couldn't scan for bans after ${maxRetries} retries :(`
+                }`,
+              },
+              { text: `` },
+              { text: `` },
+            ],
+            true
           );
           if (retryCount > 0) {
             setTimeout(() => checkBansOnApi(i, retryCount - 1), 3000);
@@ -285,16 +308,15 @@ function checkBans(players) {
         if (batches.length > i + 1) {
           setTimeout(() => checkBansOnApi(i + 1), 1000);
         } else {
-          updateResults(
-            `Looks like we're done.<br /><br />` +
-              (banStats.recentBans ? `<span class="banchecker-red">` : '') +
-              `There were ${banStats.recentBans} players who got banned after playing with you!<br /><br />` +
-              (banStats.recentBans ? `</span>` : '') +
-              `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} ` +
-              `Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)<br />` +
-              `Total amount of unique players encountered: ${uniquePlayers.length}` +
-              `<br /><br />Hover over ban status to check how many days have passed since last ban.`
-          );
+          updateResults([
+            { text: `Looks like we're done.` },
+            { text: '' },
+            { text: `There were ${banStats.recentBans} players who got banned after playing with you!`, important: banStats.recentBans > 0 },
+            { text: '' },
+            {
+              text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
+            },
+          ]);
           banstats();
         }
       }
@@ -455,10 +477,10 @@ async function banstats() {
   let endDate = '';
 
   let domMatchesParts = [...getResultsNodeList()];
-  if (conf.filterGamesWithSteamId.length > 0) {
-    // to filter matches on specific steamids
-    domMatchesParts = domMatchesParts.filter((domPart) => conf.filterGamesWithSteamId.some((steamId) => domPart.innerHTML.includes(steamId)));
-  }
+  // if (conf.filterGamesWithSteamId.length > 0) {
+  //   // to filter matches on specific steamids
+  //   domMatchesParts = domMatchesParts.filter((domPart) => conf.filterGamesWithSteamId.some((steamId) => domPart.innerHTML.includes(steamId)));
+  // }
 
   // for each match
   for (let domPart of domMatchesParts) {
@@ -538,40 +560,42 @@ async function banstats() {
     }
   }
 
-  let results = '';
   if (conf.displayOnlyGamesWithBanAfterWhenFinished) {
-    results += `<br />We have removed all matches on the page with no ban occured after playing with you!<br />`;
+    updateResults([{ text: '' }, { text: `We have removed all matches on the page with no ban occured after playing with you!` }, { text: '' }], true);
   }
-  results += `<br />Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}<br />`;
-  if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch || conf.ignoreBansBefore) {
-    results += '<ul>';
-  }
+  updateResults([{ text: '' }, { text: `Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}` }], true);
   if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch) {
-    results += `<li>we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).</li>`;
+    updateResults(`- we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).`, true);
   }
   if (conf.ignoreBansBefore) {
-    results += `<li>ignoring bans occured before playing with you older than ${conf.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${
-      Math.round((playersWithOldBan / players.length) * 10000) / 100
-    } %)`;
-  }
-  if (conf.ignoreRecentPeriodWithNoBanAfterTheMatch || conf.ignoreBansBefore) {
-    results += '</ul>';
+    updateResults(
+      `- ignoring bans occured before playing with you older than ${conf.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${
+        Math.round((playersWithOldBan / players.length) * 10000) / 100
+      } %)`,
+      true
+    );
   }
 
-  results += `Matches played : ${matchesCount}`;
-  results += `<ul><li>with at least one player banned : ${matchesCountWithPlayerBanned} (${Math.round((matchesCountWithPlayerBanned / matchesCount) * 10000) / 100} %)</li>`;
-  results += `<li>with at least one player banned after playing with you : ${matchesCountWithPlayerBannedAfter} (${
-    Math.round((matchesCountWithPlayerBannedAfter / matchesCount) * 10000) / 100
-  } %)</li></ul>`;
-  results += `Unique players : ${players.length}`;
-  results += `<ul><li>banned : ${playersBanned.length} (${Math.round((playersBanned.length / players.length) * 10000) / 100} %)</li>`;
-  results += `<li>banned after playing with you : ${playersBannedAfter.length} (${Math.round((playersBannedAfter.length / players.length) * 10000) / 100} %)</li></ul>`;
+  updateResults('', true);
+  updateResults(`Matches played : ${matchesCount}`, true);
+  updateResults(`- with at least one player banned : ${matchesCountWithPlayerBanned} (${Math.round((matchesCountWithPlayerBanned / matchesCount) * 10000) / 100} %)`, true);
+  updateResults(
+    `- with at least one player banned after playing with you : ${matchesCountWithPlayerBannedAfter} (${
+      Math.round((matchesCountWithPlayerBannedAfter / matchesCount) * 10000) / 100
+    } %)`,
+    true
+  );
+  updateResults('', true);
+  updateResults(`Unique players : ${players.length}`, true);
+  updateResults(`- banned : ${playersBanned.length} (${Math.round((playersBanned.length / players.length) * 10000) / 100} %)`, true);
+  updateResults(`- banned after playing with you : ${playersBannedAfter.length} (${Math.round((playersBannedAfter.length / players.length) * 10000) / 100} %)`, true);
 
   // we list the banned players
   let bannedPlayersInfo = [];
   const bannedPlayersDomElements = [...document.querySelectorAll('.banchecker-bans')].filter((p) => window.getComputedStyle(p).color === 'rgb(255, 0, 0)');
   if (bannedPlayersDomElements.length > 0) {
-    results += `Players banned :`;
+    updateResults('', true);
+    updateResults(`Players banned :`, true);
     for (let bannedPlayer of bannedPlayersDomElements) {
       const lastBanInDays = parseInt(bannedPlayer.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10);
       bannedPlayersInfo.push({
@@ -582,22 +606,30 @@ async function banstats() {
     bannedPlayersInfo = bannedPlayersInfo.sort((a, b) => (a.lastBanInDays > b.lastBanInDays ? 1 : a.lastBanInDays < b.lastBanInDays ? -1 : 0));
 
     if (bannedPlayersInfo.length > 0) {
-      results += '<ul>';
       for (let bannedPlayer of bannedPlayersInfo) {
-        results += `<li><a href="${bannedPlayer.link}" target="_blank">${bannedPlayer.link}</a>, banned ${bannedPlayer.lastBanInDays} days ago</li>`;
+        updateResults(
+          [
+            {
+              text: `- ${bannedPlayer.link}, banned ${bannedPlayer.lastBanInDays} days ago`,
+              link: bannedPlayer.link,
+            },
+          ],
+          true
+        );
       }
-      results += '</ul>';
     }
   }
 
-  updateResults(results, true);
+  updateResults([{ text: '' }, { text: `Hover over ban status to check how many days have passed since last ban.` }], true);
 
   toggleDisableAllButtons(false);
 }
 
 function createDiv(id) {
   const elt = document.createElement('div');
-  elt.id = id;
+  if (id) {
+    elt.id = id;
+  }
   return elt;
 }
 
@@ -670,7 +702,7 @@ dateSinceHistoryInput.value = dateAsString;
 const dateSinceHistoryPlaceholder = document.createElement('div');
 dateSinceHistoryPlaceholder.style.display = 'inline-block';
 dateSinceHistoryPlaceholder.style.margin = '0 10px';
-dateSinceHistoryPlaceholder.innerHTML = '(YYYY-MM-DD)';
+dateSinceHistoryPlaceholder.textContent = '(YYYY-MM-DD)';
 
 const bancheckerSettingsButton = createSteamButton('Set API Key and options');
 bancheckerSettingsButton.onclick = () => showSettings();
@@ -682,21 +714,38 @@ menuTop.appendChild(dateSinceHistoryPlaceholder);
 menuTop.appendChild(loadMatchHistoryStopButton);
 menuBottom.appendChild(checkBansButton);
 
-const optionsContainer = document.createElement('div');
-optionsContainer.setAttribute('id', 'banchecker-options');
-const optionsContainerInner = document.createElement('div');
-const optionsCloseButton = document.createElement('button');
-optionsCloseButton.innerText = 'Save';
-optionsCloseButton.setAttribute('type', 'button');
-optionsCloseButton.onclick = () => saveSettings();
-optionsContainerInner.innerHTML = `
-Your API key:
-<input type="text" id="yourapikey" size="35" />
-<br />
-<a href="http://steamcommunity.com/dev/apikey" target="_blank">Get your API Key here</a><br />
-`;
-optionsContainerInner.appendChild(optionsCloseButton);
-optionsContainer.appendChild(optionsContainerInner);
+function createOptionsContainer() {
+  const optionsContainer = createDiv('banchecker-options');
+  const optionsContainerInner = document.createElement('div');
+  const optionsCloseButton = document.createElement('button');
+  optionsCloseButton.innerText = 'Save';
+  optionsCloseButton.setAttribute('type', 'button');
+  optionsCloseButton.onclick = () => saveSettings();
+
+  const span = document.createElement('span');
+  span.textContent = 'Your API key:';
+  optionsContainerInner.appendChild(span);
+
+  const inputApi = document.createElement('input');
+  inputApi.id = 'yourapikey';
+  optionsContainerInner.appendChild(inputApi);
+
+  optionsContainerInner.appendChild(document.createElement('br'));
+
+  const link = document.createElement('a');
+  link.target = '_blank';
+  link.href = 'https://steamcommunity.com/dev/apikey';
+  link.textContent = 'Get your API Key here';
+  optionsContainerInner.appendChild(link);
+
+  optionsContainerInner.appendChild(document.createElement('br'));
+
+  optionsContainerInner.appendChild(optionsCloseButton);
+  optionsContainer.appendChild(optionsContainerInner);
+
+  return optionsContainer;
+}
+const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
 const banstatsConfig = {
@@ -714,14 +763,17 @@ if (initVariables()) {
     apikey = data?.yourapikey;
     if (!apikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-      updateResults(`<span class="banchecker-warning">You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !</span>`);
+      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set your API key" !`, important: true }]);
     } else {
       document.getElementById('yourapikey').value = apikey;
     }
   });
 } else {
-  updateStatus(
-    `<span class="banchecker-red">This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on <a href="https://github.com/BatStak/CSGO-match-history-ban-checker" target="_blank">github.</a></span>`
-  );
+  updateStatus([
+    {
+      text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-match-history-ban-checker`,
+      important: true,
+    },
+  ]);
   toggleDisableAllButtons(true);
 }

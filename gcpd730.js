@@ -19,10 +19,12 @@ const funStats = {
   draws: 0,
 };
 
+const config = {
+  apikey: '',
+}
+
 let profileURI = null;
 let section = null;
-let apikey = '';
-let mysteamid = '';
 
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
@@ -63,14 +65,14 @@ function updateTextContent(element, text, append) {
     element.textContent = '';
   }
   const format = (text, important, link) => {
-    const textDiv = createDiv();
+    const textDiv = create('div');
     textDiv.textContent = text;
     if (important) {
       textDiv.classList.add('banchecker-red');
     }
     if (link) {
       textDiv.textContent = '';
-      const linkElement = document.createElement('a');
+      const linkElement = create('a');
       linkElement.target = '_blank';
       linkElement.href = link;
       linkElement.textContent = text;
@@ -203,9 +205,6 @@ function formatMatchsTable() {
         const steamid64 = getSteamID64(minProfileId);
         tr.dataset.steamid64 = steamid64;
         tr.dataset.dayssince = daysSinceMatch;
-        if (profileLink.href === profileURI && !mysteamid) {
-          mysteamid = steamid64;
-        }
         tr.classList.add('banchecker-profile');
       });
       table.classList.add('banchecker-formatted');
@@ -236,7 +235,7 @@ function checkBans(players) {
       chrome.runtime.id,
       {
         action: 'fetchBans',
-        apikey: apikey,
+        apikey: config.apikey,
         batch: batches[i],
       },
       (json, error) => {
@@ -343,13 +342,13 @@ function addBanColumns() {
     const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
     if (!tableHeader.classList.contains('ban-column-added')) {
       tableHeader.classList.add('ban-column-added');
-      const bansHeader = document.createElement('th');
+      const bansHeader = create('th');
       bansHeader.innerText = 'Ban';
       tableHeader.appendChild(bansHeader);
     }
     for (let tr of document.querySelectorAll('.generic_kv_table > tbody > tr:not(.ban-column-added)')) {
       tr.classList.add('ban-column-added');
-      const bansPlaceholder = document.createElement('td');
+      const bansPlaceholder = create('td');
       bansPlaceholder.classList.add('banchecker-bans');
       bansPlaceholder.innerText = '?';
       tr.appendChild(bansPlaceholder);
@@ -359,12 +358,12 @@ function addBanColumns() {
       table.classList.add('ban-column-added');
       table.querySelectorAll('tr').forEach((tr, i) => {
         if (i === 0) {
-          const bansHeader = document.createElement('th');
+          const bansHeader = create('th');
           bansHeader.innerText = 'Bans';
           bansHeader.style.minWidth = '5.6em';
           tr.appendChild(bansHeader);
         } else if (tr.childElementCount > 3) {
-          const bansPlaceholder = document.createElement('td');
+          const bansPlaceholder = create('td');
           bansPlaceholder.classList.add('banchecker-bans');
           bansPlaceholder.innerText = '?';
           tr.appendChild(bansPlaceholder);
@@ -388,7 +387,7 @@ function checkLoadedMatchesForBans() {
 }
 
 function createSteamButton(text) {
-  const button = document.createElement('button');
+  const button = create('button');
   button.setAttribute('type', 'button');
   button.classList.add('btn-default');
   const textNode = document.createTextNode(text);
@@ -470,6 +469,37 @@ function saveSettings() {
   }
 }
 
+function createOptionsContainer() {
+  const optionsContainer = create('div', 'banchecker-options');
+  const inner = create('div');
+  optionsContainer.appendChild(inner);
+  
+  const saveButton = create('button');
+  saveButton.innerText = 'Save';
+  saveButton.setAttribute('type', 'button');
+  saveButton.onclick = () => saveSettings();
+
+  const spanApiKey = create('span');
+  spanApiKey.textContent = 'Your API key:';
+  const inputApiKey = create('input','yourapikey');
+  inner.appendChild(spanApiKey);
+  inner.appendChild(inputApiKey);
+
+  inner.appendChild(create('br'));
+
+  const link = create('a');
+  link.target = '_blank';
+  link.href = 'https://steamcommunity.com/dev/apikey';
+  link.textContent = 'Get your API Key here';
+  inner.appendChild(link);
+
+  inner.appendChild(create('br'));
+
+  inner.appendChild(saveButton);
+
+  return optionsContainer;
+}
+
 async function banstats() {
   const playersWithOldBan = new Set([...document.querySelectorAll('.banchecker-old')].map((e) => e.dataset.steamid64)).size;
 
@@ -487,10 +517,6 @@ async function banstats() {
   let endDate = '';
 
   let domMatchesParts = [...getResultsNodeList()];
-  // if (conf.filterGamesWithSteamId.length > 0) {
-  //   // to filter matches on specific steamids
-  //   domMatchesParts = domMatchesParts.filter((domPart) => conf.filterGamesWithSteamId.some((steamId) => domPart.innerHTML.includes(steamId)));
-  // }
 
   // for each match
   for (let domPart of domMatchesParts) {
@@ -628,8 +654,8 @@ async function banstats() {
   toggleDisableAllButtons(false);
 }
 
-function createDiv(id) {
-  const elt = document.createElement('div');
+function create(tag, id) {
+  const elt = document.createElement(tag);
   if (id) {
     elt.id = id;
   }
@@ -641,12 +667,12 @@ function updateUI() {
   updateFunStats();
 }
 
-const extensionContainer = createDiv('banchecker-menu');
-const statusBar = createDiv('status-bar');
-const funStatsBar = createDiv('funstats-bar');
-const menuTop = createDiv('menu-top');
-const menuBottom = createDiv('menu-bottom');
-const statsResults = createDiv('stats-results');
+const extensionContainer = create('div', 'banchecker-menu');
+const statusBar = create('div', 'status-bar');
+const funStatsBar = create('div', 'funstats-bar');
+const menuTop = create('div', 'menu-top');
+const menuBottom = create('div', 'menu-bottom');
+const statsResults = create('div', 'stats-results');
 
 extensionContainer.appendChild(menuTop);
 extensionContainer.appendChild(statusBar);
@@ -690,7 +716,7 @@ loadMatchHistoryStopButton.onclick = () => {
   loadMatchHistoryStopButton.style.display = 'none';
 };
 
-const dateSinceHistoryInput = document.createElement('input');
+const dateSinceHistoryInput = create('input');
 dateSinceHistoryInput.setAttribute('type', 'text');
 dateSinceHistoryInput.setAttribute('id', 'load-match-history-since');
 dateSinceHistoryInput.style.width = '100px';
@@ -702,7 +728,7 @@ if (!dateAsString) {
 }
 dateSinceHistoryInput.value = dateAsString;
 
-const dateSinceHistoryPlaceholder = document.createElement('div');
+const dateSinceHistoryPlaceholder = create('div');
 dateSinceHistoryPlaceholder.style.display = 'inline-block';
 dateSinceHistoryPlaceholder.style.margin = '0 10px';
 dateSinceHistoryPlaceholder.textContent = '(YYYY-MM-DD)';
@@ -717,37 +743,6 @@ menuTop.appendChild(dateSinceHistoryPlaceholder);
 menuTop.appendChild(loadMatchHistoryStopButton);
 menuBottom.appendChild(checkBansButton);
 
-function createOptionsContainer() {
-  const optionsContainer = createDiv('banchecker-options');
-  const optionsContainerInner = document.createElement('div');
-  const optionsCloseButton = document.createElement('button');
-  optionsCloseButton.innerText = 'Save';
-  optionsCloseButton.setAttribute('type', 'button');
-  optionsCloseButton.onclick = () => saveSettings();
-
-  const span = document.createElement('span');
-  span.textContent = 'Your API key:';
-  optionsContainerInner.appendChild(span);
-
-  const inputApi = document.createElement('input');
-  inputApi.id = 'yourapikey';
-  optionsContainerInner.appendChild(inputApi);
-
-  optionsContainerInner.appendChild(document.createElement('br'));
-
-  const link = document.createElement('a');
-  link.target = '_blank';
-  link.href = 'https://steamcommunity.com/dev/apikey';
-  link.textContent = 'Get your API Key here';
-  optionsContainerInner.appendChild(link);
-
-  optionsContainerInner.appendChild(document.createElement('br'));
-
-  optionsContainerInner.appendChild(optionsCloseButton);
-  optionsContainer.appendChild(optionsContainerInner);
-
-  return optionsContainer;
-}
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
@@ -755,19 +750,18 @@ const banstatsConfig = {
   ignoreBansBefore: 5 * 365, // we ignore grey bans older than this number (in days)
   filterGames: '', // 'SHORT' or 'LONG' to filter games
   ignoreRecentPeriodWithNoBanAfterTheMatch: false, // ignore recent period with no red ban (banned after the game)
-  filterGamesWithSteamId: [], // to only focus on games with specific steam id
 };
 
 if (initVariables()) {
   updateUI();
 
   chrome.storage.sync.get(['yourapikey'], (data) => {
-    apikey = data?.yourapikey;
-    if (!apikey) {
+    config.apikey = data?.yourapikey;
+    if (!config.apikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
       updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
     } else {
-      document.getElementById('yourapikey').value = apikey;
+      document.getElementById('yourapikey').value = config.apikey;
     }
   });
 } else {

@@ -29,13 +29,13 @@ const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
 const scoreRegex = /(\d+) : (\d+)/;
 
 function getSteamID64(minProfileId) {
-  return '76' + (parseInt(minProfileId) + 561197960265728);
+  return '76' + (parseInt(minProfileId, 10) + 561197960265728);
 }
 
 function parseTime(minutes, seconds) {
   let timeSecs = 0;
-  timeSecs += parseInt(minutes) * 60;
-  timeSecs += parseInt(seconds);
+  timeSecs += parseInt(minutes, 10) * 60;
+  timeSecs += parseInt(seconds, 10);
   return timeSecs;
 }
 

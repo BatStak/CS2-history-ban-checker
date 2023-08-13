@@ -592,21 +592,18 @@ async function banstats() {
   toggleDisableAllButtons(false);
 }
 
-const extensionContainer = document.createElement('div');
-extensionContainer.setAttribute('id', 'banchecker-menu');
+function createDiv(id) {
+  const elt = document.createElement('div');
+  elt.id = id;
+  return elt;
+}
 
-const statusBar = document.createElement('div');
-statusBar.setAttribute('id', 'status-bar');
-
-const funStatsBar = document.createElement('div');
-funStatsBar.setAttribute('id', 'funstats-bar');
-
-const menuTop = document.createElement('div');
-
-const menuBottom = document.createElement('div');
-
-const statsResults = document.createElement('div');
-statsResults.setAttribute('id', 'stats-results');
+const extensionContainer = createDiv('banchecker-menu');
+const statusBar = createDiv('status-bar');
+const funStatsBar = createDiv('funstats-bar');
+const menuTop = createDiv('menu-top');
+const menuBottom = createDiv('menu-bottom');
+const statsResults = createDiv('stats-results');
 
 extensionContainer.appendChild(menuTop);
 extensionContainer.appendChild(statusBar);
@@ -617,7 +614,7 @@ extensionContainer.appendChild(funStatsBar);
 document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
 
 const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
-const callback = (mutationList, observer) => {
+const observer = new MutationObserver((mutationList, observer) => {
   for (const mutation of mutationList) {
     if (mutation.attributeName === 'style') {
       if (loadMoreButton.style.display !== 'none') {
@@ -626,8 +623,7 @@ const callback = (mutationList, observer) => {
       }
     }
   }
-};
-const observer = new MutationObserver(callback);
+});
 observer.observe(loadMoreButton, { attributes: true });
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');

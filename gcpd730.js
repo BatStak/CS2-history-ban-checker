@@ -245,7 +245,9 @@ function checkBans(players) {
             [
               {
                 text: `Error while scanning players for bans: ${
-                  retryCount > 0 ? `Retrying to scan... ${maxRetries - retryCount + 1}/3` : `Couldn't scan for bans after ${maxRetries} retries. Are your sure you set a valid API key ?`
+                  retryCount > 0
+                    ? `Retrying to scan... ${maxRetries - retryCount + 1}/3`
+                    : `Couldn't scan for bans after ${maxRetries} retries. Are your sure you set a valid API key ?`
                 }`,
                 important: true,
               },
@@ -457,6 +459,15 @@ function saveSettings() {
   var yourapikey = document.getElementById('yourapikey').value;
   chrome.storage.sync.set({ yourapikey: yourapikey });
   optionsContainer.style.display = 'none';
+
+  statusBar.textContent = statsResults.textContent = '';
+  if (yourapikey) {
+    toggleDisableAllButtons(false);
+  } else {
+    updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
+    toggleDisableAllButtons(true);
+    bancheckerSettingsButton.disabled = false;
+  }
 }
 
 async function banstats() {

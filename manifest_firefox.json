@@ -1,0 +1,40 @@
+{
+  "name": "CSGO match history ban checker",
+  "description": "Check bans on your CSGO match history page",
+  "version": "1.0.0",
+  "permissions": ["storage", "contextMenus", "*://steamcommunity.com/*", "https://api.steampowered.com/*"],
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "background": {
+    "scripts": ["service_worker.js"]
+  },
+  "content_scripts": [
+    {
+      "js": ["gcpd730.js"],
+      "css": ["display.css"],
+      "run_at": "document_end",
+      "matches": [
+        "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitive",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorycompetitive",
+        "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorywingman",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorywingman",
+        "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistoryscrimmage",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistoryscrimmage",
+        "*://steamcommunity.com/id/*/gcpd/730*tab=playerreports",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=playerreports",
+        "*://steamcommunity.com/id/*/gcpd/730*tab=playercommends",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=playercommends"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "baptistemenadier@proton.me"
+    }
+  },
+  "manifest_version": 2
+}

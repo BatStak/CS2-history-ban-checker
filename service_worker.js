@@ -13,38 +13,20 @@ function genericOnClick(info) {
   }
 }
 
-// chrome only
-if (chrome.runtime.onInstalled) {
-  chrome.runtime.onInstalled.addListener(function () {
-    chrome.contextMenus.create({
-      id: 'match-history',
-      title: 'Access to matchmaking history',
-      contexts: ['all'],
-    });
-    chrome.contextMenus.create({
-      id: 'github',
-      title: 'Github page',
-      contexts: ['all'],
-    });
-  });
-
-
-  chrome.contextMenus.onClicked.addListener(genericOnClick);
-} else {
-  // for firefox
-  browser.contextMenus.create({
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.contextMenus.create({
     id: 'match-history',
     title: 'Access to matchmaking history',
     contexts: ['all'],
   });
-  browser.contextMenus.create({
+  chrome.contextMenus.create({
     id: 'github',
     title: 'Github page',
     contexts: ['all'],
   });
+});
 
-  browser.contextMenus.onClicked.addListener(genericOnClick);
-}
+chrome.contextMenus.onClicked.addListener(genericOnClick);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {

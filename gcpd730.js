@@ -24,6 +24,7 @@ const config = {
   ignoreBansBefore: 5 * 365,
   gameType: 'all',
   ignoreRecentPeriodWithNoBanAfterTheMatch: false,
+  historyDate: undefined,
 };
 
 let profileURI = null;
@@ -32,6 +33,13 @@ let section = new URLSearchParams(window.location.search).get('tab');
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
 const scoreRegex = /(\d+) : (\d+)/;
+const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+function isIsoDate(str) {
+  if (!isoDateRegex.test(str)) return false;
+  const d = new Date(str);
+  return d instanceof Date && !isNaN(d.getTime()) && d.toISOString().substring(0, 10) === str; // valid date
+}
 
 function getSteamID64(minProfileId) {
   return '76' + (parseInt(minProfileId, 10) + 561197960265728);
@@ -405,14 +413,33 @@ function getResultsNodeList() {
   return document.querySelectorAll(selector);
 }
 
+function toggleStopButton(visible) {
+  if (visible) {
+    loadMatchHistoryStopButton.style.display = 'inline-block';
+  } else {
+    loadMatchHistoryStopButton.style.display = 'none';
+  }
+}
+
+function saveHistoryDate() {
+  let historyDate = document.getElementById('load-match-history-since').value.trim();
+  // if date invalid we rollback to previous date
+  if (historyDate && !isIsoDate(historyDate)) {
+    historyDate = config.historyDate;
+  }
+  config.historyDate = historyDate;
+  chrome.storage.sync.set({ historyDate: config.historyDate });
+  updateFormValues();
+}
+
 let timerLoadMatchHistory = null;
 async function loadMatchHisory() {
-  loadMatchHistoryStopButton.style.display = 'inline-block';
+  saveHistoryDate();
+  toggleStopButton(true);
   toggleDisableAllButtons(true);
-  const since = localStorage.getItem('banchecker-load-match-history-since');
   let status = '';
-  if (since) {
-    status = `Loading match history since ${since} !`;
+  if (config.historyDate) {
+    status = `Loading match history since ${config.historyDate} !`;
   } else {
     status = `Loading all match history !`;
   }
@@ -435,8 +462,8 @@ async function loadMatchHisory() {
 
         if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
           const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
-          updateStatus(`${status} ... loading since ${lastDate} ...`);
-          if (since >= lastDate) {
+          updateStatus(`${status} ... [${lastDate}]`);
+          if (config.historyDate && config.historyDate >= lastDate) {
             clearInterval(timerLoadMatchHistory);
             resolve();
           } else {
@@ -449,7 +476,7 @@ async function loadMatchHisory() {
   });
   updateStatus(`${status} Done !`);
   toggleDisableAllButtons(false);
-  loadMatchHistoryStopButton.style.display = 'none';
+  toggleStopButton(false);
 }
 
 function showSettings() {
@@ -458,16 +485,15 @@ function showSettings() {
 
 function saveSettings() {
   config.yourapikey = document.getElementById('yourapikey').value;
-  config.gameType = document.getElementById('gameType-all').checked ? 'all' : document.getElementById('gameType-long').checked ? 'long' : 'short';
-  const ignoreBanBefore = document.getElementById('ignoreBansBefore').value;
-  if (!isNaN(ignoreBanBefore) && parseInt(ignoreBanBefore, 10) >= 0) {
-    config.ignoreBanBefore = parseInt(ignoreBanBefore, 10);
+  config.gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
+  const ignoreBansBefore = document.getElementById('ignoreBansBefore').value;
+  if (!isNaN(ignoreBansBefore) && parseInt(ignoreBansBefore, 10) >= 0) {
+    config.ignoreBansBefore = parseInt(ignoreBansBefore, 10);
   }
 
   // save
-  chrome.storage.sync.set({ yourapikey: config.yourapikey, gameType: config:gameType, ignoreBanBefore: config.ignoreBansBefore });
-  
-  statusBar.textContent = statsResults.textContent = '';
+  chrome.storage.sync.set({ yourapikey: config.yourapikey, gameType: config.gameType, ignoreBansBefore: config.ignoreBansBefore });
+
   if (config.yourapikey) {
     toggleDisableAllButtons(false);
   } else {
@@ -475,6 +501,8 @@ function saveSettings() {
     toggleDisableAllButtons(true);
     bancheckerSettingsButton.disabled = false;
   }
+
+  updateFormValues();
 
   // close
   optionsContainer.style.display = 'none';
@@ -730,6 +758,7 @@ function updateUI() {
 }
 
 const extensionContainer = create('div', 'banchecker-menu');
+
 const statusBar = create('div', 'status-bar');
 const funStatsBar = create('div', 'funstats-bar');
 const menuTop = create('div', 'menu-top');
@@ -763,32 +792,24 @@ checkBansButton.onclick = () => {
 
 const loadMatchHistoryButton = createSteamButton('Load match history since');
 loadMatchHistoryButton.onclick = () => {
-  localStorage.setItem('banchecker-load-match-history-since', document.getElementById('load-match-history-since')?.value);
   loadMatchHisory();
 };
 
 const loadMatchHistoryStopButton = createSteamButton('Stop');
-loadMatchHistoryStopButton.style.display = 'none';
+toggleStopButton(false);
 loadMatchHistoryStopButton.onclick = () => {
   if (timerLoadMatchHistory) {
     clearInterval(timerLoadMatchHistory);
     timerLoadMatchHistory = null;
   }
   toggleDisableAllButtons(false);
-  loadMatchHistoryStopButton.style.display = 'none';
+  toggleStopButton(false);
 };
 
 const dateSinceHistoryInput = create('input');
 dateSinceHistoryInput.setAttribute('type', 'text');
 dateSinceHistoryInput.setAttribute('id', 'load-match-history-since');
 dateSinceHistoryInput.style.width = '100px';
-let dateAsString = localStorage.getItem('banchecker-load-match-history-since');
-if (!dateAsString) {
-  const date = new Date();
-  date.setDate(date.getDate() - 500);
-  dateAsString = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
-}
-dateSinceHistoryInput.value = dateAsString;
 
 const dateSinceHistoryPlaceholder = create('div');
 dateSinceHistoryPlaceholder.style.display = 'inline-block';
@@ -808,32 +829,47 @@ menuBottom.appendChild(checkBansButton);
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
+function updateFormValues() {
+  document.getElementById('yourapikey').value = config.apikey;
+  switch (config.gameType) {
+    case 'long':
+      document.getElementById('gameType-long').checked = true;
+      break;
+    case 'short':
+      document.getElementById('gameType-short').checked = true;
+      break;
+    default:
+      document.getElementById('gameType-all').checked = true;
+      break;
+  }
+  document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
+  document.getElementById('load-match-history-since').value = config.historyDate;
+}
+
 if (initVariables()) {
   updateUI();
 
-  chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore'], (data) => {
-    config.apikey = data?.yourapikey;
-    if (data?.ignoreBansBefore || data?.ignoreBansBefore === 0) {
-      config.ignoreBansBefore = data?.ignoreBansBefore;
+  chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore', 'historyDate'], (data) => {
+    config.apikey = data.yourapikey;
+    if (data.ignoreBansBefore || data.ignoreBansBefore === 0) {
+      config.ignoreBansBefore = data.ignoreBansBefore;
     }
-    if (data?.gameType) {
-      config.gameType = data?.gameType;
+    if (data.gameType) {
+      config.gameType = data.gameType;
     }
     if (!config.apikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
       updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
+    }
+    if (data.historyDate === undefined) {
+      const date = new Date();
+      date.setDate(date.getDate() - 500);
+      config.historyDate = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
+      chrome.storage.sync.set({ historyDate: config.historyDate });
     } else {
-      document.getElementById('yourapikey').value = config.apikey;
+      config.historyDate = data.historyDate;
     }
-    document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
-    switch (config.gameType) {
-      case 'long':
-        document.getElementById('gameType-long').checked = true;
-        break;
-      case 'short':
-        document.getElementById('gameType-short').checked = true;
-        break;
-    }
+    updateFormValues();
   });
 } else {
   updateStatus([

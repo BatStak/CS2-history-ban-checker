@@ -28,7 +28,9 @@ const config = {
 };
 
 chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore', 'historyDate'], (storageData) => {
-  config.yourapikey = storageData.yourapikey;
+  if (storageData.yourapikey) {
+    config.yourapikey = storageData.yourapikey;
+  }
   if (storageData.ignoreBansBefore || storageData.ignoreBansBefore === 0) {
     config.ignoreBansBefore = storageData.ignoreBansBefore;
   }

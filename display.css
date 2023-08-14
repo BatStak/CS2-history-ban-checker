@@ -80,3 +80,8 @@
   z-index: 10;
   background: rgba(0, 0, 0, 0.3);
 }
+
+.csgo_scoreboard_root.hide-long-games .long-game,
+.csgo_scoreboard_root.hide-short-games .short-game {
+  display: none !important;
+}

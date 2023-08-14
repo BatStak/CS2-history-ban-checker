@@ -20,12 +20,32 @@ const funStats = {
 };
 
 const config = {
-  apikey: '',
+  yourapikey: '',
   ignoreBansBefore: 5 * 365,
   gameType: 'all',
   ignoreRecentPeriodWithNoBanAfterTheMatch: false,
   historyDate: undefined,
 };
+
+chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore', 'historyDate'], (storageData) => {
+  config.yourapikey = storageData.yourapikey;
+  if (storageData.ignoreBansBefore || storageData.ignoreBansBefore === 0) {
+    config.ignoreBansBefore = storageData.ignoreBansBefore;
+  }
+  if (storageData.gameType) {
+    config.gameType = storageData.gameType;
+  }
+  if (storageData.historyDate === undefined) {
+    const date = new Date();
+    date.setDate(date.getDate() - 500);
+    config.historyDate = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
+    chrome.storage.sync.set({ historyDate: config.historyDate });
+  } else {
+    config.historyDate = storageData.historyDate;
+  }
+
+  init();
+});
 
 let profileURI = null;
 let section = new URLSearchParams(window.location.search).get('tab');
@@ -118,44 +138,67 @@ function initVariables() {
 function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
+  let filterGame = false;
+
   // we find the links on our profil to get the statistics of the match
   const myProfileLinks = document.querySelectorAll(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`);
   for (let link of myProfileLinks) {
     const playerRow = link.closest('tr');
-    const myMatchStats = playerRow.querySelectorAll('td');
-    funStats.totalKills += parseInt(myMatchStats[2].innerText, 10);
-    funStats.totalAssists += parseInt(myMatchStats[3].innerText, 10);
-    funStats.totalDeaths += parseInt(myMatchStats[4].innerText, 10);
+    const matchRow = playerRow.closest('table').parentNode.parentNode;
     const score = playerRow.parentNode.querySelector('.csgo_scoreboard_score').innerText.match(scoreRegex);
     const rowsCount = playerRow.parentNode.children.length;
     const playerIndex = Array.from(playerRow.parentNode.children).indexOf(playerRow);
-    const isFirstTeamWin = parseInt(score[1], 10) > parseInt(score[2], 10);
+    const scoreTeam1 = parseInt(score[1], 10);
+    const scoreTeam2 = parseInt(score[2], 10);
+    const isFirstTeamWin = scoreTeam1 > scoreTeam2;
     const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
-    if (score[1] === score[2]) {
-      funStats.draws++;
-    } else if (isPlayerInFirstTeam === isFirstTeamWin) {
-      funStats.wins++;
-    } else {
-      funStats.loses++;
-    }
-    link.classList.add('personal-stats-checked');
-  }
 
-  // to add to waiting time and match duration, we check the left panels
-  const leftPanels = document.querySelectorAll('.val_left:not(.personal-stats-checked)');
-  funStats.numberOfMatches += leftPanels.length;
-  for (let leftPanel of leftPanels) {
-    for (let td of leftPanel.querySelectorAll('td')) {
-      const innerText = td.innerText.trim();
-      if (waitTimeRegex.test(innerText)) {
-        const hoursAndMinues = innerText.match(waitTimeRegex);
-        funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
-      } else if (matchTimeRegex.test(innerText)) {
-        const hoursAndMinues = innerText.match(matchTimeRegex);
-        funStats.totalTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
+    // add class "short" or "long" game
+    if (section === 'matchhistorycompetitive') {
+      const maxScore = Math.max(scoreTeam1, scoreTeam2);
+      const isLong = maxScore === 15 || maxScore === 16;
+      const isShort = maxScore === 8 || maxScore === 9;
+      const isAborted = !isLong && !isShort;
+      if (isLong) {
+        matchRow.classList.add('long-game');
+      } else if (isShort) {
+        matchRow.classList.add('short-game');
+      } else if (isAborted) {
+        matchRow.classList.add('aborted-game');
       }
+
+      filterGame = (config.gameType === 'long' && !isLong) || (config.gameType === 'short' && !isShort);
     }
-    leftPanel.classList.add('personal-stats-checked');
+
+    if (!filterGame) {
+      const myMatchStats = playerRow.querySelectorAll('td');
+      funStats.totalKills += parseInt(myMatchStats[2].innerText, 10);
+      funStats.totalAssists += parseInt(myMatchStats[3].innerText, 10);
+      funStats.totalDeaths += parseInt(myMatchStats[4].innerText, 10);
+      if (score[1] === score[2]) {
+        funStats.draws++;
+      } else if (isPlayerInFirstTeam === isFirstTeamWin) {
+        funStats.wins++;
+      } else {
+        funStats.loses++;
+      }
+
+      const leftPanel = matchRow.querySelector('.val_left');
+      for (let td of leftPanel.querySelectorAll('td')) {
+        const innerText = td.innerText.trim();
+        if (waitTimeRegex.test(innerText)) {
+          const hoursAndMinues = innerText.match(waitTimeRegex);
+          funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
+        } else if (matchTimeRegex.test(innerText)) {
+          const hoursAndMinues = innerText.match(matchTimeRegex);
+          funStats.totalTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
+        }
+      }
+
+      funStats.numberOfMatches++;
+    }
+
+    link.classList.add('personal-stats-checked');
   }
 
   funStatsBar.textContent = `Some fun stats for loaded matches:
@@ -245,7 +288,7 @@ function checkBans(players) {
       chrome.runtime.id,
       {
         action: 'fetchBans',
-        apikey: config.apikey,
+        apikey: config.yourapikey,
         batch: batches[i],
       },
       (json, error) => {
@@ -335,11 +378,11 @@ function checkBans(players) {
   if (uniquePlayers.length > 0) {
     checkBansOnApi(0, maxRetries);
   } else {
-    toggleDisableAllButtons(false);
+    disableAllButtons(false);
   }
 }
 
-function toggleDisableAllButtons(value) {
+function disableAllButtons(value) {
   bancheckerSettingsButton.disabled = loadMatchHistoryButton.disabled = checkBansButton.disabled = value;
 }
 
@@ -387,9 +430,15 @@ function addBanColumns() {
 }
 
 function checkLoadedMatchesForBans() {
-  toggleDisableAllButtons(true);
+  disableAllButtons(true);
+  let selector = '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)';
+  if (config.gameType === 'long') {
+    selector = '.long-game ' + selector;
+  } else if (config.gameType === 'short') {
+    selector = '.short-game ' + selector;
+  }
   let playersArr = [];
-  for (let player of document.querySelectorAll('.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)')) {
+  for (let player of document.querySelectorAll(selector)) {
     player.classList.add('banchecker-checking');
     playersArr.push(player.dataset.steamid64);
   }
@@ -407,6 +456,11 @@ function createSteamButton(text) {
 
 function getResultsNodeList() {
   let selector = '.csgo_scoreboard_root > tbody > tr';
+  if (config.gameType === 'long') {
+    selector += '.long-game';
+  } else if (config.gameType === 'short') {
+    selector += '.short-game';
+  }
   if (isCommendOrReportsSection()) {
     selector = '.banchecker-profile';
   }
@@ -436,7 +490,7 @@ let timerLoadMatchHistory = null;
 async function loadMatchHisory() {
   saveHistoryDate();
   toggleStopButton(true);
-  toggleDisableAllButtons(true);
+  disableAllButtons(true);
   let status = '';
   if (config.historyDate) {
     status = `Loading match history since ${config.historyDate} !`;
@@ -475,7 +529,7 @@ async function loadMatchHisory() {
     }, 800);
   });
   updateStatus(`${status} Done !`);
-  toggleDisableAllButtons(false);
+  disableAllButtons(false);
   toggleStopButton(false);
 }
 
@@ -484,8 +538,12 @@ function showSettings() {
 }
 
 function saveSettings() {
-  config.yourapikey = document.getElementById('yourapikey').value;
-  config.gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
+  const apiKey = document.getElementById('yourapikey').value;
+  const apiKeySet = apiKey && !config.yourapikey;
+  config.yourapikey = apiKey;
+  const gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
+  const gamesFilterChanged = gameType !== config.gameType;
+  config.gameType = gameType;
   const ignoreBansBefore = document.getElementById('ignoreBansBefore').value;
   if (!isNaN(ignoreBansBefore) && parseInt(ignoreBansBefore, 10) >= 0) {
     config.ignoreBansBefore = parseInt(ignoreBansBefore, 10);
@@ -495,11 +553,20 @@ function saveSettings() {
   chrome.storage.sync.set({ yourapikey: config.yourapikey, gameType: config.gameType, ignoreBansBefore: config.ignoreBansBefore });
 
   if (config.yourapikey) {
-    toggleDisableAllButtons(false);
+    disableAllButtons(false);
+    if (apiKeySet) {
+      statsResults.textContent = '';
+    }
   } else {
     updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
-    toggleDisableAllButtons(true);
+    disableAllButtons(true);
     bancheckerSettingsButton.disabled = false;
+  }
+
+  if (gamesFilterChanged) {
+    disableAllButtons(true);
+    updateResults([{ text: 'You need to reload the page if you changed games filter', important: true }]);
+    statusBar.textContent = document.querySelector('.load_more_history_area').textContent = document.querySelector('.csgo_scoreboard_root').textContent = '';
   }
 
   updateFormValues();
@@ -610,74 +677,63 @@ async function banstats() {
 
   // for each match
   for (let domPart of domMatchesParts) {
-    const scoreboardRows = domPart.querySelectorAll('.csgo_scoreboard_inner_right > tbody > tr');
     const playerRows = domPart.querySelectorAll('tr[data-steamid64]:not(.banchecker-old)');
 
     // guard but impossible
     if (playerRows.length > 0) {
-      // scores
-      const scoreIndex = scoreboardRows.length / 2;
-      const scoreValues = scoreboardRows[scoreIndex].innerText.split(':');
-      const scoreLeft = parseInt(scoreValues[0].trim(), 10);
-      const scoreRight = parseInt(scoreValues[1].trim(), 10);
-      const isLong = scoreLeft + scoreRight > 16;
+      let matchHasPlayerBanned = false;
+      let matchHasPlayerBannedAfter = false;
+      const playersOfTheMatchWeDontKnowYet = [];
 
-      // if we wish to filter games on types (short or long)
-      if (config.gameType === 'all' || (config.gameType === 'long' && isLong) || (config.gameType === 'short' && !isLong)) {
-        let matchHasPlayerBanned = false;
-        let matchHasPlayerBannedAfter = false;
-        const playersOfTheMatchWeDontKnowYet = [];
+      //  for each player
+      for (let player of playerRows) {
+        const steamId = player.attributes['data-steamid64'].value;
+        const banStatus = player.querySelector('.banchecker-bans');
 
-        //  for each player
-        for (let player of playerRows) {
-          const steamId = player.attributes['data-steamid64'].value;
-          const banStatus = player.querySelector('.banchecker-bans');
-
-          // we store players we don't know yet
-          if (!players.some((p) => p === steamId)) {
-            playersOfTheMatchWeDontKnowYet.push(steamId);
-          }
-
-          // we have a ban
-          const banLabel = banStatus.innerText.trim();
-          if (banLabel != '') {
-            if (!playersBanned.some((p) => p === steamId)) {
-              playersBanned.push(steamId);
-            }
-
-            matchHasPlayerBanned = true;
-
-            // ban occured after playing with him
-            if (banStatus.style.color === 'red') {
-              if (!playersBannedAfter.some((p) => p === steamId)) {
-                playersBannedAfter.push(steamId);
-              }
-
-              matchHasPlayerBannedAfter = true;
-            }
-          }
+        // we store players we don't know yet
+        if (!players.some((p) => p === steamId)) {
+          playersOfTheMatchWeDontKnowYet.push(steamId);
         }
 
-        // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
-        if (!config.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
-          if (!endDate) {
-            endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
+        // we have a ban
+        const banLabel = banStatus.innerText.trim();
+        if (banLabel != '') {
+          if (!playersBanned.some((p) => p === steamId)) {
+            playersBanned.push(steamId);
           }
 
-          players.push(...playersOfTheMatchWeDontKnowYet);
+          matchHasPlayerBanned = true;
 
-          matchesCount++;
+          // ban occured after playing with him
+          if (banStatus.style.color === 'red') {
+            if (!playersBannedAfter.some((p) => p === steamId)) {
+              playersBannedAfter.push(steamId);
+            }
 
-          if (matchHasPlayerBanned) {
-            matchesCountWithPlayerBanned++;
+            matchHasPlayerBannedAfter = true;
           }
-
-          if (matchHasPlayerBannedAfter) {
-            matchesCountWithPlayerBannedAfter++;
-          }
-
-          startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
         }
+      }
+
+      // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
+      if (!config.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
+        if (!endDate) {
+          endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
+        }
+
+        players.push(...playersOfTheMatchWeDontKnowYet);
+
+        matchesCount++;
+
+        if (matchHasPlayerBanned) {
+          matchesCountWithPlayerBanned++;
+        }
+
+        if (matchHasPlayerBannedAfter) {
+          matchesCountWithPlayerBannedAfter++;
+        }
+
+        startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
       }
     }
   }
@@ -741,7 +797,7 @@ async function banstats() {
 
   updateResults([{ text: '' }, { text: `Hover over ban status to check how many days have passed since last ban.` }], true);
 
-  toggleDisableAllButtons(false);
+  disableAllButtons(false);
 }
 
 function create(tag, id) {
@@ -755,6 +811,49 @@ function create(tag, id) {
 function updateUI() {
   formatMatchsTable();
   updateFunStats();
+}
+
+function updateFormValues() {
+  document.getElementById('yourapikey').value = config.yourapikey;
+  switch (config.gameType) {
+    case 'long':
+      document.getElementById('gameType-long').checked = true;
+      break;
+    case 'short':
+      document.getElementById('gameType-short').checked = true;
+      break;
+    default:
+      document.getElementById('gameType-all').checked = true;
+      break;
+  }
+  document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
+  document.getElementById('load-match-history-since').value = config.historyDate;
+}
+
+function init() {
+  if (initVariables()) {
+    updateUI();
+
+    if (config.gameType === 'short') {
+      document.querySelector('.csgo_scoreboard_root').classList.add('hide-long-games');
+    } else if (config.gameType === 'long') {
+      document.querySelector('.csgo_scoreboard_root').classList.add('hide-short-games');
+    }
+
+    if (!config.yourapikey) {
+      loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
+      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
+    }
+    updateFormValues();
+  } else {
+    updateStatus([
+      {
+        text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
+        important: true,
+      },
+    ]);
+    disableAllButtons(true);
+  }
 }
 
 const extensionContainer = create('div', 'banchecker-menu');
@@ -802,7 +901,7 @@ loadMatchHistoryStopButton.onclick = () => {
     clearInterval(timerLoadMatchHistory);
     timerLoadMatchHistory = null;
   }
-  toggleDisableAllButtons(false);
+  disableAllButtons(false);
   toggleStopButton(false);
 };
 
@@ -828,55 +927,3 @@ menuBottom.appendChild(checkBansButton);
 
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
-
-function updateFormValues() {
-  document.getElementById('yourapikey').value = config.apikey;
-  switch (config.gameType) {
-    case 'long':
-      document.getElementById('gameType-long').checked = true;
-      break;
-    case 'short':
-      document.getElementById('gameType-short').checked = true;
-      break;
-    default:
-      document.getElementById('gameType-all').checked = true;
-      break;
-  }
-  document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
-  document.getElementById('load-match-history-since').value = config.historyDate;
-}
-
-if (initVariables()) {
-  updateUI();
-
-  chrome.storage.sync.get(['yourapikey', 'gameType', 'ignoreBansBefore', 'historyDate'], (data) => {
-    config.apikey = data.yourapikey;
-    if (data.ignoreBansBefore || data.ignoreBansBefore === 0) {
-      config.ignoreBansBefore = data.ignoreBansBefore;
-    }
-    if (data.gameType) {
-      config.gameType = data.gameType;
-    }
-    if (!config.apikey) {
-      loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
-    }
-    if (data.historyDate === undefined) {
-      const date = new Date();
-      date.setDate(date.getDate() - 500);
-      config.historyDate = `${date.getFullYear()}-${date.getMonth() < 10 ? '0' : ''}${date.getMonth()}-${date.getDate() < 10 ? '0' : ''}${date.getDate()}`;
-      chrome.storage.sync.set({ historyDate: config.historyDate });
-    } else {
-      config.historyDate = data.historyDate;
-    }
-    updateFormValues();
-  });
-} else {
-  updateStatus([
-    {
-      text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
-      important: true,
-    },
-  ]);
-  toggleDisableAllButtons(true);
-}

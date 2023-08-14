@@ -82,6 +82,8 @@
 }
 
 .csgo_scoreboard_root.hide-long-games .long-game,
-.csgo_scoreboard_root.hide-short-games .short-game {
+.csgo_scoreboard_root.hide-short-games .short-game,
+.csgo_scoreboard_root.hide-long-games .aborted-game,
+.csgo_scoreboard_root.hide-short-games .aborted-game {
   display: none !important;
 }

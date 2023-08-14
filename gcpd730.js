@@ -207,8 +207,8 @@ Number of matches: ${funStats.numberOfMatches}
 Total kills: ${funStats.totalKills}
 Total assists: ${funStats.totalAssists}
 Total deaths: ${funStats.totalDeaths}
-K/D: ${(funStats.totalKills / funStats.totalDeaths).toFixed(3)}
-(K+A)/D: ${((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3)}
+K/D: ${funStats.totalDeaths ? (funStats.totalKills / funStats.totalDeaths).toFixed(3) : 0}
+(K+A)/D: ${funStats.totalDeaths ? ((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3) : 0}
 Total wait time: ${timeString(funStats.totalWaitTime)}
 Total match time: ${timeString(funStats.totalTime)}
 Wins: ${funStats.wins}
@@ -457,9 +457,9 @@ function createSteamButton(text) {
   return button;
 }
 
-function getResultsNodeList() {
+function getResultsNodeList(nofilter) {
   let selector = '.csgo_scoreboard_root > tbody > tr';
-  if (is5v5CompetitiveSection()) {
+  if (is5v5CompetitiveSection() && !nofilter) {
     if (config.gameType === 'long') {
       selector += '.long-game';
     } else if (config.gameType === 'short') {
@@ -514,7 +514,7 @@ async function loadMatchHisory() {
     if (moreButton) {
       timerLoadMatchHistory = setInterval(() => {
         if (moreButton.offsetParent !== null) {
-          const newNumberOfMatches = getResultsNodeList().length;
+          const newNumberOfMatches = getResultsNodeList(true).length;
           if (newNumberOfMatches === numberOfMatches) {
             if (attemptsToLoadMoreMatches < 3) {
               attemptsToLoadMoreMatches++;

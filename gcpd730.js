@@ -128,13 +128,12 @@ function updateStatus(text, append) {
   updateTextContent(statusBar, text, append);
 }
 
-function initVariables() {
+function canContinue() {
   if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
 
-  hasLoadMoreButton = !!document.querySelector('#load_more_button');
   profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
 
-  return hasLoadMoreButton && !!profileURI && !!section;
+  return !!profileURI && !!section;
 }
 
 function updateFunStats() {
@@ -155,8 +154,8 @@ function updateFunStats() {
     const isFirstTeamWin = scoreTeam1 > scoreTeam2;
     const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
 
-    // add class "short" or "long" game
-    if (section === 'matchhistorycompetitive') {
+    if (is5v5CompetitiveSection()) {
+      // add class "short" or "long" game
       const maxScore = Math.max(scoreTeam1, scoreTeam2);
       const isLong = maxScore === 15 || maxScore === 16;
       const isShort = maxScore === 8 || maxScore === 9;
@@ -215,9 +214,9 @@ Total match time: ${timeString(funStats.totalTime)}
 Wins: ${funStats.wins}
 Draws: ${funStats.draws}
 Loses: ${funStats.loses}
-Winrate: ${Math.round((funStats.wins / funStats.numberOfMatches) * 10000) / 100} %
-Winrate with draws: ${Math.round(((funStats.wins + funStats.draws) / funStats.numberOfMatches) * 10000) / 100} %
-Loserate: ${Math.round((funStats.loses / funStats.numberOfMatches) * 10000) / 100} %`;
+Winrate: ${getPourcentage(funStats.wins, funStats.numberOfMatches)} %
+Winrate with draws: ${getPourcentage(funStats.wins + funStats.draws, funStats.numberOfMatches)} %
+Loserate: ${getPourcentage(funStats.loses, funStats.numberOfMatches)} %`;
 }
 
 function formatMatchsTable() {
@@ -434,10 +433,12 @@ function addBanColumns() {
 function checkLoadedMatchesForBans() {
   disableAllButtons(true);
   let selector = '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)';
-  if (config.gameType === 'long') {
-    selector = '.long-game ' + selector;
-  } else if (config.gameType === 'short') {
-    selector = '.short-game ' + selector;
+  if (is5v5CompetitiveSection()) {
+    if (config.gameType === 'long') {
+      selector = '.long-game ' + selector;
+    } else if (config.gameType === 'short') {
+      selector = '.short-game ' + selector;
+    }
   }
   let playersArr = [];
   for (let player of document.querySelectorAll(selector)) {
@@ -458,10 +459,12 @@ function createSteamButton(text) {
 
 function getResultsNodeList() {
   let selector = '.csgo_scoreboard_root > tbody > tr';
-  if (config.gameType === 'long') {
-    selector += '.long-game';
-  } else if (config.gameType === 'short') {
-    selector += '.short-game';
+  if (is5v5CompetitiveSection()) {
+    if (config.gameType === 'long') {
+      selector += '.long-game';
+    } else if (config.gameType === 'short') {
+      selector += '.short-game';
+    }
   }
   if (isCommendOrReportsSection()) {
     selector = '.banchecker-profile';
@@ -475,6 +478,10 @@ function toggleStopButton(visible) {
   } else {
     loadMatchHistoryStopButton.style.display = 'none';
   }
+}
+
+function is5v5CompetitiveSection() {
+  return section === 'matchhistorycompetitive';
 }
 
 function saveHistoryDate() {
@@ -504,31 +511,35 @@ async function loadMatchHisory() {
     let numberOfMatches = 0;
     let attemptsToLoadMoreMatches = 0;
     const moreButton = document.getElementById('load_more_button');
-    timerLoadMatchHistory = setInterval(() => {
-      if (moreButton.offsetParent !== null) {
-        const newNumberOfMatches = getResultsNodeList().length;
-        if (newNumberOfMatches === numberOfMatches) {
-          if (attemptsToLoadMoreMatches < 3) {
-            attemptsToLoadMoreMatches++;
-          } else {
-            clearInterval(timerLoadMatchHistory);
-            resolve();
+    if (moreButton) {
+      timerLoadMatchHistory = setInterval(() => {
+        if (moreButton.offsetParent !== null) {
+          const newNumberOfMatches = getResultsNodeList().length;
+          if (newNumberOfMatches === numberOfMatches) {
+            if (attemptsToLoadMoreMatches < 3) {
+              attemptsToLoadMoreMatches++;
+            } else {
+              clearInterval(timerLoadMatchHistory);
+              resolve();
+            }
           }
-        }
 
-        if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
-          const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
-          updateStatus(`${status} ... [${lastDate}]`);
-          if (config.historyDate && config.historyDate >= lastDate) {
-            clearInterval(timerLoadMatchHistory);
-            resolve();
-          } else {
-            numberOfMatches = newNumberOfMatches;
-            moreButton.click();
+          if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
+            const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
+            updateStatus(`${status} ... [${lastDate}]`);
+            if (config.historyDate && config.historyDate >= lastDate) {
+              clearInterval(timerLoadMatchHistory);
+              resolve();
+            } else {
+              numberOfMatches = newNumberOfMatches;
+              moreButton.click();
+            }
           }
         }
-      }
-    }, 800);
+      }, 800);
+    } else {
+      resolve();
+    }
   });
   updateStatus(`${status} Done !`);
   disableAllButtons(false);
@@ -539,20 +550,30 @@ function showSettings() {
   optionsContainer.style.display = 'block';
 }
 
+function getPourcentage(value, count) {
+  return count ? Math.round((value / count) * 10000) / 100 : 0;
+}
+
 function saveSettings() {
   const apiKey = document.getElementById('yourapikey').value;
   const apiKeySet = apiKey && !config.yourapikey;
   config.yourapikey = apiKey;
-  const gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
-  const gamesFilterChanged = gameType !== config.gameType;
-  config.gameType = gameType;
+  let gamesFilterChanged = false;
   const ignoreBansBefore = document.getElementById('ignoreBansBefore').value;
   if (!isNaN(ignoreBansBefore) && parseInt(ignoreBansBefore, 10) >= 0) {
     config.ignoreBansBefore = parseInt(ignoreBansBefore, 10);
   }
 
+  const configToSave = { yourapikey: config.yourapikey, ignoreBansBefore: config.ignoreBansBefore };
+  if (is5v5CompetitiveSection()) {
+    const gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
+    gamesFilterChanged = gameType !== config.gameType;
+    config.gameType = gameType;
+    configToSave.gameType = config.gameType;
+  }
+
   // save
-  chrome.storage.sync.set({ yourapikey: config.yourapikey, gameType: config.gameType, ignoreBansBefore: config.ignoreBansBefore });
+  chrome.storage.sync.set(configToSave);
 
   if (config.yourapikey) {
     disableAllButtons(false);
@@ -614,7 +635,7 @@ function createOptionsContainer() {
   inner.appendChild(oldBanInputLabel);
   inner.appendChild(oldBanInput);
 
-  if (section === 'matchhistorycompetitive') {
+  if (is5v5CompetitiveSection()) {
     inner.appendChild(create('br'));
     inner.appendChild(create('br'));
 
@@ -746,26 +767,25 @@ async function banstats() {
   }
   if (config.ignoreBansBefore) {
     updateResults(
-      `- ignoring bans occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${
-        Math.round((playersWithOldBan / players.length) * 10000) / 100
-      } %)`,
+      `- ignoring bans occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
+        playersWithOldBan,
+        players.length
+      )} %)`,
       true
     );
   }
 
   updateResults('', true);
   updateResults(`Matches played : ${matchesCount}`, true);
-  updateResults(`- with at least one player banned : ${matchesCountWithPlayerBanned} (${Math.round((matchesCountWithPlayerBanned / matchesCount) * 10000) / 100} %)`, true);
+  updateResults(`- with at least one player banned : ${matchesCountWithPlayerBanned} (${getPourcentage(matchesCountWithPlayerBanned, matchesCount)} %)`, true);
   updateResults(
-    `- with at least one player banned after playing with you : ${matchesCountWithPlayerBannedAfter} (${
-      Math.round((matchesCountWithPlayerBannedAfter / matchesCount) * 10000) / 100
-    } %)`,
+    `- with at least one player banned after playing with you : ${matchesCountWithPlayerBannedAfter} (${getPourcentage(matchesCountWithPlayerBannedAfter, matchesCount)} %)`,
     true
   );
   updateResults('', true);
   updateResults(`Unique players : ${players.length}`, true);
-  updateResults(`- banned : ${playersBanned.length} (${Math.round((playersBanned.length / players.length) * 10000) / 100} %)`, true);
-  updateResults(`- banned after playing with you : ${playersBannedAfter.length} (${Math.round((playersBannedAfter.length / players.length) * 10000) / 100} %)`, true);
+  updateResults(`- banned : ${playersBanned.length} (${getPourcentage(playersBanned.length, players.length)} %)`, true);
+  updateResults(`- banned after playing with you : ${playersBannedAfter.length} (${getPourcentage(playersBannedAfter.length, players.length)} %)`, true);
 
   // we list the banned players
   let bannedPlayersInfo = [];
@@ -817,29 +837,33 @@ function updateUI() {
 
 function updateFormValues() {
   document.getElementById('yourapikey').value = config.yourapikey;
-  switch (config.gameType) {
-    case 'long':
-      document.getElementById('gameType-long').checked = true;
-      break;
-    case 'short':
-      document.getElementById('gameType-short').checked = true;
-      break;
-    default:
-      document.getElementById('gameType-all').checked = true;
-      break;
+  if (is5v5CompetitiveSection()) {
+    switch (config.gameType) {
+      case 'long':
+        document.getElementById('gameType-long').checked = true;
+        break;
+      case 'short':
+        document.getElementById('gameType-short').checked = true;
+        break;
+      default:
+        document.getElementById('gameType-all').checked = true;
+        break;
+    }
   }
   document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
   document.getElementById('load-match-history-since').value = config.historyDate;
 }
 
 function init() {
-  if (initVariables()) {
+  if (canContinue()) {
     updateUI();
 
-    if (config.gameType === 'short') {
-      document.querySelector('.csgo_scoreboard_root').classList.add('hide-long-games');
-    } else if (config.gameType === 'long') {
-      document.querySelector('.csgo_scoreboard_root').classList.add('hide-short-games');
+    if (is5v5CompetitiveSection()) {
+      if (config.gameType === 'short') {
+        document.querySelector('.csgo_scoreboard_root').classList.add('hide-long-games');
+      } else if (config.gameType === 'long') {
+        document.querySelector('.csgo_scoreboard_root').classList.add('hide-short-games');
+      }
     }
 
     if (!config.yourapikey) {
@@ -850,7 +874,7 @@ function init() {
   } else {
     updateStatus([
       {
-        text: `This page lacks of one of those elements, we can't continue : "load more history" button, profile link or is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
+        text: `This page lacks of one of those elements, we can't continue : unable to  profile link or it is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
         important: true,
       },
     ]);
@@ -875,16 +899,18 @@ extensionContainer.appendChild(funStatsBar);
 document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
 
 const loadMoreButton = document.querySelector('.load_more_history_area #load_more_clickable');
-const observer = new MutationObserver((mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.attributeName === 'style') {
-      if (loadMoreButton.style.display !== 'none') {
-        updateUI();
+if (loadMoreButton) {
+  const observer = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.attributeName === 'style') {
+        if (loadMoreButton.style.display !== 'none') {
+          updateUI();
+        }
       }
     }
-  }
-});
-observer.observe(loadMoreButton, { attributes: true });
+  });
+  observer.observe(loadMoreButton, { attributes: true });
+}
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');
 checkBansButton.onclick = () => {

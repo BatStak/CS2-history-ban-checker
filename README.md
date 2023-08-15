@@ -32,6 +32,6 @@ Here are some screeshots :
 
 ![Loading](./readme/statistics.png)
 
-![Results](./readme/results.png)
+![Result](./readme/result.png)
 
 ![Highlight](./readme/highlight.png)

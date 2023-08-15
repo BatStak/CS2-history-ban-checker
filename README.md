@@ -26,6 +26,8 @@ The extension for Chrome and Firefox are waiting for validation.
 
 I will provide links after.
 
+Future : add statistics per map in a table. Don't hesitate to propose.
+
 Here are some screeshots :
 
 ![Winrate](./readme/options.png)

@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "js": ["gcpd730.js"],
+      "js": ["config.js", "helpers.js", "helpers-ui.js", "gcpd730.js", "main.js"],
       "css": ["display.css"],
       "run_at": "document_end",
       "matches": [

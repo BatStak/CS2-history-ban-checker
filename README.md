@@ -1,4 +1,4 @@
-# CSGO match history ban checker
+# CSGO history ban checker
 
 This is a fork of [Ban-Checker-for-Steam](https://github.com/ge-ku/Ban-Checker-for-Steam).
 

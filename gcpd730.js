@@ -54,18 +54,54 @@ function updateFunStats() {
       funStats.totalKills += parseInt(myMatchStats[2].innerText, 10);
       funStats.totalAssists += parseInt(myMatchStats[3].innerText, 10);
       funStats.totalDeaths += parseInt(myMatchStats[4].innerText, 10);
+
+      let isDraw = false;
+      let isWin = false;
+      let isLose = false;
+
       if (score[1] === score[2]) {
+        isDraw = true;
         funStats.draws++;
       } else if (isPlayerInFirstTeam === isFirstTeamWin) {
+        isWin = true;
         funStats.wins++;
       } else {
+        isLose = true;
         funStats.loses++;
       }
 
       const leftPanel = matchRow.querySelector('.val_left');
       for (let td of leftPanel.querySelectorAll('td')) {
         const innerText = td.innerText.trim();
-        if (waitTimeRegex.test(innerText)) {
+        if (mapNameRegex.test(innerText)) {
+          const mapName = innerText.match(mapNameRegex)[2];
+
+          // set map name for all players
+          matchRow.querySelectorAll('tr[data-steamid64]').forEach((player) => {
+            player.dataset.map = mapName;
+          });
+
+          if (!mapsStats.some((map) => map.name === mapName)) {
+            mapsStats.push({
+              name: mapName,
+              count: 0,
+              wins: 0,
+              draws: 0,
+              loses: 0,
+              bans: 0,
+              bansAfter: 0,
+            });
+          }
+          const mapStats = mapsStats.find((map) => map.name === mapName);
+          mapStats.count++;
+          if (isWin) {
+            mapStats.wins++;
+          } else if (isLose) {
+            mapStats.loses++;
+          } else if (isDraw) {
+            mapStats.draws++;
+          }
+        } else if (waitTimeRegex.test(innerText)) {
           const hoursAndMinues = innerText.match(waitTimeRegex);
           funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
         } else if (matchTimeRegex.test(innerText)) {
@@ -192,7 +228,8 @@ function checkBans(players) {
         }
         for (let player of json.players) {
           const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
-          const daySinceLastMatch = parseInt(playerEls[0].dataset.dayssince, 10);
+          const playerRow = playerEls[0];
+          const daySinceLastMatch = parseInt(playerRow.dataset.dayssince, 10);
           let verdict = '';
           if (player.NumberOfVACBans > 0) {
             verdict += 'VAC';
@@ -204,10 +241,14 @@ function checkBans(players) {
             banStats.gameBans++;
           }
           if (verdict) {
+            const mapStats = mapsStats.find((mapStats) => mapStats.name === playerRow.dataset.map);
+            mapStats.bans++;
+
             const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
             if (daySinceLastMatch > player.DaysSinceLastBan) {
               banStats.recentBans++;
               verdict += '+' + daysAfter;
+              mapStats.bansAfter++;
             } else {
               verdict += daysAfter;
             }

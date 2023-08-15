@@ -362,10 +362,14 @@ function checkBans(players) {
         if (batches.length > i + 1) {
           setTimeout(() => checkBansOnApi(i + 1, maxRetries), 1000);
         } else {
+          const plural = banStats.recentBans > 1;
           updateResults([
             { text: `Looks like we're done.` },
             { text: '' },
-            { text: `There were ${banStats.recentBans} players who got banned after playing with you!`, important: banStats.recentBans > 0 },
+            {
+              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you!`,
+              important: banStats.recentBans > 0,
+            },
             { text: '' },
             {
               text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
@@ -627,7 +631,8 @@ function createOptionsContainer() {
   inner.appendChild(create('br'));
 
   const oldBanInputLabel = create('span');
-  oldBanInputLabel.textContent = 'Ignore bans which occured before the games older than (in days) : ';
+  oldBanInputLabel.textContent = 'Ignore bans which occured before the games older than (in days), set 0 to ignore : ';
+  oldBanInputLabel.appendChild(create('br'));
   const oldBanInput = create('input', 'ignoreBansBefore');
   oldBanInput.type = 'number';
   oldBanInput.style.width = '60px';
@@ -767,7 +772,7 @@ async function banstats() {
   }
   if (config.ignoreBansBefore) {
     updateResults(
-      `- ignoring bans occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
+      `- ignoring bans which occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
         playersWithOldBan,
         players.length
       )} %)`,
@@ -792,7 +797,7 @@ async function banstats() {
   const bannedPlayersDomElements = [...document.querySelectorAll('.banchecker-bans')].filter((p) => window.getComputedStyle(p).color === 'rgb(255, 0, 0)');
   if (bannedPlayersDomElements.length > 0) {
     updateResults('', true);
-    updateResults(`Players banned :`, true);
+    updateResults(`Players banned after the game (more likely to be on CSGO) :`, true);
     for (let bannedPlayer of bannedPlayersDomElements) {
       const lastBanInDays = parseInt(bannedPlayer.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10);
       bannedPlayersInfo.push({

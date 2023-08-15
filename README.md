@@ -5,8 +5,10 @@ This is a fork of [Ban-Checker-for-Steam](https://github.com/ge-ku/Ban-Checker-f
 Load your matchmaking history and find if players have been banned (VAC or Game ban). You can filter your games between short and long games and ignore old bans for statistics.
 
 I provide two main statistics at the end of scan :
-- number and pourcentage of matches with someone who has been banned after the game (more probably on CSGO),
-- number and pourcentage of players who has been banned after the game (more probably on CSGO).
+- number and pourcentage of matches with someone who has been banned after the game,
+- number and pourcentage of players who has been banned after the game.
+
+Bans after the game displayed in red are more likey to be for CSGO. Older ones (grey and yellow) can't be on CSGO.
 
 You will find some personal statistics like K/D and winrate at the bottom left. I just add winrate and fix some NaN cases.
 

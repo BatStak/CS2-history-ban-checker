@@ -190,8 +190,8 @@ function updateMapStats() {
     draws: 0,
     loses: 0,
     bans: 0,
-    bansAfter: 0
-  }
+    bansAfter: 0,
+  };
 
   for (let map of mapsStats.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))) {
     const mapRow = create('tr');
@@ -226,7 +226,7 @@ function updateMapStats() {
     total.bans += map.bans;
     total.bansAfter += map.bansAfter;
   }
-  
+
   const totalRow = create('tr');
   totalRow.classList.add('map-total');
   const tdTotal1 = create('td');
@@ -296,9 +296,12 @@ function formatMatchsTable() {
         const steamid64 = getSteamID64(minProfileId);
         tr.dataset.steamid64 = steamid64;
         tr.dataset.dayssince = daysSinceMatch;
+        tr.dataset.matchindex = matchIndex;
         tr.classList.add('banchecker-profile');
       });
       table.classList.add('banchecker-formatted');
+      table.classList.add(`match-${matchIndex}`);
+      matchIndex++;
     }
   }
   addBanColumns();
@@ -365,13 +368,19 @@ function checkBans(players) {
           }
           if (verdict) {
             const mapStats = mapsStats.find((mapStats) => mapStats.name === playerRow.dataset.map);
-            mapStats.bans++;
+            const matchBanAlreadyCounted = matchIndexWithBans.includes(playerRow.dataset.matchindex);
+            matchIndexWithBans.push(playerRow.dataset.matchindex);
+            if (!matchBanAlreadyCounted) {
+              mapStats.bans++;
+            }
 
             const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
             if (daySinceLastMatch > player.DaysSinceLastBan) {
               banStats.recentBans++;
               verdict += '+' + daysAfter;
-              mapStats.bansAfter++;
+              if (!matchBanAlreadyCounted) {
+                mapStats.bansAfter++;
+              }
             } else {
               verdict += daysAfter;
             }

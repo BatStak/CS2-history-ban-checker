@@ -49,3 +49,5 @@ let timerLoadMatchHistory = null;
  * bansAfter
  */
 const mapsStats = [];
+let matchIndex = 1;
+const matchIndexWithBans = [];

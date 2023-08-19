@@ -87,3 +87,38 @@
 .csgo_scoreboard_root.hide-short-games .aborted-game {
   display: none !important;
 }
+
+.map-stats {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.map-stats th {
+  cursor: help;
+}
+
+.map-stats th,
+.map-stats td {
+  border: 1px solid #6f6f6f;
+  padding: 5px 10px;
+}
+
+.map-stats .map-sample {
+  width: 50px;
+}
+
+.map-stats .map-name,
+.map-stats .map-win,
+.map-stats .map-draw,
+.map-stats .map-lose {
+  width: 120px;
+}
+
+.map-stats .map-ban {
+  width: 110px;
+}
+
+.map-stats .map-total {
+  font-weight: bold;
+}

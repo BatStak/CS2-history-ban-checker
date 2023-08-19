@@ -164,4 +164,5 @@ function createOptionsContainer() {
 function updateUI() {
   formatMatchsTable();
   updateFunStats();
+  updateMapStats();
 }

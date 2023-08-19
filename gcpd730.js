@@ -133,6 +133,129 @@ Winrate with draws: ${getPourcentage(funStats.wins + funStats.draws, funStats.nu
 Loserate: ${getPourcentage(funStats.loses, funStats.numberOfMatches)} %`;
 }
 
+function updateMapStats() {
+  if (!mapsStats.length) {
+    return;
+  }
+
+  statsMaps.textContent = '';
+
+  const table = create('table');
+  table.classList.add('map-stats');
+  const tbody = create('tbody');
+  table.appendChild(tbody);
+
+  const headerRow = create('tr');
+  const th1 = create('th');
+  th1.classList.add('map-name');
+  const th2 = create('th');
+  th2.classList.add('map-sample');
+  const th3 = create('th');
+  th3.classList.add('map-win');
+  const th4 = create('th');
+  th4.classList.add('map-draw');
+  const th5 = create('th');
+  th5.classList.add('map-lose');
+  const th6 = create('th');
+  th6.classList.add('map-ban');
+  const th7 = create('th');
+  th7.classList.add('map-ban-after');
+  headerRow.appendChild(th1);
+  headerRow.appendChild(th2);
+  headerRow.appendChild(th3);
+  headerRow.appendChild(th4);
+  headerRow.appendChild(th5);
+  headerRow.appendChild(th6);
+  headerRow.appendChild(th7);
+  tbody.appendChild(headerRow);
+
+  th1.textContent = 'Map';
+  th1.title = 'map name';
+  th2.textContent = 'Sample';
+  th2.title = 'sample size';
+  th3.textContent = 'Win';
+  th3.title = 'win sample [win rate]';
+  th4.textContent = 'Draw';
+  th4.title = 'draw sample [draw rate]';
+  th5.textContent = 'Lose';
+  th5.title = 'lose sample [lose rate]';
+  th6.textContent = 'With ban';
+  th6.title = 'Someone has been banned in the match, before or after playing with you - map sample [pourcentage]';
+  th7.textContent = 'With ban after';
+  th7.title = 'Someone has been banned in the match after playing with you - map sample [pourcentage]';
+
+  let total = {
+    count: 0,
+    wins: 0,
+    draws: 0,
+    loses: 0,
+    bans: 0,
+    bansAfter: 0
+  }
+
+  for (let map of mapsStats.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))) {
+    const mapRow = create('tr');
+    const td1 = create('td');
+    const td2 = create('td');
+    const td3 = create('td');
+    const td4 = create('td');
+    const td5 = create('td');
+    const td6 = create('td');
+    const td7 = create('td');
+    mapRow.appendChild(td1);
+    mapRow.appendChild(td2);
+    mapRow.appendChild(td3);
+    mapRow.appendChild(td4);
+    mapRow.appendChild(td5);
+    mapRow.appendChild(td6);
+    mapRow.appendChild(td7);
+    tbody.appendChild(mapRow);
+
+    td1.textContent = map.name;
+    td2.textContent = map.count;
+    td3.textContent = `${map.wins} [${getPourcentage(map.wins, map.count)} %]`;
+    td4.textContent = `${map.draws} [${getPourcentage(map.draws, map.count)} %]`;
+    td5.textContent = `${map.loses} [${getPourcentage(map.loses, map.count)} %]`;
+    td6.textContent = `${map.bans} [${getPourcentage(map.bans, map.count)} %]`;
+    td7.textContent = `${map.bansAfter} [${getPourcentage(map.bansAfter, map.count)} %]`;
+
+    total.count += map.count;
+    total.wins += map.wins;
+    total.draws += map.draws;
+    total.loses += map.loses;
+    total.bans += map.bans;
+    total.bansAfter += map.bansAfter;
+  }
+  
+  const totalRow = create('tr');
+  totalRow.classList.add('map-total');
+  const tdTotal1 = create('td');
+  const tdTotal2 = create('td');
+  const tdTotal3 = create('td');
+  const tdTotal4 = create('td');
+  const tdTotal5 = create('td');
+  const tdTotal6 = create('td');
+  const tdTotal7 = create('td');
+  totalRow.appendChild(tdTotal1);
+  totalRow.appendChild(tdTotal2);
+  totalRow.appendChild(tdTotal3);
+  totalRow.appendChild(tdTotal4);
+  totalRow.appendChild(tdTotal5);
+  totalRow.appendChild(tdTotal6);
+  totalRow.appendChild(tdTotal7);
+  tbody.appendChild(totalRow);
+
+  tdTotal1.textContent = 'Total';
+  tdTotal2.textContent = total.count;
+  tdTotal3.textContent = `${total.wins} [${getPourcentage(total.wins, total.count)} %]`;
+  tdTotal4.textContent = `${total.draws} [${getPourcentage(total.draws, total.count)} %]`;
+  tdTotal5.textContent = `${total.loses} [${getPourcentage(total.loses, total.count)} %]`;
+  tdTotal6.textContent = `${total.bans} [${getPourcentage(total.bans, total.count)} %]`;
+  tdTotal7.textContent = `${total.bansAfter} [${getPourcentage(total.bansAfter, total.count)} %]`;
+
+  statsMaps.appendChild(table);
+}
+
 function formatMatchsTable() {
   const daysSince = (dateString) => {
     const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
@@ -278,6 +401,7 @@ function checkBans(players) {
             }
           }
         }
+        updateMapStats();
         if (batches.length > i + 1) {
           setTimeout(() => checkBansOnApi(i + 1, maxRetries), 1000);
         } else {

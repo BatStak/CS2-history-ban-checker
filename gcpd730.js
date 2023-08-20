@@ -431,6 +431,7 @@ function checkBans(players) {
             playerEl.classList.add('banchecker-checked');
             verdictEl = playerEl.querySelector('.banchecker-bans');
             if (verdict) {
+              playerEl.classList.add('player-banned');
               const mapStats = mapsStats.find((mapStats) => mapStats.name === playerEl.dataset.map);
               const matchBanAlreadyCounted = matchIndexWithBans.includes(playerEl.dataset.matchindex);
               matchIndexWithBans.push(playerEl.dataset.matchindex);
@@ -438,6 +439,7 @@ function checkBans(players) {
                 mapStats.bans++;
               }
               if (daySinceLastMatch > player.DaysSinceLastBan) {
+                playerEl.classList.add('after');
                 verdictEl.style.color = 'red';
                 if (!isCommendOrReportsSection()) {
                   playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';

@@ -14,15 +14,22 @@ function canContinue() {
   return !!profileURI && !!section;
 }
 
+function addFilterGameSelector(selector) {
+  let editedSelector = selector;
+
+  if (config.gameType === 'long') {
+    editedSelector = '.long-game ' + editedSelector;
+  } else if (config.gameType === 'short') {
+    editedSelector = '.short-game ' + editedSelector;
+  }
+
+  return editedSelector;
+}
+
 function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
-  let selector = `.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`;
-  if (config.gameType === 'long') {
-    selector = '.long-game ' + selector;
-  } else if (config.gameType === 'short') {
-    selector = '.short-game ' + selector;
-  }
+  let selector = addFilterGameSelector(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`);
 
   // we find the links on our profil to get the statistics of the match
   const myProfileLinks = document.querySelectorAll(selector);
@@ -486,11 +493,7 @@ function checkLoadedMatchesForBans() {
   disableAllButtons(true);
   let selector = '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)';
   if (is5v5CompetitiveSection()) {
-    if (config.gameType === 'long') {
-      selector = '.long-game ' + selector;
-    } else if (config.gameType === 'short') {
-      selector = '.short-game ' + selector;
-    }
+    selector = addFilterGameSelector(selector);
   }
   let playersArr = [];
   for (let player of document.querySelectorAll(selector)) {
@@ -500,15 +503,8 @@ function checkLoadedMatchesForBans() {
   checkBans(playersArr);
 }
 
-function getResultsNodeList(nofilter) {
+function getResultsNodeList() {
   let selector = '.csgo_scoreboard_root > tbody > tr';
-  if (is5v5CompetitiveSection() && !nofilter) {
-    if (config.gameType === 'long') {
-      selector += '.long-game';
-    } else if (config.gameType === 'short') {
-      selector += '.short-game';
-    }
-  }
   if (isCommendOrReportsSection()) {
     selector = '.banchecker-profile';
   }
@@ -544,7 +540,7 @@ async function loadMatchHisory() {
     if (moreButton) {
       timerLoadMatchHistory = setInterval(() => {
         if (moreButton.offsetParent !== null) {
-          const newNumberOfMatches = getResultsNodeList(true).length;
+          const newNumberOfMatches = getResultsNodeList().length;
           if (newNumberOfMatches === numberOfMatches) {
             if (attemptsToLoadMoreMatches < 3) {
               attemptsToLoadMoreMatches++;

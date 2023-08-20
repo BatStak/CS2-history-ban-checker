@@ -60,14 +60,10 @@ menuBottom.appendChild(checkBansButton);
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);
 
-// 'ignoreBansBefore'
 chrome.storage.sync.get(['yourapikey', 'gameType', 'historyDate'], (storageData) => {
   if (storageData.yourapikey) {
     config.yourapikey = storageData.yourapikey;
   }
-  // if (storageData.ignoreBansBefore || storageData.ignoreBansBefore === 0) {
-  //   config.ignoreBansBefore = storageData.ignoreBansBefore;
-  // }
   if (storageData.gameType) {
     config.gameType = storageData.gameType;
   }

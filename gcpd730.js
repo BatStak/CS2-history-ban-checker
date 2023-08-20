@@ -17,101 +17,65 @@ function canContinue() {
 function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
-  let filterGame = false;
+  let selector = `.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`;
+  if (config.gameType === 'long') {
+    selector = '.long-game ' + selector;
+  } else if (config.gameType === 'short') {
+    selector = '.short-game ' + selector;
+  }
 
   // we find the links on our profil to get the statistics of the match
-  const myProfileLinks = document.querySelectorAll(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`);
+  const myProfileLinks = document.querySelectorAll(selector);
   for (let link of myProfileLinks) {
     const playerRow = link.closest('tr');
     const matchRow = playerRow.closest('table').parentNode.parentNode;
-    const score = playerRow.parentNode.querySelector('.csgo_scoreboard_score').innerText.match(scoreRegex);
-    const rowsCount = playerRow.parentNode.children.length;
-    const playerIndex = Array.from(playerRow.parentNode.children).indexOf(playerRow);
-    const scoreTeam1 = parseInt(score[1], 10);
-    const scoreTeam2 = parseInt(score[2], 10);
-    const isFirstTeamWin = scoreTeam1 > scoreTeam2;
-    const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
 
-    if (is5v5CompetitiveSection()) {
-      // add class "short" or "long" game
-      const maxScore = Math.max(scoreTeam1, scoreTeam2);
-      const isLong = maxScore === 15 || maxScore === 16;
-      const isShort = maxScore === 8 || maxScore === 9;
-      const isAborted = !isLong && !isShort;
-      if (isLong) {
-        matchRow.classList.add('long-game');
-      } else if (isShort) {
-        matchRow.classList.add('short-game');
-      } else if (isAborted) {
-        matchRow.classList.add('aborted-game');
-      }
+    const myMatchStats = playerRow.querySelectorAll('td');
+    funStats.totalKills += parseInt(myMatchStats[2].innerText, 10);
+    funStats.totalAssists += parseInt(myMatchStats[3].innerText, 10);
+    funStats.totalDeaths += parseInt(myMatchStats[4].innerText, 10);
 
-      filterGame = (config.gameType === 'long' && !isLong) || (config.gameType === 'short' && !isShort);
-    }
+    const leftPanel = matchRow.querySelector('.val_left');
+    for (let td of leftPanel.querySelectorAll('td')) {
+      const innerText = td.innerText.trim();
+      if (mapNameRegex.test(innerText)) {
+        const mapName = innerText.match(mapNameRegex)[2];
 
-    if (!filterGame) {
-      const myMatchStats = playerRow.querySelectorAll('td');
-      funStats.totalKills += parseInt(myMatchStats[2].innerText, 10);
-      funStats.totalAssists += parseInt(myMatchStats[3].innerText, 10);
-      funStats.totalDeaths += parseInt(myMatchStats[4].innerText, 10);
+        // set map name for all players
+        matchRow.querySelectorAll('tr[data-steamid64]').forEach((player) => {
+          player.dataset.map = mapName;
+        });
 
-      let isDraw = false;
-      let isWin = false;
-      let isLose = false;
-
-      if (score[1] === score[2]) {
-        isDraw = true;
-        funStats.draws++;
-      } else if (isPlayerInFirstTeam === isFirstTeamWin) {
-        isWin = true;
-        funStats.wins++;
-      } else {
-        isLose = true;
-        funStats.loses++;
-      }
-
-      const leftPanel = matchRow.querySelector('.val_left');
-      for (let td of leftPanel.querySelectorAll('td')) {
-        const innerText = td.innerText.trim();
-        if (mapNameRegex.test(innerText)) {
-          const mapName = innerText.match(mapNameRegex)[2];
-
-          // set map name for all players
-          matchRow.querySelectorAll('tr[data-steamid64]').forEach((player) => {
-            player.dataset.map = mapName;
+        if (!mapsStats.some((map) => map.name === mapName)) {
+          mapsStats.push({
+            name: mapName,
+            count: 0,
+            wins: 0,
+            draws: 0,
+            loses: 0,
+            bans: 0,
+            bansAfter: 0,
           });
-
-          if (!mapsStats.some((map) => map.name === mapName)) {
-            mapsStats.push({
-              name: mapName,
-              count: 0,
-              wins: 0,
-              draws: 0,
-              loses: 0,
-              bans: 0,
-              bansAfter: 0,
-            });
-          }
-          const mapStats = mapsStats.find((map) => map.name === mapName);
-          mapStats.count++;
-          if (isWin) {
-            mapStats.wins++;
-          } else if (isLose) {
-            mapStats.loses++;
-          } else if (isDraw) {
-            mapStats.draws++;
-          }
-        } else if (waitTimeRegex.test(innerText)) {
-          const hoursAndMinues = innerText.match(waitTimeRegex);
-          funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
-        } else if (matchTimeRegex.test(innerText)) {
-          const hoursAndMinues = innerText.match(matchTimeRegex);
-          funStats.totalTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
         }
+        const mapStats = mapsStats.find((map) => map.name === mapName);
+        mapStats.count++;
+        if (matchRow.classList.contains('match-win')) {
+          mapStats.wins++;
+        } else if (matchRow.classList.contains('match-lose')) {
+          mapStats.loses++;
+        } else if (matchRow.classList.contains('match-draw')) {
+          mapStats.draws++;
+        }
+      } else if (waitTimeRegex.test(innerText)) {
+        const hoursAndMinues = innerText.match(waitTimeRegex);
+        funStats.totalWaitTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
+      } else if (matchTimeRegex.test(innerText)) {
+        const hoursAndMinues = innerText.match(matchTimeRegex);
+        funStats.totalTime += parseTime(hoursAndMinues[1], hoursAndMinues[2]);
       }
-
-      funStats.numberOfMatches++;
     }
+
+    funStats.numberOfMatches++;
 
     link.classList.add('personal-stats-checked');
   }
@@ -124,13 +88,7 @@ Total deaths: ${funStats.totalDeaths}
 K/D: ${funStats.totalDeaths ? (funStats.totalKills / funStats.totalDeaths).toFixed(3) : 0}
 (K+A)/D: ${funStats.totalDeaths ? ((funStats.totalKills + funStats.totalAssists) / funStats.totalDeaths).toFixed(3) : 0}
 Total wait time: ${timeString(funStats.totalWaitTime)}
-Total match time: ${timeString(funStats.totalTime)}
-Wins: ${funStats.wins}
-Draws: ${funStats.draws}
-Loses: ${funStats.loses}
-Winrate: ${getPourcentage(funStats.wins, funStats.numberOfMatches)} %
-Winrate with draws: ${getPourcentage(funStats.wins + funStats.draws, funStats.numberOfMatches)} %
-Loserate: ${getPourcentage(funStats.loses, funStats.numberOfMatches)} %`;
+Total match time: ${timeString(funStats.totalTime)}`;
 }
 
 function updateMapStats() {
@@ -174,15 +132,15 @@ function updateMapStats() {
   th2.textContent = 'Sample';
   th2.title = 'sample size';
   th3.textContent = 'Win';
-  th3.title = 'win sample [win rate]';
+  th3.title = 'win [win rate]';
   th4.textContent = 'Draw';
-  th4.title = 'draw sample [draw rate]';
+  th4.title = 'draw [draw rate]';
   th5.textContent = 'Lose';
-  th5.title = 'lose sample [lose rate]';
+  th5.title = 'lose [lose rate]';
   th6.textContent = 'With ban';
-  th6.title = 'Someone has been banned in the match, before or after playing with you - map sample [pourcentage]';
+  th6.title = 'Someone has been banned in the match, before or after playing with you';
   th7.textContent = 'With ban after';
-  th7.title = 'Someone has been banned in the match after playing with you - map sample [pourcentage]';
+  th7.title = 'Someone has been banned in the match after playing with you';
 
   let total = {
     count: 0,
@@ -256,25 +214,35 @@ function updateMapStats() {
   statsMaps.appendChild(table);
 }
 
-function formatMatchsTable() {
-  const daysSince = (dateString) => {
-    const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
-    let daysSinceMatch = -1;
-    if (matchDate.length > 6) {
-      const year = parseInt(matchDate[1], 10);
-      const month = parseInt(matchDate[2], 10) - 1;
-      const day = parseInt(matchDate[3], 10);
-      const hour = parseInt(matchDate[4], 10);
-      const minute = parseInt(matchDate[5], 10);
-      const second = parseInt(matchDate[6], 10);
-      const matchDateObj = new Date(year, month, day, hour, minute, second);
-      const matchDayTime = matchDateObj.getTime();
-      const currentTime = Date.now();
-      const timePassed = currentTime - matchDayTime;
-      daysSinceMatch = Math.ceil(timePassed / (1000 * 60 * 60 * 24));
+function daysSince(dateString, updateDates) {
+  const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
+  let daysSinceMatch = -1;
+  if (matchDate.length > 6) {
+    const year = parseInt(matchDate[1], 10);
+    const month = parseInt(matchDate[2], 10) - 1;
+    const day = parseInt(matchDate[3], 10);
+    const hour = parseInt(matchDate[4], 10);
+    const minute = parseInt(matchDate[5], 10);
+    const second = parseInt(matchDate[6], 10);
+    const matchDateObj = new Date(year, month, day, hour, minute, second);
+    const matchDayTime = matchDateObj.getTime();
+    const currentTime = Date.now();
+    const timePassed = currentTime - matchDayTime;
+    daysSinceMatch = Math.ceil(timePassed / (1000 * 60 * 60 * 24));
+
+    if (updateDates) {
+      const formattedDate = `${matchDate[1]}-${matchDate[2]}-${matchDate[3]}`;
+      if (!endDate) {
+        endDate = formattedDate;
+      }
+      startDate = formattedDate;
     }
-    return daysSinceMatch;
-  };
+  }
+
+  return daysSinceMatch;
+}
+
+function formatMatchsTable() {
   if (isCommendOrReportsSection()) {
     for (let report of document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)')) {
       const dateEl = report.querySelector('td:first-child');
@@ -286,10 +254,43 @@ function formatMatchsTable() {
       report.classList.add('banchecker-formatted');
     }
   } else {
-    for (let table of document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)')) {
-      const leftColumn = table.parentElement.parentElement.querySelector('.csgo_scoreboard_inner_left');
-      const daysSinceMatch = daysSince(leftColumn.innerText);
-      table.querySelectorAll('tbody > tr').forEach((tr, i) => {
+    for (let rightPanel of document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)')) {
+      const matchRow = rightPanel.parentElement.parentElement;
+      const score = rightPanel.querySelector('.csgo_scoreboard_score').innerText.match(scoreRegex);
+      const playerRows = rightPanel.querySelectorAll('tbody > tr');
+      const playerRow = rightPanel.querySelector(`.inner_name .playerAvatar a[href="${profileURI}"]`).parentElement.parentElement.parentElement;
+      const rowsCount = playerRows.length;
+      const playerIndex = Array.from(playerRows).indexOf(playerRow);
+      const scoreTeam1 = parseInt(score[1], 10);
+      const scoreTeam2 = parseInt(score[2], 10);
+      const isFirstTeamWin = scoreTeam1 > scoreTeam2;
+      const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
+
+      if (score[1] === score[2]) {
+        matchRow.classList.add('match-draw');
+      } else if (isPlayerInFirstTeam === isFirstTeamWin) {
+        matchRow.classList.add('match-win');
+      } else {
+        matchRow.classList.add('match-lose');
+      }
+
+      const maxScore = Math.max(scoreTeam1, scoreTeam2);
+      const isLong = maxScore === 15 || maxScore === 16;
+      const isShort = maxScore === 8 || maxScore === 9;
+      const isAborted = !isLong && !isShort;
+      if (isLong) {
+        matchRow.classList.add('long-game');
+      } else if (isShort) {
+        matchRow.classList.add('short-game');
+      } else if (isAborted) {
+        matchRow.classList.add('aborted-game');
+      }
+
+      const gameNotFiltered = config.gameType === 'long' ? isLong : config.gameType === 'short' ? isShort : true;
+
+      const leftColumn = matchRow.querySelector('.csgo_scoreboard_inner_left');
+      const daysSinceMatch = daysSince(leftColumn.innerText, gameNotFiltered);
+      rightPanel.querySelectorAll('tbody > tr').forEach((tr, i) => {
         if (i === 0 || tr.childElementCount < 3) return;
         const profileLink = tr.querySelector('.linkTitle');
         const minProfileId = profileLink.dataset.miniprofile;
@@ -298,9 +299,11 @@ function formatMatchsTable() {
         tr.dataset.dayssince = daysSinceMatch;
         tr.dataset.matchindex = matchIndex;
         tr.classList.add('banchecker-profile');
+        if (!playersList.includes(steamid64) && gameNotFiltered) {
+          playersList.push(steamid64);
+        }
       });
-      table.classList.add('banchecker-formatted');
-      table.classList.add(`match-${matchIndex}`);
+      rightPanel.classList.add('banchecker-formatted');
       matchIndex++;
     }
   }
@@ -354,8 +357,8 @@ function checkBans(players) {
         }
         for (let player of json.players) {
           const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
-          const playerRow = playerEls[0];
-          const daySinceLastMatch = parseInt(playerRow.dataset.dayssince, 10);
+          const playerEl = playerEls[0];
+          const daySinceLastMatch = parseInt(playerEl.dataset.dayssince, 10);
           let verdict = '';
           if (player.NumberOfVACBans > 0) {
             verdict += 'VAC';
@@ -367,20 +370,17 @@ function checkBans(players) {
             banStats.gameBans++;
           }
           if (verdict) {
-            const mapStats = mapsStats.find((mapStats) => mapStats.name === playerRow.dataset.map);
-            const matchBanAlreadyCounted = matchIndexWithBans.includes(playerRow.dataset.matchindex);
-            matchIndexWithBans.push(playerRow.dataset.matchindex);
-            if (!matchBanAlreadyCounted) {
-              mapStats.bans++;
-            }
-
+            const bannedAfter = daySinceLastMatch > player.DaysSinceLastBan;
+            bannedPlayers.push({
+              steamid: playerEl.dataset.steamid64,
+              daySinceLastBan: player.DaysSinceLastBan,
+              after: bannedAfter,
+              profileUrl: playerEl.querySelector('.linkTitle').href,
+            });
             const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
-            if (daySinceLastMatch > player.DaysSinceLastBan) {
+            if (bannedAfter) {
               banStats.recentBans++;
               verdict += '+' + daysAfter;
-              if (!matchBanAlreadyCounted) {
-                mapStats.bansAfter++;
-              }
             } else {
               verdict += daysAfter;
             }
@@ -389,18 +389,22 @@ function checkBans(players) {
             playerEl.classList.add('banchecker-checked');
             verdictEl = playerEl.querySelector('.banchecker-bans');
             if (verdict) {
+              const mapStats = mapsStats.find((mapStats) => mapStats.name === playerEl.dataset.map);
+              const matchBanAlreadyCounted = matchIndexWithBans.includes(playerEl.dataset.matchindex);
+              matchIndexWithBans.push(playerEl.dataset.matchindex);
+              if (!matchBanAlreadyCounted && mapStats) {
+                mapStats.bans++;
+              }
               if (daySinceLastMatch > player.DaysSinceLastBan) {
                 verdictEl.style.color = 'red';
                 if (!isCommendOrReportsSection()) {
                   playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
                 }
+                if (!matchBanAlreadyCounted && mapStats) {
+                  mapStats.bansAfter++;
+                }
               } else {
-                // if (config.ignoreBansBefore && config.ignoreBansBefore > 0 && player.DaysSinceLastBan > config.ignoreBansBefore) {
-                verdictEl.style.color = 'grey';
-                // playerEl.classList.add('banchecker-old');
-                // } else {
-                //   verdictEl.style.color = 'yellow';
-                // }
+                verdictEl.style.color = 'yellow';
               }
               verdictEl.style.cursor = 'help';
               verdictEl.innerText = verdict;
@@ -427,7 +431,7 @@ function checkBans(players) {
               text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
             },
           ]);
-          banstats();
+          displayBannedPlayers();
         }
       }
     );
@@ -572,137 +576,24 @@ async function loadMatchHisory() {
   toggleStopButton(false);
 }
 
-async function banstats() {
-  // const playersWithOldBan = new Set([...document.querySelectorAll('.banchecker-old')].map((e) => e.dataset.steamid64)).size;
-  const players = [];
-  const playersBanned = [];
-  const playersBannedAfter = [];
+async function displayBannedPlayers() {
+  const bannedPlayersAfter = bannedPlayers
+    .filter((bannedPlayer) => bannedPlayer.after)
+    .sort((a, b) => (a.daySinceLastBan > b.daySinceLastBan ? 1 : a.daySinceLastBan < b.daySinceLastBan ? -1 : 0));
 
-  let matchesCount = 0;
-  let matchesCountWithPlayerBanned = 0;
-  let matchesCountWithPlayerBannedAfter = 0;
-
-  let startDate = '';
-  let endDate = '';
-
-  let domMatchesParts = [...getResultsNodeList()];
-
-  // for each match
-  for (let domPart of domMatchesParts) {
-    const playerRows = domPart.querySelectorAll('tr[data-steamid64]:not(.banchecker-old)');
-
-    // guard but impossible
-    if (playerRows.length > 0) {
-      let matchHasPlayerBanned = false;
-      let matchHasPlayerBannedAfter = false;
-      const playersOfTheMatchWeDontKnowYet = [];
-
-      //  for each player
-      for (let player of playerRows) {
-        const steamId = player.attributes['data-steamid64'].value;
-        const banStatus = player.querySelector('.banchecker-bans');
-
-        // we store players we don't know yet
-        if (!players.some((p) => p === steamId)) {
-          playersOfTheMatchWeDontKnowYet.push(steamId);
-        }
-
-        // we have a ban
-        const banLabel = banStatus.innerText.trim();
-        if (banLabel != '') {
-          if (!playersBanned.some((p) => p === steamId)) {
-            playersBanned.push(steamId);
-          }
-
-          matchHasPlayerBanned = true;
-
-          // ban occured after playing with him
-          if (banStatus.style.color === 'red') {
-            if (!playersBannedAfter.some((p) => p === steamId)) {
-              playersBannedAfter.push(steamId);
-            }
-
-            matchHasPlayerBannedAfter = true;
-          }
-        }
-      }
-
-      // if we wish to exclude recent period with no red ban (supposing that banwaves did not happen yet)
-      if (!config.ignoreRecentPeriodWithNoBanAfterTheMatch || playersBanned.length > 0) {
-        if (!endDate) {
-          endDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
-        }
-
-        players.push(...playersOfTheMatchWeDontKnowYet);
-
-        matchesCount++;
-
-        if (matchHasPlayerBanned) {
-          matchesCountWithPlayerBanned++;
-        }
-
-        if (matchHasPlayerBannedAfter) {
-          matchesCountWithPlayerBannedAfter++;
-        }
-
-        startDate = domPart.querySelector('.csgo_scoreboard_inner_left > tbody').children[1].innerText;
-      }
-    }
-  }
-
-  updateResults([{ text: '' }, { text: `Results on the period : ${startDate.substring(0, 10)} ⇒ ${endDate.substring(0, 10)}` }], true);
-  if (config.ignoreRecentPeriodWithNoBanAfterTheMatch) {
-    updateResults(`- we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).`, true);
-  }
-  // if (config.ignoreBansBefore) {
-  //   updateResults(
-  //     `- ignoring bans which occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
-  //       playersWithOldBan,
-  //       players.length
-  //     )} %)`,
-  //     true
-  //   );
-  // }
-
-  updateResults('', true);
-  updateResults(`Matches played : ${matchesCount}`, true);
-  updateResults(`- with at least one player banned : ${matchesCountWithPlayerBanned} (${getPourcentage(matchesCountWithPlayerBanned, matchesCount)} %)`, true);
-  updateResults(
-    `- with at least one player banned after playing with you : ${matchesCountWithPlayerBannedAfter} (${getPourcentage(matchesCountWithPlayerBannedAfter, matchesCount)} %)`,
-    true
-  );
-  updateResults('', true);
-  updateResults(`Unique players : ${players.length}`, true);
-  updateResults(`- banned : ${playersBanned.length} (${getPourcentage(playersBanned.length, players.length)} %)`, true);
-  updateResults(`- banned after playing with you : ${playersBannedAfter.length} (${getPourcentage(playersBannedAfter.length, players.length)} %)`, true);
-
-  // we list the banned players
-  let bannedPlayersInfo = [];
-  const bannedPlayersDomElements = [...document.querySelectorAll('.banchecker-bans')].filter((p) => window.getComputedStyle(p).color === 'rgb(255, 0, 0)');
-  if (bannedPlayersDomElements.length > 0) {
+  if (bannedPlayersAfter.length) {
     updateResults('', true);
     updateResults(`Players banned after the game (more likely to be on CSGO) :`, true);
-    for (let bannedPlayer of bannedPlayersDomElements) {
-      const lastBanInDays = parseInt(bannedPlayer.attributes['title'].value.match(/Days since last ban: (\d+)/)[1], 10);
-      bannedPlayersInfo.push({
-        lastBanInDays: lastBanInDays,
-        link: bannedPlayer.parentNode.querySelector('.linkTitle').href,
-      });
-    }
-    bannedPlayersInfo = bannedPlayersInfo.sort((a, b) => (a.lastBanInDays > b.lastBanInDays ? 1 : a.lastBanInDays < b.lastBanInDays ? -1 : 0));
-
-    if (bannedPlayersInfo.length > 0) {
-      for (let bannedPlayer of bannedPlayersInfo) {
-        updateResults(
-          [
-            {
-              text: `- ${bannedPlayer.link}, banned ${bannedPlayer.lastBanInDays} days ago`,
-              link: bannedPlayer.link,
-            },
-          ],
-          true
-        );
-      }
+    for (let bannedPlayer of bannedPlayersAfter) {
+      updateResults(
+        [
+          {
+            text: `- ${bannedPlayer.profileUrl}, banned ${bannedPlayer.daySinceLastBan} days ago`,
+            link: bannedPlayer.profileUrl,
+          },
+        ],
+        true
+      );
     }
   }
 
@@ -726,7 +617,6 @@ function updateFormValues() {
         break;
     }
   }
-  // document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
   document.getElementById('load-match-history-since').value = config.historyDate;
 }
 

@@ -14,16 +14,11 @@ const funStats = {
   totalWins: 0,
   totalWaitTime: 0,
   totalTime: 0,
-  wins: 0,
-  loses: 0,
-  draws: 0,
 };
 
 const config = {
   yourapikey: '',
-  // ignoreBansBefore: 5 * 365,
   gameType: 'all',
-  ignoreRecentPeriodWithNoBanAfterTheMatch: false,
   historyDate: undefined,
 };
 
@@ -51,3 +46,18 @@ let timerLoadMatchHistory = null;
 const mapsStats = [];
 let matchIndex = 1;
 const matchIndexWithBans = [];
+
+let startDate = '';
+let endDate = '';
+
+// array of steamid34
+const playersList = [];
+
+/**
+ * Array of {} with those attributes :
+ * steamid
+ * daySinceLastBan
+ * after
+ * profileUrl
+ */
+const bannedPlayers = [];

@@ -7,12 +7,8 @@ function saveSettings() {
   const apiKeySet = apiKey && !config.yourapikey;
   config.yourapikey = apiKey;
   let gamesFilterChanged = false;
-  // const ignoreBansBefore = document.getElementById('ignoreBansBefore').value;
-  // if (!isNaN(ignoreBansBefore) && parseInt(ignoreBansBefore, 10) >= 0) {
-  //   config.ignoreBansBefore = parseInt(ignoreBansBefore, 10);
-  // }
 
-  const configToSave = { yourapikey: config.yourapikey }; // , ignoreBansBefore: config.ignoreBansBefore
+  const configToSave = { yourapikey: config.yourapikey };
   if (is5v5CompetitiveSection()) {
     const gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
     gamesFilterChanged = gameType !== config.gameType;
@@ -99,19 +95,6 @@ function createOptionsContainer() {
   linkForApiKey.href = 'https://steamcommunity.com/dev/apikey';
   linkForApiKey.textContent = 'Get your API Key here';
   inner.appendChild(linkForApiKey);
-
-  // inner.appendChild(create('br'));
-  // inner.appendChild(create('br'));
-
-  // const oldBanInputLabel = create('span');
-  // oldBanInputLabel.textContent = 'Ignore bans which occured before the games older than (in days), set 0 to ignore : ';
-  // oldBanInputLabel.appendChild(create('br'));
-  // const oldBanInput = create('input', 'ignoreBansBefore');
-  // oldBanInput.type = 'number';
-  // oldBanInput.style.width = '60px';
-  // oldBanInput.value = 0;
-  // inner.appendChild(oldBanInputLabel);
-  // inner.appendChild(oldBanInput);
 
   if (is5v5CompetitiveSection()) {
     inner.appendChild(create('br'));

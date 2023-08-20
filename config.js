@@ -21,7 +21,7 @@ const funStats = {
 
 const config = {
   yourapikey: '',
-  ignoreBansBefore: 5 * 365,
+  // ignoreBansBefore: 5 * 365,
   gameType: 'all',
   ignoreRecentPeriodWithNoBanAfterTheMatch: false,
   historyDate: undefined,

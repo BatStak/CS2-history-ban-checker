@@ -48,11 +48,12 @@
 }
 
 #banchecker-options {
+  box-sizing: border-box;
   z-index: 501;
-  top: calc(50% - 115px);
-  left: calc(50% - 315px);
+  top: calc(50% - 90px);
+  left: calc(50% - 300px);
   width: 600px;
-  height: 200px;
+  height: 180px;
   background: #fff;
   display: none;
 }

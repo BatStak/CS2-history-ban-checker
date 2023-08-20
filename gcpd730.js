@@ -395,12 +395,12 @@ function checkBans(players) {
                   playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
                 }
               } else {
-                if (config.ignoreBansBefore && config.ignoreBansBefore > 0 && player.DaysSinceLastBan > config.ignoreBansBefore) {
-                  verdictEl.style.color = 'grey';
-                  playerEl.classList.add('banchecker-old');
-                } else {
-                  verdictEl.style.color = 'yellow';
-                }
+                // if (config.ignoreBansBefore && config.ignoreBansBefore > 0 && player.DaysSinceLastBan > config.ignoreBansBefore) {
+                verdictEl.style.color = 'grey';
+                // playerEl.classList.add('banchecker-old');
+                // } else {
+                //   verdictEl.style.color = 'yellow';
+                // }
               }
               verdictEl.style.cursor = 'help';
               verdictEl.innerText = verdict;
@@ -573,7 +573,7 @@ async function loadMatchHisory() {
 }
 
 async function banstats() {
-  const playersWithOldBan = new Set([...document.querySelectorAll('.banchecker-old')].map((e) => e.dataset.steamid64)).size;
+  // const playersWithOldBan = new Set([...document.querySelectorAll('.banchecker-old')].map((e) => e.dataset.steamid64)).size;
   const players = [];
   const playersBanned = [];
   const playersBannedAfter = [];
@@ -654,15 +654,15 @@ async function banstats() {
   if (config.ignoreRecentPeriodWithNoBanAfterTheMatch) {
     updateResults(`- we exclude recent period with no ban occuring after playing with you (supposing ban waves did not occured yet on recent period).`, true);
   }
-  if (config.ignoreBansBefore) {
-    updateResults(
-      `- ignoring bans which occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
-        playersWithOldBan,
-        players.length
-      )} %)`,
-      true
-    );
-  }
+  // if (config.ignoreBansBefore) {
+  //   updateResults(
+  //     `- ignoring bans which occured before playing with you older than ${config.ignoreBansBefore} days, players concerned : ${playersWithOldBan} (${getPourcentage(
+  //       playersWithOldBan,
+  //       players.length
+  //     )} %)`,
+  //     true
+  //   );
+  // }
 
   updateResults('', true);
   updateResults(`Matches played : ${matchesCount}`, true);
@@ -726,7 +726,7 @@ function updateFormValues() {
         break;
     }
   }
-  document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
+  // document.getElementById('ignoreBansBefore').value = config.ignoreBansBefore;
   document.getElementById('load-match-history-since').value = config.historyDate;
 }
 

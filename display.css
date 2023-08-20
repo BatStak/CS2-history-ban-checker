@@ -89,10 +89,14 @@
   display: none !important;
 }
 
-.map-stats {
+.map-stats,
+.player-stats {
   border-collapse: collapse;
-  width: 100%;
   margin: 20px 0;
+}
+
+.map-stats {
+  width: 100%;
 }
 
 .map-stats th {
@@ -100,7 +104,9 @@
 }
 
 .map-stats th,
-.map-stats td {
+.map-stats td,
+.player-stats th,
+.player-stats td {
   border: 1px solid #6f6f6f;
   padding: 5px 10px;
 }

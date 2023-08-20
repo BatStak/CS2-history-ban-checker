@@ -98,12 +98,40 @@ Total wait time: ${timeString(funStats.totalWaitTime)}
 Total match time: ${timeString(funStats.totalTime)}`;
 }
 
-function updateMapStats() {
+function updateGlobalStats() {
   if (!mapsStats.length) {
     return;
   }
 
   statsMaps.textContent = '';
+
+  const playerTable = create('table');
+  playerTable.classList.add('player-stats');
+  const playerTbody = create('tbody');
+  playerTable.appendChild(playerTbody);
+  const playerHeaderRow = create('tr');
+  const thPlayer1 = create('th');
+  thPlayer1.textContent = 'Unique players';
+  const thPlayer2 = create('th');
+  thPlayer2.textContent = 'Banned';
+  const thPlayer3 = create('th');
+  thPlayer3.textContent = 'Banned after playing with you';
+  playerHeaderRow.appendChild(thPlayer1);
+  playerHeaderRow.appendChild(thPlayer2);
+  playerHeaderRow.appendChild(thPlayer3);
+  playerTbody.appendChild(playerHeaderRow);
+  const playerRow = create('tr');
+  const tdPlayer1 = create('th');
+  tdPlayer1.textContent = playersList.length;
+  const tdPlayer2 = create('th');
+  tdPlayer2.textContent = checkBanStarted ? `${bannedPlayers.length} [${getPourcentage(bannedPlayers.length, playersList.length)} %]` : '?';
+  const tdPlayer3 = create('th');
+  const banAfterCount = bannedPlayers.filter((bannedPlayer) => bannedPlayer.after).length;
+  tdPlayer3.textContent = checkBanStarted ? `${banAfterCount} [${getPourcentage(banAfterCount, playersList.length)} %]` : '?';
+  playerRow.appendChild(tdPlayer1);
+  playerRow.appendChild(tdPlayer2);
+  playerRow.appendChild(tdPlayer3);
+  playerTbody.appendChild(playerRow);
 
   const table = create('table');
   table.classList.add('map-stats');
@@ -181,8 +209,8 @@ function updateMapStats() {
     td3.textContent = `${map.wins} [${getPourcentage(map.wins, map.count)} %]`;
     td4.textContent = `${map.draws} [${getPourcentage(map.draws, map.count)} %]`;
     td5.textContent = `${map.loses} [${getPourcentage(map.loses, map.count)} %]`;
-    td6.textContent = `${map.bans} [${getPourcentage(map.bans, map.count)} %]`;
-    td7.textContent = `${map.bansAfter} [${getPourcentage(map.bansAfter, map.count)} %]`;
+    td6.textContent = checkBanStarted ? `${map.bans} [${getPourcentage(map.bans, map.count)} %]` : '?';
+    td7.textContent = checkBanStarted ? `${map.bansAfter} [${getPourcentage(map.bansAfter, map.count)} %]` : '?';
 
     total.count += map.count;
     total.wins += map.wins;
@@ -215,9 +243,10 @@ function updateMapStats() {
   tdTotal3.textContent = `${total.wins} [${getPourcentage(total.wins, total.count)} %]`;
   tdTotal4.textContent = `${total.draws} [${getPourcentage(total.draws, total.count)} %]`;
   tdTotal5.textContent = `${total.loses} [${getPourcentage(total.loses, total.count)} %]`;
-  tdTotal6.textContent = `${total.bans} [${getPourcentage(total.bans, total.count)} %]`;
-  tdTotal7.textContent = `${total.bansAfter} [${getPourcentage(total.bansAfter, total.count)} %]`;
+  tdTotal6.textContent = checkBanStarted ? `${total.bans} [${getPourcentage(total.bans, total.count)} %]` : '?';
+  tdTotal7.textContent = checkBanStarted ? `${total.bansAfter} [${getPourcentage(total.bansAfter, total.count)} %]` : '?';
 
+  statsMaps.appendChild(playerTable);
   statsMaps.appendChild(table);
 }
 
@@ -421,7 +450,7 @@ function checkBans(players) {
             }
           }
         }
-        updateMapStats();
+        updateGlobalStats();
         if (batches.length > i + 1) {
           setTimeout(() => checkBansOnApi(i + 1, maxRetries), 1000);
         } else {
@@ -430,12 +459,12 @@ function checkBans(players) {
             { text: `Looks like we're done.` },
             { text: '' },
             {
-              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you!`,
-              important: banStats.recentBans > 0,
+              text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
             },
             { text: '' },
             {
-              text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
+              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you : `,
+              important: banStats.recentBans > 0,
             },
           ]);
           displayBannedPlayers();
@@ -490,6 +519,7 @@ function addBanColumns() {
 }
 
 function checkLoadedMatchesForBans() {
+  checkBanStarted = true;
   disableAllButtons(true);
   let selector = '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)';
   if (is5v5CompetitiveSection()) {
@@ -577,20 +607,16 @@ async function displayBannedPlayers() {
     .filter((bannedPlayer) => bannedPlayer.after)
     .sort((a, b) => (a.daySinceLastBan > b.daySinceLastBan ? 1 : a.daySinceLastBan < b.daySinceLastBan ? -1 : 0));
 
-  if (bannedPlayersAfter.length) {
-    updateResults('', true);
-    updateResults(`Players banned after the game (more likely to be on CSGO) :`, true);
-    for (let bannedPlayer of bannedPlayersAfter) {
-      updateResults(
-        [
-          {
-            text: `- ${bannedPlayer.profileUrl}, banned ${bannedPlayer.daySinceLastBan} days ago`,
-            link: bannedPlayer.profileUrl,
-          },
-        ],
-        true
-      );
-    }
+  for (let bannedPlayer of bannedPlayersAfter) {
+    updateResults(
+      [
+        {
+          text: `- ${bannedPlayer.profileUrl}, banned ${bannedPlayer.daySinceLastBan} days ago`,
+          link: bannedPlayer.profileUrl,
+        },
+      ],
+      true
+    );
   }
 
   updateResults([{ text: '' }, { text: `Hover over ban status to check how many days have passed since last ban.` }], true);

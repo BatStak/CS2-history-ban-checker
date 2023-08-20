@@ -61,3 +61,5 @@ const playersList = [];
  * profileUrl
  */
 const bannedPlayers = [];
+
+let checkBanStarted = false;

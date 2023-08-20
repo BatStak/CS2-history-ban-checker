@@ -105,6 +105,12 @@ function updateGlobalStats() {
 
   statsMaps.textContent = '';
 
+  statsMaps.appendChild(create('hr'));
+
+  const period = create('div', 'period');
+  period.textContent = `Period from ${startDate} to ${endDate}`;
+  statsMaps.appendChild(period);
+
   const playerTable = create('table');
   playerTable.classList.add('player-stats');
   const playerTbody = create('tbody');
@@ -121,11 +127,11 @@ function updateGlobalStats() {
   playerHeaderRow.appendChild(thPlayer3);
   playerTbody.appendChild(playerHeaderRow);
   const playerRow = create('tr');
-  const tdPlayer1 = create('th');
+  const tdPlayer1 = create('td');
   tdPlayer1.textContent = playersList.length;
-  const tdPlayer2 = create('th');
+  const tdPlayer2 = create('td');
   tdPlayer2.textContent = checkBanStarted ? `${bannedPlayers.length} [${getPourcentage(bannedPlayers.length, playersList.length)} %]` : '?';
-  const tdPlayer3 = create('th');
+  const tdPlayer3 = create('td');
   const banAfterCount = bannedPlayers.filter((bannedPlayer) => bannedPlayer.after).length;
   tdPlayer3.textContent = checkBanStarted ? `${banAfterCount} [${getPourcentage(banAfterCount, playersList.length)} %]` : '?';
   playerRow.appendChild(tdPlayer1);

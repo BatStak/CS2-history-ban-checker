@@ -129,3 +129,15 @@
 .map-stats .map-total {
   font-weight: bold;
 }
+
+#period {
+  font-weight: 500;
+}
+
+hr {
+  margin: 20px 0;
+  border: 0;
+  height: 1px;
+  width: 100%;
+  background: #FFF;
+}

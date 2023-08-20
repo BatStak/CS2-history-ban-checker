@@ -469,7 +469,7 @@ function checkBans(players) {
             },
             { text: '' },
             {
-              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you : `,
+              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO): `,
               important: banStats.recentBans > 0,
             },
           ]);

@@ -16,10 +16,6 @@
   color: #f00;
 }
 
-.banchecker-warning {
-  color: rgb(255, 115, 0);
-}
-
 .btn-default {
   display: inline-block;
   border: 0;
@@ -139,5 +135,5 @@ hr {
   border: 0;
   height: 1px;
   width: 100%;
-  background: #FFF;
+  background: #fff;
 }

@@ -1,35 +1,7 @@
-function is5v5CompetitiveSection() {
-  return section === 'matchhistorycompetitive';
-}
-
-function isCommendOrReportsSection() {
-  return ['playerreports', 'playercommends'].includes(section);
-}
-
-function canContinue() {
-  if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
-
-  profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
-
-  return !!profileURI && !!section;
-}
-
-function addFilterGameSelector(selector) {
-  let editedSelector = selector;
-
-  if (config.gameType === 'long') {
-    editedSelector = '.long-game ' + editedSelector;
-  } else if (config.gameType === 'short') {
-    editedSelector = '.short-game ' + editedSelector;
-  }
-
-  return editedSelector;
-}
-
 function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
-  let selector = addFilterGameSelector(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.personal-stats-checked)`);
+  let selector = addFilterGameSelector(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.${myProfileStatsCheckedClass})`);
 
   // we find the links on our profil to get the statistics of the match
   const myProfileLinks = document.querySelectorAll(selector);
@@ -66,11 +38,11 @@ function updateFunStats() {
         }
         const mapStats = mapsStats.find((map) => map.name === mapName);
         mapStats.count++;
-        if (matchRow.classList.contains('match-win')) {
+        if (matchRow.classList.contains(matchWinClass)) {
           mapStats.wins++;
-        } else if (matchRow.classList.contains('match-lose')) {
+        } else if (matchRow.classList.contains(matchLoseClass)) {
           mapStats.loses++;
-        } else if (matchRow.classList.contains('match-draw')) {
+        } else if (matchRow.classList.contains(matchDrawClass)) {
           mapStats.draws++;
         }
       } else if (waitTimeRegex.test(innerText)) {
@@ -84,7 +56,7 @@ function updateFunStats() {
 
     funStats.numberOfMatches++;
 
-    link.classList.add('personal-stats-checked');
+    link.classList.add(myProfileStatsCheckedClass);
   }
 
   funStatsBar.textContent = `Some fun stats for loaded matches:
@@ -256,8 +228,8 @@ function updateGlobalStats() {
   statsMaps.appendChild(table);
 }
 
-function daysSince(dateString, updateDates) {
-  const matchDate = dateString.match(/(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/);
+function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
+  const matchDate = dateString.match(dateMatchRegex);
   let daysSinceMatch = -1;
   if (matchDate.length > 6) {
     const year = parseInt(matchDate[1], 10);
@@ -286,17 +258,17 @@ function daysSince(dateString, updateDates) {
 
 function formatMatchsTable() {
   if (isCommendOrReportsSection()) {
-    for (let report of document.querySelectorAll('.generic_kv_table > tbody > tr:not(:first-child):not(.banchecker-profile)')) {
+    for (let report of document.querySelectorAll(`.generic_kv_table > tbody > tr:not(:first-child):not(.${profileToCheckClass})`)) {
       const dateEl = report.querySelector('td:first-child');
-      const daysSinceMatch = daysSince(dateEl.innerText);
+      const daysSinceMatch = getDaysSinceAndUpdatePeriod(dateEl.innerText);
       const minProfileId = report.querySelector('.linkTitle').dataset.miniprofile;
       report.dataset.steamid64 = getSteamID64(minProfileId);
       report.dataset.dayssince = daysSinceMatch;
-      report.classList.add('banchecker-profile');
-      report.classList.add('banchecker-formatted');
+      report.classList.add(profileToCheckClass);
+      report.classList.add(tableFormattedClass);
     }
   } else {
-    for (let rightPanel of document.querySelectorAll('.csgo_scoreboard_inner_right:not(.banchecker-formatted)')) {
+    for (let rightPanel of document.querySelectorAll(`.csgo_scoreboard_inner_right:not(.${tableFormattedClass})`)) {
       const matchRow = rightPanel.parentElement.parentElement;
       const score = rightPanel.querySelector('.csgo_scoreboard_score').innerText.match(scoreRegex);
       const playerRows = rightPanel.querySelectorAll('tbody > tr');
@@ -309,11 +281,11 @@ function formatMatchsTable() {
       const isPlayerInFirstTeam = playerIndex < Math.floor(rowsCount / 2);
 
       if (score[1] === score[2]) {
-        matchRow.classList.add('match-draw');
+        matchRow.classList.add(matchDrawClass);
       } else if (isPlayerInFirstTeam === isFirstTeamWin) {
-        matchRow.classList.add('match-win');
+        matchRow.classList.add(matchWinClass);
       } else {
-        matchRow.classList.add('match-lose');
+        matchRow.classList.add(matchLoseClass);
       }
 
       const maxScore = Math.max(scoreTeam1, scoreTeam2);
@@ -321,17 +293,17 @@ function formatMatchsTable() {
       const isShort = maxScore === 8 || maxScore === 9;
       const isAborted = !isLong && !isShort;
       if (isLong) {
-        matchRow.classList.add('long-game');
+        matchRow.classList.add(longGameClass);
       } else if (isShort) {
-        matchRow.classList.add('short-game');
+        matchRow.classList.add(shortGameClass);
       } else if (isAborted) {
-        matchRow.classList.add('aborted-game');
+        matchRow.classList.add(abortedGameClass);
       }
 
       const gameNotFiltered = config.gameType === 'long' ? isLong : config.gameType === 'short' ? isShort : true;
 
       const leftColumn = matchRow.querySelector('.csgo_scoreboard_inner_left');
-      const daysSinceMatch = daysSince(leftColumn.innerText, gameNotFiltered);
+      const daysSinceMatch = getDaysSinceAndUpdatePeriod(leftColumn.innerText, gameNotFiltered);
       rightPanel.querySelectorAll('tbody > tr').forEach((tr, i) => {
         if (i === 0 || tr.childElementCount < 3) return;
         const profileLink = tr.querySelector('.linkTitle');
@@ -340,19 +312,70 @@ function formatMatchsTable() {
         tr.dataset.steamid64 = steamid64;
         tr.dataset.dayssince = daysSinceMatch;
         tr.dataset.matchindex = matchIndex;
-        tr.classList.add('banchecker-profile');
+        tr.classList.add(profileToCheckClass);
         if (!playersList.includes(steamid64) && gameNotFiltered) {
           playersList.push(steamid64);
         }
       });
-      rightPanel.classList.add('banchecker-formatted');
+      rightPanel.classList.add(tableFormattedClass);
       matchIndex++;
     }
   }
   addBanColumns();
 }
 
-function checkBans(players) {
+function addBanColumns() {
+  if (isCommendOrReportsSection()) {
+    const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
+    if (!tableHeader.classList.contains(columnBanResultAddedClass)) {
+      tableHeader.classList.add(columnBanResultAddedClass);
+      const bansHeader = create('th');
+      bansHeader.innerText = 'Ban';
+      tableHeader.appendChild(bansHeader);
+    }
+    for (let tr of document.querySelectorAll(`.generic_kv_table > tbody > tr:not(.${columnBanResultAddedClass})`)) {
+      tr.classList.add(columnBanResultAddedClass);
+      const bansPlaceholder = create('td');
+      bansPlaceholder.classList.add(columnBanResultClass);
+      bansPlaceholder.innerText = '?';
+      tr.appendChild(bansPlaceholder);
+    }
+  } else {
+    for (let table of document.querySelectorAll(`.${tableFormattedClass}:not(.${columnBanResultAddedClass})`)) {
+      table.classList.add(columnBanResultAddedClass);
+      table.querySelectorAll('tr').forEach((tr, i) => {
+        if (i === 0) {
+          const bansHeader = create('th');
+          bansHeader.innerText = 'Bans';
+          bansHeader.style.minWidth = '5.6em';
+          tr.appendChild(bansHeader);
+        } else if (tr.childElementCount > 3) {
+          const bansPlaceholder = create('td');
+          bansPlaceholder.classList.add(columnBanResultClass);
+          bansPlaceholder.innerText = '?';
+          tr.appendChild(bansPlaceholder);
+        } else {
+          const scoreboard = tr.querySelector('td');
+          if (scoreboard) scoreboard.setAttribute('colspan', '9');
+        }
+      });
+    }
+  }
+}
+
+function checkLoadedMatchesForBans() {
+  checkBanStarted = true;
+  disableAllButtons(true);
+  let selector = `.${profileToCheckClass}:not(.${profileCheckedClass}):not(.${profileCheckingClass})`;
+  if (is5v5CompetitiveSection()) {
+    selector = addFilterGameSelector(selector);
+  }
+  let players = [];
+  for (let player of document.querySelectorAll(selector)) {
+    player.classList.add(profileCheckingClass);
+    players.push(player.dataset.steamid64);
+  }
+
   const uniquePlayers = [...new Set(players)];
   let batches = uniquePlayers.reduce((arr, player, i) => {
     const batchIndex = Math.floor(i / 100);
@@ -363,11 +386,12 @@ function checkBans(players) {
     }
     return arr;
   }, []);
-  const checkBansOnApi = (i, retryCount) => {
+
+  const checkBansOnApi = (requestIndex, retryCount) => {
     updateResults([
       { text: `Loaded unchecked matches contain ${uniquePlayers.length} players.` },
       { text: `We can scan 100 players at a time so we're sending ${batches.length} request${batches.length > 1 ? 's' : ''}` },
-      { text: `${i} successful request${i === 1 ? '' : 's'} so far...` },
+      { text: `${requestIndex} successful request${requestIndex === 1 ? '' : 's'} so far...` },
     ]);
 
     chrome.runtime.sendMessage(
@@ -375,7 +399,7 @@ function checkBans(players) {
       {
         action: 'fetchBans',
         apikey: config.yourapikey,
-        batch: batches[i],
+        batch: batches[requestIndex],
       },
       (json, error) => {
         if (error || !json) {
@@ -393,7 +417,7 @@ function checkBans(players) {
             true
           );
           if (retryCount > 0) {
-            setTimeout(() => checkBansOnApi(i, retryCount - 1), 3000);
+            setTimeout(() => checkBansOnApi(requestIndex, retryCount - 1), 3000);
           }
           return;
         }
@@ -428,8 +452,8 @@ function checkBans(players) {
             }
           }
           for (let playerEl of playerEls) {
-            playerEl.classList.add('banchecker-checked');
-            verdictEl = playerEl.querySelector('.banchecker-bans');
+            playerEl.classList.add(profileCheckedClass);
+            verdictEl = playerEl.querySelector(`.${columnBanResultClass}`);
             if (verdict) {
               playerEl.classList.add('player-banned');
               const mapStats = mapsStats.find((mapStats) => mapStats.name === playerEl.dataset.map);
@@ -459,8 +483,8 @@ function checkBans(players) {
           }
         }
         updateGlobalStats();
-        if (batches.length > i + 1) {
-          setTimeout(() => checkBansOnApi(i + 1, maxRetries), 1000);
+        if (batches.length > requestIndex + 1) {
+          setTimeout(() => checkBansOnApi(requestIndex + 1, maxRetries), 1000);
         } else {
           const plural = banStats.recentBans > 1;
           updateResults([
@@ -471,7 +495,7 @@ function checkBans(players) {
             },
             { text: '' },
             {
-              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO): `,
+              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO).`,
               important: banStats.recentBans > 0,
             },
           ]);
@@ -485,79 +509,6 @@ function checkBans(players) {
   } else {
     disableAllButtons(false);
   }
-}
-
-function addBanColumns() {
-  if (isCommendOrReportsSection()) {
-    const tableHeader = document.querySelector('.generic_kv_table > tbody > tr:first-child');
-    if (!tableHeader.classList.contains('ban-column-added')) {
-      tableHeader.classList.add('ban-column-added');
-      const bansHeader = create('th');
-      bansHeader.innerText = 'Ban';
-      tableHeader.appendChild(bansHeader);
-    }
-    for (let tr of document.querySelectorAll('.generic_kv_table > tbody > tr:not(.ban-column-added)')) {
-      tr.classList.add('ban-column-added');
-      const bansPlaceholder = create('td');
-      bansPlaceholder.classList.add('banchecker-bans');
-      bansPlaceholder.innerText = '?';
-      tr.appendChild(bansPlaceholder);
-    }
-  } else {
-    for (let table of document.querySelectorAll('.banchecker-formatted:not(.ban-column-added)')) {
-      table.classList.add('ban-column-added');
-      table.querySelectorAll('tr').forEach((tr, i) => {
-        if (i === 0) {
-          const bansHeader = create('th');
-          bansHeader.innerText = 'Bans';
-          bansHeader.style.minWidth = '5.6em';
-          tr.appendChild(bansHeader);
-        } else if (tr.childElementCount > 3) {
-          const bansPlaceholder = create('td');
-          bansPlaceholder.classList.add('banchecker-bans');
-          bansPlaceholder.innerText = '?';
-          tr.appendChild(bansPlaceholder);
-        } else {
-          const scoreboard = tr.querySelector('td');
-          if (scoreboard) scoreboard.setAttribute('colspan', '9');
-        }
-      });
-    }
-  }
-}
-
-function checkLoadedMatchesForBans() {
-  checkBanStarted = true;
-  disableAllButtons(true);
-  let selector = '.banchecker-profile:not(.banchecker-checked):not(.banchecker-checking)';
-  if (is5v5CompetitiveSection()) {
-    selector = addFilterGameSelector(selector);
-  }
-  let playersArr = [];
-  for (let player of document.querySelectorAll(selector)) {
-    player.classList.add('banchecker-checking');
-    playersArr.push(player.dataset.steamid64);
-  }
-  checkBans(playersArr);
-}
-
-function getResultsNodeList() {
-  let selector = '.csgo_scoreboard_root > tbody > tr';
-  if (isCommendOrReportsSection()) {
-    selector = '.banchecker-profile';
-  }
-  return document.querySelectorAll(selector);
-}
-
-function saveHistoryDate() {
-  let historyDate = document.getElementById('load-match-history-since').value.trim();
-  // if date invalid we rollback to previous date
-  if (historyDate && !isIsoDate(historyDate)) {
-    historyDate = config.historyDate;
-  }
-  config.historyDate = historyDate;
-  chrome.storage.sync.set({ historyDate: config.historyDate });
-  updateFormValues();
 }
 
 async function loadMatchHisory() {
@@ -615,6 +566,9 @@ async function displayBannedPlayers() {
     .filter((bannedPlayer) => bannedPlayer.after)
     .sort((a, b) => (a.daySinceLastBan > b.daySinceLastBan ? 1 : a.daySinceLastBan < b.daySinceLastBan ? -1 : 0));
 
+  if (bannedPlayersAfter.length) {
+    updateResults('', true);
+  }
   for (let bannedPlayer of bannedPlayersAfter) {
     updateResults(
       [
@@ -630,24 +584,6 @@ async function displayBannedPlayers() {
   updateResults([{ text: '' }, { text: `Hover over ban status to check how many days have passed since last ban.` }], true);
 
   disableAllButtons(false);
-}
-
-function updateFormValues() {
-  document.getElementById('yourapikey').value = config.yourapikey;
-  if (is5v5CompetitiveSection()) {
-    switch (config.gameType) {
-      case 'long':
-        document.getElementById('gameType-long').checked = true;
-        break;
-      case 'short':
-        document.getElementById('gameType-short').checked = true;
-        break;
-      default:
-        document.getElementById('gameType-all').checked = true;
-        break;
-    }
-  }
-  document.getElementById('load-match-history-since').value = config.historyDate;
 }
 
 function init() {

@@ -22,14 +22,15 @@ const config = {
   historyDate: undefined,
 };
 
-let profileURI = null;
-let section = new URLSearchParams(window.location.search).get('tab');
+const profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
+const section = new URLSearchParams(window.location.search).get('tab');
 
 const mapNameRegex = /(Competitive|Wingman) (.+)/;
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
 const scoreRegex = /(\d+) : (\d+)/;
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+const dateMatchRegex = /(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
 
 let timerLoadMatchHistory = null;
 
@@ -63,3 +64,19 @@ const playersList = [];
 const bannedPlayers = [];
 
 let checkBanStarted = false;
+
+const myProfileStatsCheckedClass = 'csgo-history-mystats-checked';
+const matchWinClass = 'csgo-history-match-win';
+const matchDrawClass = 'csgo-history-match-draw';
+const matchLoseClass = 'csgo-history-match-lose';
+const longGameClass = 'csgo-history-long-game';
+const shortGameClass = 'csgo-history-short-game';
+const abortedGameClass = 'csgo-history-aborted-game';
+
+const profileToCheckClass = 'csgo-history-check-profile';
+const profileCheckingClass = 'csgo-history-ban-checking';
+const profileCheckedClass = 'vchecked';
+
+const columnBanResultAddedClass = 'csgo-history-ban-column-added';
+const columnBanResultClass = 'csgo-history-column-ban';
+const tableFormattedClass = 'csgo-history-result-formatted';

@@ -7,7 +7,9 @@ const menuBottom = create('div', 'menu-bottom');
 const statsResults = create('div', 'stats-results');
 const statsMaps = create('div', 'stats-maps');
 
-extensionContainer.appendChild(funStatsBar);
+if (!isCommendOrReportsSection()) {
+  extensionContainer.appendChild(funStatsBar);
+}
 extensionContainer.appendChild(menuTop);
 extensionContainer.appendChild(statusBar);
 extensionContainer.appendChild(menuBottom);

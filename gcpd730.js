@@ -511,7 +511,14 @@ function checkLoadedMatchesForBans() {
   }
 }
 
-async function loadMatchHisory() {
+function stopTimerLoadMatchHistory() {
+  if (timerLoadMatchHistory) {
+    clearInterval(timerLoadMatchHistory);
+    timerLoadMatchHistory = null;
+  }
+}
+
+async function loadMatchHistory() {
   saveHistoryDate();
   toggleStopButton(true);
   disableAllButtons(true);
@@ -523,33 +530,38 @@ async function loadMatchHisory() {
   }
   updateStatus(status);
   await new Promise((resolve) => {
+    const maxNumberAttempsToLoadMoreMatches = 10;
     let numberOfMatches = 0;
     let attemptsToLoadMoreMatches = 0;
     const moreButton = document.getElementById('load_more_button');
+    const stop = () => {
+      stopTimerLoadMatchHistory();
+      resolve();
+    };
     if (moreButton) {
       timerLoadMatchHistory = setInterval(() => {
         if (moreButton.offsetParent !== null) {
           const newNumberOfMatches = getResultsNodeList().length;
-          if (newNumberOfMatches === numberOfMatches) {
-            if (attemptsToLoadMoreMatches < 3) {
-              attemptsToLoadMoreMatches++;
-            } else {
-              clearInterval(timerLoadMatchHistory);
-              resolve();
-            }
+          const hasNewMatches = newNumberOfMatches !== numberOfMatches;
+
+          if (hasNewMatches) {
+            attemptsToLoadMoreMatches = 0;
           }
 
-          if (newNumberOfMatches !== numberOfMatches || attemptsToLoadMoreMatches < 3) {
+          if (hasNewMatches || attemptsToLoadMoreMatches < maxNumberAttempsToLoadMoreMatches) {
             const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
             updateStatus(`${status} ... [${lastDate}]`);
             if (config.historyDate && config.historyDate >= lastDate) {
-              clearInterval(timerLoadMatchHistory);
-              resolve();
+              stop();
             } else {
               numberOfMatches = newNumberOfMatches;
               moreButton.click();
             }
+          } else {
+            stop();
           }
+
+          attemptsToLoadMoreMatches++;
         }
       }, 800);
     } else {

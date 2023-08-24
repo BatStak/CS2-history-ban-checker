@@ -25,16 +25,13 @@ checkBansButton.onclick = () => {
 
 const loadMatchHistoryButton = createSteamButton('Load match history since');
 loadMatchHistoryButton.onclick = () => {
-  loadMatchHisory();
+  loadMatchHistory();
 };
 
 const loadMatchHistoryStopButton = createSteamButton('Stop');
 toggleStopButton(false);
 loadMatchHistoryStopButton.onclick = () => {
-  if (timerLoadMatchHistory) {
-    clearInterval(timerLoadMatchHistory);
-    timerLoadMatchHistory = null;
-  }
+  stopTimerLoadMatchHistory();
   disableAllButtons(false);
   toggleStopButton(false);
 };

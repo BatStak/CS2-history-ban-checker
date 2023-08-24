@@ -13,17 +13,16 @@ function genericOnClick(info) {
   }
 }
 
-chrome.runtime.onInstalled.addListener(function () {
-  chrome.contextMenus.create({
-    id: 'match-history',
-    title: 'Access to matchmaking history',
-    contexts: ['all'],
-  });
-  chrome.contextMenus.create({
-    id: 'github',
-    title: 'Github page',
-    contexts: ['all'],
-  });
+chrome.contextMenus.removeAll();
+chrome.contextMenus.create({
+  id: 'match-history',
+  title: 'Access to matchmaking history',
+  contexts: ['all'],
+});
+chrome.contextMenus.create({
+  id: 'github',
+  title: 'Github page',
+  contexts: ['all'],
 });
 
 chrome.contextMenus.onClicked.addListener(genericOnClick);

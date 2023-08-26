@@ -606,6 +606,9 @@ async function displayBannedPlayers() {
   bannedPlayersTable.textContent = '';
   if (bannedPlayersAfter.length) {
     bannedPlayersTable.appendChild(create('hr'));
+    const title = create('p');
+    bannedPlayersTable.appendChild(title);
+    title.textContent = 'List of players banned after playing with you :';
     const table = create('table');
     bannedPlayersTable.appendChild(table);
     table.classList.add('players-banned-table');

@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "js": ["config.js", "helpers.js", "gcpd730.js", "friends.js", "main.js"],
+      "js": ["config.js", "helpers.js", "gcpd730.js", "people.js", "main.js"],
       "css": ["display.css"],
       "run_at": "document_end",
       "matches": [

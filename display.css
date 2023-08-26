@@ -163,7 +163,22 @@ hr {
   width: 50px;
   background: #f00;
   height: 100%;
-  color: aliceblue;
+  color: #fff;
+  line-height: 45px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.profile_friends .persona:not(.people-banned)::after {
+  content: '✓';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 25px;
+  background: rgb(0, 77, 0);
+  height: 100%;
+  color: #fff;
   line-height: 45px;
   text-align: center;
   font-weight: bold;

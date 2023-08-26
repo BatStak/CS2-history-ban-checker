@@ -3,6 +3,7 @@ function checkPeople() {
   if (people.length) {
     for (let profile of people) {
       profile.classList.add(profileToCheckClass);
+      profile.title = 'No ban for this player';
       profile.dataset.steamid64 = profile.dataset.steamid;
     }
     checkLoadedMatchesForBans();

@@ -154,3 +154,18 @@ hr {
   width: 100%;
   background: #fff;
 }
+
+.people-banned::after {
+  content: 'Banned';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  background: #f00;
+  height: 100%;
+  color: aliceblue;
+  line-height: 45px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+}

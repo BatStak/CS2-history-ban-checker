@@ -57,10 +57,15 @@ const playersList = [];
 
 /**
  * Array of {} with those attributes :
+ * verdict
  * steamid
  * daySinceLastBan
+ * daySinceLastMatch
+ * dateSinceLastMatch
  * after
  * profileUrl
+ * profileName
+ * profileAvatar
  */
 const bannedPlayers = [];
 

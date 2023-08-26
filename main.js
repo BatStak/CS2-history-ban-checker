@@ -18,7 +18,9 @@ extensionContainer.appendChild(statsResults);
 extensionContainer.appendChild(bannedPlayersTable);
 extensionContainer.appendChild(statsMaps);
 
-document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
+if (document.querySelector('#subtabs')) {
+  document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
+}
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');
 checkBansButton.onclick = () => {
@@ -99,4 +101,16 @@ if (loadMoreButton) {
     }
   });
   observer.observe(loadMoreButton, { attributes: true });
+}
+
+const subpage_container = document.querySelector('#subpage_container');
+if (subpage_container) {
+  const observer = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.attributeName === 'class' && mutation.target.classList.contains('friends_content') && !mutation.target.classList.contains('loading')) {
+        checkPeople();
+      }
+    }
+  });
+  observer.observe(subpage_container, { attributes: true });
 }

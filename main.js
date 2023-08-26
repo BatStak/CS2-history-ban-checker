@@ -5,6 +5,7 @@ const funStatsBar = create('div', 'funstats-bar');
 const menuTop = create('div', 'menu-top');
 const menuBottom = create('div', 'menu-bottom');
 const statsResults = create('div', 'stats-results');
+const bannedPlayersTable = create('div', 'banned-players-table');
 const statsMaps = create('div', 'stats-maps');
 
 if (!isCommendOrReportsSection()) {
@@ -14,6 +15,7 @@ extensionContainer.appendChild(menuTop);
 extensionContainer.appendChild(statusBar);
 extensionContainer.appendChild(menuBottom);
 extensionContainer.appendChild(statsResults);
+extensionContainer.appendChild(bannedPlayersTable);
 extensionContainer.appendChild(statsMaps);
 
 document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);

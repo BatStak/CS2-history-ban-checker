@@ -85,24 +85,41 @@
   display: none !important;
 }
 
-.map-stats,
-.player-stats {
+.csgo-history-table {
   border-collapse: collapse;
   margin: 20px 0;
 }
 
-.map-stats {
+.map-stats,
+.players-banned-table {
   width: 100%;
+}
+
+.players-banned-table th:first-child,
+.players-banned-table td:first-child {
+  text-align: center;
+  width: 44px;
+}
+
+.players-banned-table td:first-child img {
+  width: 32px;
+  height: 32px;
+}
+
+.players-banned-date {
+  width: 200px;
+}
+
+.players-banned-link {
+  width: 100px;
 }
 
 .map-stats th {
   cursor: help;
 }
 
-.map-stats th,
-.map-stats td,
-.player-stats th,
-.player-stats td {
+.csgo-history-table th,
+.csgo-history-table td {
   border: 1px solid #6f6f6f;
   padding: 5px 10px;
 }

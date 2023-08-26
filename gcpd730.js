@@ -84,7 +84,7 @@ function updateGlobalStats() {
   statsMaps.appendChild(period);
 
   const playerTable = create('table');
-  playerTable.classList.add('player-stats');
+  playerTable.classList.add('csgo-history-table');
   const playerTbody = create('tbody');
   playerTable.appendChild(playerTbody);
   const playerHeaderRow = create('tr');
@@ -113,6 +113,7 @@ function updateGlobalStats() {
 
   const table = create('table');
   table.classList.add('map-stats');
+  table.classList.add('csgo-history-table');
   const tbody = create('tbody');
   table.appendChild(tbody);
 
@@ -229,8 +230,11 @@ function updateGlobalStats() {
 }
 
 function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
+  const results = {
+    daysSinceMatch: -1,
+    dateAsString: null,
+  };
   const matchDate = dateString.match(dateMatchRegex);
-  let daysSinceMatch = -1;
   if (matchDate.length > 6) {
     const year = parseInt(matchDate[1], 10);
     const month = parseInt(matchDate[2], 10) - 1;
@@ -242,10 +246,12 @@ function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
     const matchDayTime = matchDateObj.getTime();
     const currentTime = Date.now();
     const timePassed = currentTime - matchDayTime;
-    daysSinceMatch = Math.ceil(timePassed / (1000 * 60 * 60 * 24));
+    const formattedDate = `${matchDate[1]}-${matchDate[2]}-${matchDate[3]}`;
+
+    results.daysSinceMatch = Math.ceil(timePassed / (1000 * 60 * 60 * 24));
+    results.dateAsString = formattedDate;
 
     if (updateDates) {
-      const formattedDate = `${matchDate[1]}-${matchDate[2]}-${matchDate[3]}`;
       if (!endDate) {
         endDate = formattedDate;
       }
@@ -253,14 +259,14 @@ function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
     }
   }
 
-  return daysSinceMatch;
+  return results;
 }
 
 function formatMatchsTable() {
   if (isCommendOrReportsSection()) {
     for (let report of document.querySelectorAll(`.generic_kv_table > tbody > tr:not(:first-child):not(.${profileToCheckClass})`)) {
       const dateEl = report.querySelector('td:first-child');
-      const daysSinceMatch = getDaysSinceAndUpdatePeriod(dateEl.innerText);
+      const daysSinceMatch = getDaysSinceAndUpdatePeriod(dateEl.innerText).daysSinceMatch;
       const minProfileId = report.querySelector('.linkTitle').dataset.miniprofile;
       report.dataset.steamid64 = getSteamID64(minProfileId);
       report.dataset.dayssince = daysSinceMatch;
@@ -303,14 +309,15 @@ function formatMatchsTable() {
       const gameNotFiltered = config.gameType === 'long' ? isLong : config.gameType === 'short' ? isShort : true;
 
       const leftColumn = matchRow.querySelector('.csgo_scoreboard_inner_left');
-      const daysSinceMatch = getDaysSinceAndUpdatePeriod(leftColumn.innerText, gameNotFiltered);
+      const results = getDaysSinceAndUpdatePeriod(leftColumn.innerText, gameNotFiltered);
       rightPanel.querySelectorAll('tbody > tr').forEach((tr, i) => {
         if (i === 0 || tr.childElementCount < 3) return;
         const profileLink = tr.querySelector('.linkTitle');
         const minProfileId = profileLink.dataset.miniprofile;
         const steamid64 = getSteamID64(minProfileId);
         tr.dataset.steamid64 = steamid64;
-        tr.dataset.dayssince = daysSinceMatch;
+        tr.dataset.dayssince = results.daysSinceMatch;
+        tr.dataset.datesince = results.dateAsString;
         tr.dataset.matchindex = matchIndex;
         tr.classList.add(profileToCheckClass);
         if (!playersList.includes(steamid64) && gameNotFiltered) {
@@ -437,11 +444,16 @@ function checkLoadedMatchesForBans() {
           }
           if (verdict) {
             const bannedAfter = daySinceLastMatch > player.DaysSinceLastBan;
+            const linkTitle = playerEl.querySelector('.linkTitle');
             bannedPlayers.push({
               steamid: playerEl.dataset.steamid64,
               daySinceLastBan: player.DaysSinceLastBan,
+              daySinceLastMatch: daySinceLastMatch,
+              dateSinceLastMatch: playerEl.dataset.datesince,
               after: bannedAfter,
-              profileUrl: playerEl.querySelector('.linkTitle').href,
+              profileUrl: linkTitle.href,
+              profileName: linkTitle.innerText.trim(),
+              profileAvatar: playerEl.querySelector('.playerAvatar img').src,
             });
             const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
             if (bannedAfter) {
@@ -483,6 +495,7 @@ function checkLoadedMatchesForBans() {
           }
         }
         updateGlobalStats();
+        displayBannedPlayers();
         if (batches.length > requestIndex + 1) {
           setTimeout(() => checkBansOnApi(requestIndex + 1, maxRetries), 1000);
         } else {
@@ -499,7 +512,6 @@ function checkLoadedMatchesForBans() {
               important: banStats.recentBans > 0,
             },
           ]);
-          displayBannedPlayers();
         }
       }
     );
@@ -569,24 +581,75 @@ async function displayBannedPlayers() {
     .filter((bannedPlayer) => bannedPlayer.after)
     .sort((a, b) => (a.daySinceLastBan > b.daySinceLastBan ? 1 : a.daySinceLastBan < b.daySinceLastBan ? -1 : 0));
 
+  bannedPlayersTable.textContent = '';
   if (bannedPlayersAfter.length) {
-    updateResults('', true);
-  }
-  for (let bannedPlayer of bannedPlayersAfter) {
-    updateResults(
-      [
-        {
-          text: `- ${bannedPlayer.profileUrl}, banned ${bannedPlayer.daySinceLastBan} days ago`,
-          link: bannedPlayer.profileUrl,
-        },
-      ],
-      true
-    );
-  }
+    bannedPlayersTable.appendChild(create('hr'));
+    const table = create('table');
+    bannedPlayersTable.appendChild(table);
+    table.classList.add('players-banned-table');
+    table.classList.add('csgo-history-table');
+    const tableBody = create('tbody');
+    table.appendChild(tableBody);
 
-  updateResults([{ text: '' }, { text: `Hover over ban status to check how many days have passed since last ban.` }], true);
+    const header = create('tr');
+    tableBody.appendChild(header);
 
+    const th1 = create('th');
+    th1.textContent = 'Avatar';
+    header.appendChild(th1);
+    const th2 = create('th');
+    th2.textContent = 'Name';
+    header.appendChild(th2);
+    const th3 = create('th');
+    th3.textContent = 'Banned since';
+    th3.classList.add('players-banned-date');
+    header.appendChild(th3);
+    const th4 = create('th');
+    th4.textContent = 'Last played with on';
+    th4.classList.add('players-banned-date');
+    header.appendChild(th4);
+    const th5 = create('th');
+    th5.textContent = 'Profile link';
+    th5.classList.add('players-banned-link');
+    header.appendChild(th5);
+
+    for (let bannedPlayer of bannedPlayersAfter) {
+      const row = create('tr');
+      tableBody.appendChild(row);
+
+      const td1 = create('td');
+      const img = create('img');
+      td1.appendChild(img);
+      img.src = bannedPlayer.profileAvatar;
+      row.appendChild(td1);
+      const td2 = create('td');
+      td2.textContent = bannedPlayer.profileName;
+      row.appendChild(td2);
+      const td3 = create('td');
+      td3.textContent = `${bannedPlayer.daySinceLastBan} days (~${getDateSince(bannedPlayer.daySinceLastBan)})`;
+      row.appendChild(td3);
+      const td4 = create('td');
+      td4.textContent = `${bannedPlayer.daySinceLastMatch} days (${bannedPlayer.dateSinceLastMatch})`;
+      row.appendChild(td4);
+      const td5 = create('td');
+      const link = create('a');
+      td5.appendChild(link);
+      link.target = '_blank';
+      link.href = bannedPlayer.profileUrl;
+      link.textContent = 'Link to profile';
+      row.appendChild(td5);
+    }
+  }
   disableAllButtons(false);
+}
+
+function getDateSince(days) {
+  const today = new Date();
+  today.setDate(today.getDate() - days);
+  const year = `${today.getFullYear()}`;
+  const month = `${today.getMonth() + 1}`;
+  const day = `${today.getDate()}`;
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
 function init() {

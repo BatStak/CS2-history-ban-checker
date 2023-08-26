@@ -530,38 +530,29 @@ async function loadMatchHistory() {
   }
   updateStatus(status);
   await new Promise((resolve) => {
-    const maxNumberAttempsToLoadMoreMatches = 10;
-    let numberOfMatches = 0;
-    let attemptsToLoadMoreMatches = 0;
     const moreButton = document.getElementById('load_more_button');
+    const moreDate = document.getElementById('load_more_button_continue_text');
     const stop = () => {
       stopTimerLoadMatchHistory();
       resolve();
     };
-    if (moreButton) {
+    if (moreButton && moreDate && moreDate.offsetParent !== null) {
       timerLoadMatchHistory = setInterval(() => {
-        if (moreButton.offsetParent !== null) {
-          const newNumberOfMatches = getResultsNodeList().length;
-          const hasNewMatches = newNumberOfMatches !== numberOfMatches;
+        // if there is no date, it's because we reach the end of history (2017).
+        if (moreDate.offsetParent === null) {
+          stop();
+        } else {
+          const lastDate = moreDate.innerText.trim();
+          updateStatus(`${status} ... [${lastDate}]`);
 
-          if (hasNewMatches) {
-            attemptsToLoadMoreMatches = 0;
-          }
-
-          if (hasNewMatches || attemptsToLoadMoreMatches < maxNumberAttempsToLoadMoreMatches) {
-            const lastDate = document.getElementById('load_more_button_continue_text').innerText.trim();
-            updateStatus(`${status} ... [${lastDate}]`);
+          // still loading
+          if (moreButton.offsetParent !== null) {
             if (config.historyDate && config.historyDate >= lastDate) {
               stop();
             } else {
-              numberOfMatches = newNumberOfMatches;
               moreButton.click();
             }
-          } else {
-            stop();
           }
-
-          attemptsToLoadMoreMatches++;
         }
       }, 800);
     } else {

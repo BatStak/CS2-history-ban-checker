@@ -201,11 +201,11 @@ function updateStatus(text, append) {
   updateTextContent(statusBar, text, append);
 }
 
-function toggleStopButton(visible) {
+function toggleStopButton(button, visible) {
   if (visible) {
-    loadMatchHistoryStopButton.style.display = 'inline-block';
+    button.style.display = 'inline-block';
   } else {
-    loadMatchHistoryStopButton.style.display = 'none';
+    button.style.display = 'none';
   }
 }
 

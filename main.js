@@ -25,17 +25,23 @@ checkBansButton.onclick = () => {
   checkLoadedMatchesForBans();
 };
 
+const stopCheckBansButton = createSteamButton('Stop');
+toggleStopButton(stopCheckBansButton, false);
+stopCheckBansButton.onclick = () => {
+  stopCheckBan = true;
+};
+
 const loadMatchHistoryButton = createSteamButton('Load match history since');
 loadMatchHistoryButton.onclick = () => {
   loadMatchHistory();
 };
 
-const loadMatchHistoryStopButton = createSteamButton('Stop');
-toggleStopButton(false);
-loadMatchHistoryStopButton.onclick = () => {
+const stopLoadMatchHistoryButton = createSteamButton('Stop');
+toggleStopButton(stopLoadMatchHistoryButton, false);
+stopLoadMatchHistoryButton.onclick = () => {
   stopTimerLoadMatchHistory();
   disableAllButtons(false);
-  toggleStopButton(false);
+  toggleStopButton(stopLoadMatchHistoryButton, false);
 };
 
 const dateSinceHistoryInput = create('input');
@@ -55,8 +61,9 @@ menuTop.appendChild(bancheckerSettingsButton);
 menuTop.appendChild(loadMatchHistoryButton);
 menuTop.appendChild(dateSinceHistoryInput);
 menuTop.appendChild(dateSinceHistoryPlaceholder);
-menuTop.appendChild(loadMatchHistoryStopButton);
+menuTop.appendChild(stopLoadMatchHistoryButton);
 menuBottom.appendChild(checkBansButton);
+menuBottom.appendChild(stopCheckBansButton);
 
 const optionsContainer = createOptionsContainer();
 extensionContainer.appendChild(optionsContainer);

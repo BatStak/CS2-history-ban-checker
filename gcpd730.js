@@ -372,14 +372,15 @@ function addBanColumns() {
 
 function checkLoadedMatchesForBans() {
   checkBanStarted = true;
+  stopCheckBan = false;
+  toggleStopButton(stopCheckBansButton, true);
   disableAllButtons(true);
-  let selector = `.${profileToCheckClass}:not(.${profileCheckedClass}):not(.${profileCheckingClass})`;
+  let selector = `.${profileToCheckClass}:not(.${profileCheckedClass})`;
   if (is5v5CompetitiveSection()) {
     selector = addFilterGameSelector(selector);
   }
   let players = [];
   for (let player of document.querySelectorAll(selector)) {
-    player.classList.add(profileCheckingClass);
     players.push(player.dataset.steamid64);
   }
 
@@ -393,6 +394,11 @@ function checkLoadedMatchesForBans() {
     }
     return arr;
   }, []);
+
+  const stop = () => {
+    disableAllButtons(false);
+    toggleStopButton(stopCheckBansButton, false);
+  }
 
   const checkBansOnApi = (requestIndex, retryCount) => {
     updateResults([
@@ -496,7 +502,10 @@ function checkLoadedMatchesForBans() {
         }
         updateGlobalStats();
         displayBannedPlayers();
-        if (batches.length > requestIndex + 1) {
+        if (stopCheckBan) {
+          updateResults('Stopped.');
+          stop();
+        } else if (batches.length > requestIndex + 1) {
           setTimeout(() => checkBansOnApi(requestIndex + 1, maxRetries), 1000);
         } else {
           const plural = banStats.recentBans > 1;
@@ -512,6 +521,7 @@ function checkLoadedMatchesForBans() {
               important: banStats.recentBans > 0,
             },
           ]);
+          stop();
         }
       }
     );
@@ -519,7 +529,7 @@ function checkLoadedMatchesForBans() {
   if (uniquePlayers.length > 0) {
     checkBansOnApi(0, maxRetries);
   } else {
-    disableAllButtons(false);
+    stop();
   }
 }
 
@@ -532,7 +542,7 @@ function stopTimerLoadMatchHistory() {
 
 async function loadMatchHistory() {
   saveHistoryDate();
-  toggleStopButton(true);
+  toggleStopButton(stopLoadMatchHistoryButton, true);
   disableAllButtons(true);
   let status = '';
   if (config.historyDate) {
@@ -573,7 +583,7 @@ async function loadMatchHistory() {
   });
   updateStatus(`${status} Done !`);
   disableAllButtons(false);
-  toggleStopButton(false);
+  toggleStopButton(stopLoadMatchHistoryButton, false);
 }
 
 async function displayBannedPlayers() {
@@ -640,7 +650,6 @@ async function displayBannedPlayers() {
       row.appendChild(td5);
     }
   }
-  disableAllButtons(false);
 }
 
 function getDateSince(days) {

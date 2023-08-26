@@ -33,6 +33,7 @@ const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const dateMatchRegex = /(20\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
 
 let timerLoadMatchHistory = null;
+let stopCheckBan = false;
 
 /**
  * Array of {} with those attributes :
@@ -74,7 +75,6 @@ const shortGameClass = 'csgo-history-short-game';
 const abortedGameClass = 'csgo-history-aborted-game';
 
 const profileToCheckClass = 'csgo-history-check-profile';
-const profileCheckingClass = 'csgo-history-ban-checking';
 const profileCheckedClass = 'vchecked';
 
 const columnBanResultAddedClass = 'csgo-history-ban-column-added';

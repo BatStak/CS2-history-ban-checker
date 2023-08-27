@@ -35,7 +35,7 @@ function updateFormValues() {
   document.getElementById('load-match-history-since').value = config.historyDate;
 }
 
-function canContinue() {
+function onGCPDSection() {
   if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
 
   return !!profileURI && !!section;

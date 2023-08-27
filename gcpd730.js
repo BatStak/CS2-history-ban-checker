@@ -514,6 +514,7 @@ function checkLoadedMatchesForBans() {
         updateGlobalStats();
         displayBannedPlayers();
         updatePeopleList();
+        updateGroupMembersList();
         if (stopCheckBan) {
           updateResults('Stopped.');
           stop();
@@ -677,7 +678,7 @@ function getDateSince(days) {
 }
 
 function init() {
-  if (canContinue()) {
+  if (onGCPDSection()) {
     updateUI();
 
     if (is5v5CompetitiveSection()) {
@@ -702,5 +703,6 @@ function init() {
     ]);
     disableAllButtons(true);
     checkPeople();
+    checkGroupMembers();
   }
 }

@@ -114,3 +114,17 @@ if (subpage_container) {
   });
   observer.observe(subpage_container, { attributes: true });
 }
+
+let mutationCount = 0;
+const group_page_dynamic_content = document.querySelector('#group_page_dynamic_content');
+if (group_page_dynamic_content) {
+  const observer = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      mutationCount++;
+      if (mutationCount % 2) {
+        checkGroupMembers();
+      }
+    }
+  });
+  observer.observe(group_page_dynamic_content, { childList: true });
+}

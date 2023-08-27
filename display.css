@@ -184,3 +184,20 @@ hr {
   font-weight: bold;
   font-size: 12px;
 }
+
+.group-member-ban-status {
+  float: right;
+  height: 100%;
+  width: 25px;
+  background: rgb(0, 77, 0);
+  color: #fff;
+  line-height: 45px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.people-banned .group-member-ban-status {
+  width: 50px;
+  background: #f00;
+}

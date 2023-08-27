@@ -26,6 +26,7 @@
         "*://steamcommunity.com/profiles/*/following/",
         "*://steamcommunity.com/id/*/following",
         "*://steamcommunity.com/profiles/*/following",
+        "*://steamcommunity.com/groups/*",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitive",
         "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorycompetitive",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorywingman",

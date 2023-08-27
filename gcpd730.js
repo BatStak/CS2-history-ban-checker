@@ -152,9 +152,9 @@ function updateGlobalStats() {
   th5.textContent = 'Lose';
   th5.title = 'lose [lose rate]';
   th6.textContent = 'With ban';
-  th6.title = 'Someone has been banned in the match, before or after playing with you';
+  th6.title = 'Someone has been banned before or after playing with you';
   th7.textContent = 'With ban after';
-  th7.title = 'Someone has been banned in the match after playing with you';
+  th7.title = 'Someone has been banned after playing with you';
 
   let total = {
     count: 0,

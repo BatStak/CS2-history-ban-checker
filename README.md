@@ -15,7 +15,8 @@ The most important statistics I wanted to add in the first place :
 - number and pourcentage of players who has been banned after playing with you.
 
 I remove all the functionnalities about alarms and notifications.  
-I keep the friends list and followed players ban check. No group members check though.
+
+I add since 1.2.1 the ban status check about friends list, followed players, recently played with, and group members page like in the original extension.
 
 What this version add to the original version :
 - number and pourcentage of matches with someone who has been banned after playing with you,

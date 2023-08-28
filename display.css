@@ -1,5 +1,6 @@
 #banchecker-menu {
   padding: 0 14px;
+  margin-top: -20px;
 }
 
 #status-bar,
@@ -114,37 +115,37 @@
   width: 100px;
 }
 
-.map-stats th {
-  cursor: help;
-}
-
 .csgo-history-table th,
 .csgo-history-table td {
   border: 1px solid #6f6f6f;
-  padding: 5px 10px;
+  padding: 5px;
 }
 
 .map-stats .map-sample {
   width: 50px;
 }
 
-.map-stats .map-name,
+.map-stats .map-name {
+  width: 100px;
+}
+
 .map-stats .map-win,
 .map-stats .map-draw,
 .map-stats .map-lose {
-  width: 120px;
+  width: 110px;
 }
 
 .map-stats .map-ban {
-  width: 110px;
+  width: 150px;
 }
 
 .map-stats .map-total {
   font-weight: bold;
 }
 
-#period {
-  font-weight: 500;
+.important {
+  font-weight: 700;
+  color: #fff;
 }
 
 hr {
@@ -200,4 +201,38 @@ hr {
 .people-banned .group-member-ban-status {
   width: 50px;
   background: #f00;
+}
+
+.bancheck-flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#historyload-description,
+#checkbans-description,
+#bancheck-title-players-list,
+#checkban-title {
+  font-weight: 400;
+  color: #fff;
+}
+
+#bancheck-title-players-list,
+#checkban-title {
+  margin-top: 20px;
+}
+
+#checkbans-description {
+  margin-right: 15px;
+  display: inline-block;
+}
+
+#historyload-input-date {
+  width: 100px;
+}
+
+#historyload-input-date-suffix {
+  padding: 0px 15px 0 5px;
+  display: inline-block;
 }

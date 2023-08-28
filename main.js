@@ -1,26 +1,12 @@
-const extensionContainer = create('div', 'banchecker-menu');
-
-const statusBar = create('div', 'status-bar');
 const funStatsBar = create('div', 'funstats-bar');
-const menuTop = create('div', 'menu-top');
-const menuBottom = create('div', 'menu-bottom');
-const statsResults = create('div', 'stats-results');
-const bannedPlayersTable = create('div', 'banned-players-table');
-const statsMaps = create('div', 'stats-maps');
 
-if (!isCommendOrReportsSection()) {
-  extensionContainer.appendChild(funStatsBar);
-}
-extensionContainer.appendChild(menuTop);
-extensionContainer.appendChild(statusBar);
-extensionContainer.appendChild(menuBottom);
-extensionContainer.appendChild(statsResults);
-extensionContainer.appendChild(bannedPlayersTable);
-extensionContainer.appendChild(statsMaps);
+const historyLoadMenu = create('div', 'menu-top');
+const historyLoadTextsResults = create('div', 'status-bar');
 
-if (document.querySelector('#subtabs')) {
-  document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
-}
+const checkbansMenu = create('div', 'menu-bottom');
+const checkbansTextsResults = create('div', 'stats-results');
+const checkbansPlayersList = create('div', 'banned-players-table');
+const checkbansGlobalResults = create('div', 'stats-maps');
 
 const checkBansButton = createSteamButton('Check loaded matches for bans');
 checkBansButton.onclick = () => {
@@ -33,7 +19,7 @@ stopCheckBansButton.onclick = () => {
   stopCheckBan = true;
 };
 
-const loadMatchHistoryButton = createSteamButton('Load match history since');
+const loadMatchHistoryButton = createSteamButton('Load match history !');
 loadMatchHistoryButton.onclick = () => {
   loadMatchHistory();
 };
@@ -46,29 +32,43 @@ stopLoadMatchHistoryButton.onclick = () => {
   toggleStopButton(stopLoadMatchHistoryButton, false);
 };
 
-const dateSinceHistoryInput = create('input');
+const dateSinceHistoryInput = create('input', 'historyload-input-date');
 dateSinceHistoryInput.setAttribute('type', 'text');
-dateSinceHistoryInput.setAttribute('id', 'load-match-history-since');
-dateSinceHistoryInput.style.width = '100px';
 
-const dateSinceHistoryPlaceholder = create('div');
-dateSinceHistoryPlaceholder.style.display = 'inline-block';
-dateSinceHistoryPlaceholder.style.margin = '0 10px';
+const dateSinceHistoryPlaceholder = create('div', 'historyload-input-date-suffix');
 dateSinceHistoryPlaceholder.textContent = '(YYYY-MM-DD)';
 
 const bancheckerSettingsButton = createSteamButton('Set API Key and options');
 bancheckerSettingsButton.onclick = () => showSettings();
 
-menuTop.appendChild(bancheckerSettingsButton);
-menuTop.appendChild(loadMatchHistoryButton);
-menuTop.appendChild(dateSinceHistoryInput);
-menuTop.appendChild(dateSinceHistoryPlaceholder);
-menuTop.appendChild(stopLoadMatchHistoryButton);
-menuBottom.appendChild(checkBansButton);
-menuBottom.appendChild(stopCheckBansButton);
+const historyLoadDescription = create('div', 'historyload-description');
+historyLoadDescription.textContent = 'First, load your matchmaking history by choosing options and date : ';
+
+const historyLoadOptions = create('div');
+historyLoadOptions.classList = 'bancheck-flex-container';
+historyLoadOptions.appendChild(historyLoadDescription);
+historyLoadOptions.appendChild(bancheckerSettingsButton);
+
+const historyLoadlabelDate = create('label');
+historyLoadlabelDate.for = 'historyload-input-date';
+historyLoadlabelDate.textContent = 'Load history since : ';
+
+historyLoadMenu.appendChild(historyLoadOptions);
+historyLoadMenu.appendChild(historyLoadlabelDate);
+historyLoadMenu.appendChild(dateSinceHistoryInput);
+historyLoadMenu.appendChild(dateSinceHistoryPlaceholder);
+historyLoadMenu.appendChild(loadMatchHistoryButton);
+historyLoadMenu.appendChild(stopLoadMatchHistoryButton);
+
+const checkbansDescription = create('span', 'checkbans-description');
+checkbansDescription.textContent = 'Then, check if there were banned players in loaded matches with this button :';
+
+checkbansMenu.appendChild(create('br'));
+checkbansMenu.appendChild(checkbansDescription);
+checkbansMenu.appendChild(checkBansButton);
+checkbansMenu.appendChild(stopCheckBansButton);
 
 const optionsContainer = createOptionsContainer();
-extensionContainer.appendChild(optionsContainer);
 
 chrome.storage.sync.get(['yourapikey', 'gameType', 'historyDate'], (storageData) => {
   if (storageData.yourapikey) {
@@ -127,4 +127,20 @@ if (group_page_dynamic_content) {
     }
   });
   observer.observe(group_page_dynamic_content, { childList: true });
+}
+
+const extensionContainer = create('div', 'banchecker-menu');
+extensionContainer.appendChild(optionsContainer);
+if (!isCommendOrReportsSection()) {
+  extensionContainer.appendChild(funStatsBar);
+}
+extensionContainer.appendChild(historyLoadMenu);
+extensionContainer.appendChild(historyLoadTextsResults);
+extensionContainer.appendChild(checkbansMenu);
+extensionContainer.appendChild(checkbansTextsResults);
+extensionContainer.appendChild(checkbansPlayersList);
+extensionContainer.appendChild(checkbansGlobalResults);
+
+if (document.querySelector('#subtabs')) {
+  document.querySelector('#subtabs').insertAdjacentElement('afterend', extensionContainer);
 }

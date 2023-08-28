@@ -7,7 +7,7 @@ function isCommendOrReportsSection() {
 }
 
 function saveHistoryDate() {
-  let historyDate = document.getElementById('load-match-history-since').value.trim();
+  let historyDate = document.getElementById('historyload-input-date').value.trim();
   // if date invalid we rollback to previous date
   if (historyDate && !isIsoDate(historyDate)) {
     historyDate = config.historyDate;
@@ -32,7 +32,7 @@ function updateFormValues() {
         break;
     }
   }
-  document.getElementById('load-match-history-since').value = config.historyDate;
+  document.getElementById('historyload-input-date').value = config.historyDate;
 }
 
 function onGCPDSection() {
@@ -160,7 +160,7 @@ function saveSettings() {
   if (config.yourapikey) {
     disableAllButtons(false);
     if (apiKeySet) {
-      statsResults.textContent = '';
+      checkbansTextsResults.textContent = '';
     }
   } else {
     updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
@@ -171,7 +171,7 @@ function saveSettings() {
   if (gamesFilterChanged) {
     disableAllButtons(true);
     updateResults([{ text: 'You need to reload the page if you changed games filter', important: true }]);
-    statusBar.textContent = document.querySelector('.load_more_history_area').textContent = document.querySelector('.csgo_scoreboard_root').textContent = '';
+    historyLoadTextsResults.textContent = document.querySelector('.load_more_history_area').textContent = document.querySelector('.csgo_scoreboard_root').textContent = '';
   }
 
   updateFormValues();
@@ -194,11 +194,11 @@ function disableAllButtons(value) {
 }
 
 function updateResults(text, append) {
-  updateTextContent(statsResults, text, append);
+  updateTextContent(checkbansTextsResults, text, append);
 }
 
 function updateStatus(text, append) {
-  updateTextContent(statusBar, text, append);
+  updateTextContent(historyLoadTextsResults, text, append);
 }
 
 function toggleStopButton(button, visible) {

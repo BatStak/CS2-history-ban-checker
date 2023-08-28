@@ -75,86 +75,84 @@ function updateGlobalStats() {
     return;
   }
 
-  statsMaps.textContent = '';
+  checkbansGlobalResults.textContent = '';
 
-  statsMaps.appendChild(create('hr'));
+  const period = create('div', 'checkban-title');
+  period.textContent = `Here are your results from ${startDate} to ${endDate}`;
+  checkbansGlobalResults.appendChild(period);
 
-  const period = create('div', 'period');
-  period.textContent = `Period from ${startDate} to ${endDate}`;
-  statsMaps.appendChild(period);
+  const playerbaseTable = create('table');
+  playerbaseTable.classList.add('csgo-history-table');
+  const playerbaseTbody = create('tbody');
+  playerbaseTable.appendChild(playerbaseTbody);
+  const playerbaseHeaderRow = create('tr');
+  const thPlayerbase1 = create('th');
+  thPlayerbase1.textContent = 'Unique players';
+  const thPlayerbase2 = create('th');
+  thPlayerbase2.textContent = 'Banned';
+  const thPlayerbase3 = create('th');
+  thPlayerbase3.textContent = 'Banned after playing with you';
+  playerbaseHeaderRow.appendChild(thPlayerbase1);
+  playerbaseHeaderRow.appendChild(thPlayerbase2);
+  playerbaseHeaderRow.appendChild(thPlayerbase3);
+  playerbaseTbody.appendChild(playerbaseHeaderRow);
+  const playerbaseRow = create('tr');
+  const tdPlayerbase1 = create('td');
+  tdPlayerbase1.textContent = playersList.length;
+  const tdPlayerbase2 = create('td');
+  tdPlayerbase2.textContent = checkBanStarted ? `${bannedPlayers.length} [${getPourcentage(bannedPlayers.length, playersList.length)} %]` : '?';
+  const tdPlayerbase3 = create('td');
+  tdPlayerbase3.classList.add('important');
+  const playerbaseBannedAfterCount = bannedPlayers.filter((bannedPlayer) => bannedPlayer.after).length;
+  tdPlayerbase3.textContent = checkBanStarted ? `${playerbaseBannedAfterCount} [${getPourcentage(playerbaseBannedAfterCount, playersList.length)} %]` : '?';
+  playerbaseRow.appendChild(tdPlayerbase1);
+  playerbaseRow.appendChild(tdPlayerbase2);
+  playerbaseRow.appendChild(tdPlayerbase3);
+  playerbaseTbody.appendChild(playerbaseRow);
 
-  const playerTable = create('table');
-  playerTable.classList.add('csgo-history-table');
-  const playerTbody = create('tbody');
-  playerTable.appendChild(playerTbody);
-  const playerHeaderRow = create('tr');
-  const thPlayer1 = create('th');
-  thPlayer1.textContent = 'Unique players';
-  const thPlayer2 = create('th');
-  thPlayer2.textContent = 'Banned';
-  const thPlayer3 = create('th');
-  thPlayer3.textContent = 'Banned after playing with you';
-  playerHeaderRow.appendChild(thPlayer1);
-  playerHeaderRow.appendChild(thPlayer2);
-  playerHeaderRow.appendChild(thPlayer3);
-  playerTbody.appendChild(playerHeaderRow);
-  const playerRow = create('tr');
-  const tdPlayer1 = create('td');
-  tdPlayer1.textContent = playersList.length;
-  const tdPlayer2 = create('td');
-  tdPlayer2.textContent = checkBanStarted ? `${bannedPlayers.length} [${getPourcentage(bannedPlayers.length, playersList.length)} %]` : '?';
-  const tdPlayer3 = create('td');
-  const banAfterCount = bannedPlayers.filter((bannedPlayer) => bannedPlayer.after).length;
-  tdPlayer3.textContent = checkBanStarted ? `${banAfterCount} [${getPourcentage(banAfterCount, playersList.length)} %]` : '?';
-  playerRow.appendChild(tdPlayer1);
-  playerRow.appendChild(tdPlayer2);
-  playerRow.appendChild(tdPlayer3);
-  playerTbody.appendChild(playerRow);
+  const mapsTable = create('table');
+  mapsTable.classList.add('map-stats');
+  mapsTable.classList.add('csgo-history-table');
+  const mapsTbody = create('tbody');
+  mapsTable.appendChild(mapsTbody);
 
-  const table = create('table');
-  table.classList.add('map-stats');
-  table.classList.add('csgo-history-table');
-  const tbody = create('tbody');
-  table.appendChild(tbody);
+  const mapsHeaderRow = create('tr');
+  const mapsTh1 = create('th');
+  mapsTh1.classList.add('map-name');
+  const mapsTh2 = create('th');
+  mapsTh2.classList.add('map-sample');
+  const mapsTh3 = create('th');
+  mapsTh3.classList.add('map-win');
+  const mapsTh4 = create('th');
+  mapsTh4.classList.add('map-draw');
+  const mapsTh5 = create('th');
+  mapsTh5.classList.add('map-lose');
+  const mapsTh6 = create('th');
+  mapsTh6.classList.add('map-ban');
+  const mapsTh7 = create('th');
+  mapsTh7.classList.add('map-ban-after');
+  mapsHeaderRow.appendChild(mapsTh1);
+  mapsHeaderRow.appendChild(mapsTh2);
+  mapsHeaderRow.appendChild(mapsTh3);
+  mapsHeaderRow.appendChild(mapsTh4);
+  mapsHeaderRow.appendChild(mapsTh5);
+  mapsHeaderRow.appendChild(mapsTh6);
+  mapsHeaderRow.appendChild(mapsTh7);
+  mapsTbody.appendChild(mapsHeaderRow);
 
-  const headerRow = create('tr');
-  const th1 = create('th');
-  th1.classList.add('map-name');
-  const th2 = create('th');
-  th2.classList.add('map-sample');
-  const th3 = create('th');
-  th3.classList.add('map-win');
-  const th4 = create('th');
-  th4.classList.add('map-draw');
-  const th5 = create('th');
-  th5.classList.add('map-lose');
-  const th6 = create('th');
-  th6.classList.add('map-ban');
-  const th7 = create('th');
-  th7.classList.add('map-ban-after');
-  headerRow.appendChild(th1);
-  headerRow.appendChild(th2);
-  headerRow.appendChild(th3);
-  headerRow.appendChild(th4);
-  headerRow.appendChild(th5);
-  headerRow.appendChild(th6);
-  headerRow.appendChild(th7);
-  tbody.appendChild(headerRow);
-
-  th1.textContent = 'Map';
-  th1.title = 'map name';
-  th2.textContent = 'Sample';
-  th2.title = 'sample size';
-  th3.textContent = 'Win';
-  th3.title = 'win [win rate]';
-  th4.textContent = 'Draw';
-  th4.title = 'draw [draw rate]';
-  th5.textContent = 'Lose';
-  th5.title = 'lose [lose rate]';
-  th6.textContent = 'With ban';
-  th6.title = 'Someone has been banned before or after playing with you';
-  th7.textContent = 'With ban after';
-  th7.title = 'Someone has been banned after playing with you';
+  mapsTh1.textContent = 'Map';
+  mapsTh2.textContent = 'Sample';
+  mapsTh3.textContent = 'Win [%]';
+  mapsTh4.textContent = 'Draw [%]';
+  mapsTh5.textContent = 'Lose [%]';
+  mapsTh6.textContent = 'With someone banned [%]';
+  const text1 = create('span');
+  text1.textContent = 'With someone banned';
+  const text2 = create('span');
+  text2.textContent = 'after playing with you [%]';
+  mapsTh7.appendChild(text1);
+  mapsTh7.appendChild(create('br'));
+  mapsTh7.appendChild(text2);
 
   let total = {
     count: 0,
@@ -181,7 +179,7 @@ function updateGlobalStats() {
     mapRow.appendChild(td5);
     mapRow.appendChild(td6);
     mapRow.appendChild(td7);
-    tbody.appendChild(mapRow);
+    mapsTbody.appendChild(mapRow);
 
     td1.textContent = map.name;
     td2.textContent = map.count;
@@ -199,34 +197,35 @@ function updateGlobalStats() {
     total.bansAfter += map.bansAfter;
   }
 
-  const totalRow = create('tr');
-  totalRow.classList.add('map-total');
-  const tdTotal1 = create('td');
-  const tdTotal2 = create('td');
-  const tdTotal3 = create('td');
-  const tdTotal4 = create('td');
-  const tdTotal5 = create('td');
-  const tdTotal6 = create('td');
-  const tdTotal7 = create('td');
-  totalRow.appendChild(tdTotal1);
-  totalRow.appendChild(tdTotal2);
-  totalRow.appendChild(tdTotal3);
-  totalRow.appendChild(tdTotal4);
-  totalRow.appendChild(tdTotal5);
-  totalRow.appendChild(tdTotal6);
-  totalRow.appendChild(tdTotal7);
-  tbody.appendChild(totalRow);
+  const totalMapsRow = create('tr');
+  totalMapsRow.classList.add('map-total');
+  const totalMapsTd1 = create('td');
+  const totalMapsTd2 = create('td');
+  const totalMapsTd3 = create('td');
+  const totalMapsTd4 = create('td');
+  const totalMapsTd5 = create('td');
+  const totalMapsTd6 = create('td');
+  const totalMapsTd7 = create('td');
+  totalMapsTd7.classList.add('important');
+  totalMapsRow.appendChild(totalMapsTd1);
+  totalMapsRow.appendChild(totalMapsTd2);
+  totalMapsRow.appendChild(totalMapsTd3);
+  totalMapsRow.appendChild(totalMapsTd4);
+  totalMapsRow.appendChild(totalMapsTd5);
+  totalMapsRow.appendChild(totalMapsTd6);
+  totalMapsRow.appendChild(totalMapsTd7);
+  mapsTbody.appendChild(totalMapsRow);
 
-  tdTotal1.textContent = 'Total';
-  tdTotal2.textContent = total.count;
-  tdTotal3.textContent = `${total.wins} [${getPourcentage(total.wins, total.count)} %]`;
-  tdTotal4.textContent = `${total.draws} [${getPourcentage(total.draws, total.count)} %]`;
-  tdTotal5.textContent = `${total.loses} [${getPourcentage(total.loses, total.count)} %]`;
-  tdTotal6.textContent = checkBanStarted ? `${total.bans} [${getPourcentage(total.bans, total.count)} %]` : '?';
-  tdTotal7.textContent = checkBanStarted ? `${total.bansAfter} [${getPourcentage(total.bansAfter, total.count)} %]` : '?';
+  totalMapsTd1.textContent = 'Total';
+  totalMapsTd2.textContent = total.count;
+  totalMapsTd3.textContent = `${total.wins} [${getPourcentage(total.wins, total.count)} %]`;
+  totalMapsTd4.textContent = `${total.draws} [${getPourcentage(total.draws, total.count)} %]`;
+  totalMapsTd5.textContent = `${total.loses} [${getPourcentage(total.loses, total.count)} %]`;
+  totalMapsTd6.textContent = checkBanStarted ? `${total.bans} [${getPourcentage(total.bans, total.count)} %]` : '?';
+  totalMapsTd7.textContent = checkBanStarted ? `${total.bansAfter} [${getPourcentage(total.bansAfter, total.count)} %]` : '?';
 
-  statsMaps.appendChild(playerTable);
-  statsMaps.appendChild(table);
+  checkbansGlobalResults.appendChild(playerbaseTable);
+  checkbansGlobalResults.appendChild(mapsTable);
 }
 
 function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
@@ -368,6 +367,25 @@ function addBanColumns() {
       });
     }
   }
+}
+
+function displayBanCheckResult(done) {
+  const plural = banStats.recentBans > 1;
+  updateResults([
+    { text: done ? `Looks like we're done.` : 'Stopped !' },
+    { text: '' },
+    {
+      text: `${banStats.vacBans} (${getPourcentage(banStats.vacBans, banStats.vacBans + banStats.gameBans)} %) VAC banned and ${banStats.gameBans} (${getPourcentage(
+        banStats.gameBans,
+        banStats.vacBans + banStats.gameBans
+      )} %) Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
+    },
+    { text: '' },
+    {
+      text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO).`,
+      important: banStats.recentBans > 0,
+    },
+  ]);
 }
 
 function checkLoadedMatchesForBans() {
@@ -516,24 +534,12 @@ function checkLoadedMatchesForBans() {
         updatePeopleList();
         updateGroupMembersList();
         if (stopCheckBan) {
-          updateResults('Stopped.');
+          displayBanCheckResult(false);
           stop();
         } else if (batches.length > requestIndex + 1) {
           setTimeout(() => checkBansOnApi(requestIndex + 1, maxRetries), 1000);
         } else {
-          const plural = banStats.recentBans > 1;
-          updateResults([
-            { text: `Looks like we're done.` },
-            { text: '' },
-            {
-              text: `Total ban stats: ${banStats.vacBans} VAC banned and ${banStats.gameBans} Game banned players in games we scanned (a lot of these could happen outside of CS:GO.)`,
-            },
-            { text: '' },
-            {
-              text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO).`,
-              important: banStats.recentBans > 0,
-            },
-          ]);
+          displayBanCheckResult(true);
           stop();
         }
       }
@@ -604,14 +610,13 @@ async function displayBannedPlayers() {
     .filter((bannedPlayer) => bannedPlayer.after)
     .sort((a, b) => (a.daySinceLastBan > b.daySinceLastBan ? 1 : a.daySinceLastBan < b.daySinceLastBan ? -1 : 0));
 
-  bannedPlayersTable.textContent = '';
+  checkbansPlayersList.textContent = '';
   if (bannedPlayersAfter.length) {
-    bannedPlayersTable.appendChild(create('hr'));
-    const title = create('p');
-    bannedPlayersTable.appendChild(title);
+    const title = create('div', 'bancheck-title-players-list');
+    checkbansPlayersList.appendChild(title);
     title.textContent = 'List of players banned after playing with you :';
     const table = create('table');
-    bannedPlayersTable.appendChild(table);
+    checkbansPlayersList.appendChild(table);
     table.classList.add('players-banned-table');
     table.classList.add('csgo-history-table');
     const tableBody = create('tbody');

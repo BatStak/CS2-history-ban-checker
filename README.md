@@ -30,14 +30,12 @@ What this version add to the original version :
 
 Here are some screeshots :
 
-![Results](./readme/results-1.2.0-1.jpg)
+![Results](./readme/results-1_1.2.2.jpg)
 
-![Results](./readme/results-1.1.0-2.png)
+![Results](./readme/results-2_1.2.2.jpg)
 
-![Highlight](./readme/highlight.png)
+![Highlight](./readme/highlight_1.2.2.jpg)
 
-![People](./readme/people.jpg)
+![People](./readme/people_1.2.2.jpg)
 
-![Options](./readme/options-1.1.0.png)
-
-![Loading](./readme/statistics-1.1.0.png)
+![Loading](./readme/statistics_1.2.2.png);

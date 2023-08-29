@@ -170,7 +170,7 @@ function saveSettings() {
 
   if (gamesFilterChanged) {
     disableAllButtons(true);
-    updateResults([{ text: 'You need to reload the page if you changed games filter', important: true }]);
+    updateResults([{ text: 'You need to reload the page if you changed games filter.', important: true }]);
     historyLoadTextsResults.textContent = document.querySelector('.load_more_history_area').textContent = document.querySelector('.csgo_scoreboard_root').textContent = '';
   }
 

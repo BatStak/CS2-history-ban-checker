@@ -17,6 +17,11 @@
   color: #f00;
 }
 
+#filter-text {
+  margin-top: 15px;
+  color: yellow;
+}
+
 .btn-default {
   display: inline-block;
   border: 0;
@@ -79,10 +84,10 @@
   background: rgba(0, 0, 0, 0.3);
 }
 
-.csgo_scoreboard_root.hide-long-games .long-game,
-.csgo_scoreboard_root.hide-short-games .short-game,
-.csgo_scoreboard_root.hide-long-games .aborted-game,
-.csgo_scoreboard_root.hide-short-games .aborted-game {
+.csgo_scoreboard_root.hide-long-games .csgo-history-long-game,
+.csgo_scoreboard_root.hide-short-games .csgo-history-short-game,
+.csgo_scoreboard_root.hide-long-games .csgo-history-aborted-game,
+.csgo_scoreboard_root.hide-short-games .csgo-history-aborted-game {
   display: none !important;
 }
 

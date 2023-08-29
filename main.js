@@ -60,6 +60,9 @@ historyLoadMenu.appendChild(dateSinceHistoryPlaceholder);
 historyLoadMenu.appendChild(loadMatchHistoryButton);
 historyLoadMenu.appendChild(stopLoadMatchHistoryButton);
 
+const filterText = create('div', 'filter-text');
+historyLoadMenu.appendChild(filterText);
+
 const checkbansDescription = create('span', 'checkbans-description');
 checkbansDescription.textContent = 'Then, check if there were banned players in loaded matches with this button :';
 
@@ -76,6 +79,10 @@ chrome.storage.sync.get(['yourapikey', 'gameType', 'historyDate'], (storageData)
   }
   if (storageData.gameType) {
     config.gameType = storageData.gameType;
+    if (config.gameType !== 'all') {
+      filterText.style.display = 'block';
+      filterText.textContent = `You have chosen to see only ${config.gameType} games. You can change it in "Set API Key and options".`;
+    }
   }
   if (storageData.historyDate === undefined) {
     const date = new Date();

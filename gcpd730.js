@@ -78,7 +78,7 @@ function updateGlobalStats() {
   checkbansGlobalResults.textContent = '';
 
   const period = create('div', 'checkban-title');
-  period.textContent = `Here are your results from ${startDate} to ${endDate}`;
+  period.textContent = `Here are your results from ${startDate} to ${endDate}.`;
   checkbansGlobalResults.appendChild(period);
 
   const playerbaseTable = create('table');

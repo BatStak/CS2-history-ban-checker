@@ -132,11 +132,11 @@
 .map-stats .map-win,
 .map-stats .map-draw,
 .map-stats .map-lose {
-  width: 110px;
+  width: 115px;
 }
 
 .map-stats .map-ban {
-  width: 150px;
+  width: 140px;
 }
 
 .map-stats .map-total {

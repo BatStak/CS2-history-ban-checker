@@ -39,3 +39,7 @@ Here are some screeshots :
 ![People](./readme/people_1.2.2.jpg)
 
 ![Loading](./readme/statistics_1.2.2.png);
+
+TODO list :
+- sort tables features
+- no need to rescan when changing game type

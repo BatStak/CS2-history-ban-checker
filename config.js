@@ -1,12 +1,12 @@
 const maxRetries = 3;
 
-const banStats = {
+let banStats = {
   vacBans: 0,
   gameBans: 0,
   recentBans: 0,
 };
 
-const funStats = {
+let funStats = {
   numberOfMatches: 0,
   totalKills: 0,
   totalAssists: 0,

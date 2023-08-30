@@ -140,6 +140,68 @@ function showSettings() {
   optionsContainer.style.display = 'block';
 }
 
+function resetUI() {
+  banStats = {
+    vacBans: 0,
+    gameBans: 0,
+    recentBans: 0,
+  };
+  funStats = {
+    numberOfMatches: 0,
+    totalKills: 0,
+    totalAssists: 0,
+    totalDeaths: 0,
+    totalWins: 0,
+    totalWaitTime: 0,
+    totalTime: 0,
+  };
+  mapsStats.splice(0, mapsStats.length);
+  matchIndexWithBans.splice(0, matchIndexWithBans.length);
+  playersList.splice(0, playersList.length);
+  bannedPlayers.splice(0, bannedPlayers.length);
+  checkBanStarted = false;
+  matchIndex = 1;
+
+  const scoreboardRoot = document.querySelector('.csgo_scoreboard_root');
+  scoreboardRoot.classList.remove('hide-long-games');
+  scoreboardRoot.classList.remove('hide-short-games');
+  if (config.gameType === 'short') {
+    scoreboardRoot.classList.add('hide-long-games');
+  } else if (config.gameType === 'long') {
+    scoreboardRoot.classList.add('hide-short-games');
+  }
+
+  document.querySelectorAll(`.${myProfileStatsCheckedClass}`).forEach((elt) => {
+    elt.classList.remove(myProfileStatsCheckedClass);
+  });
+  document.querySelectorAll(`.${profileToCheckClass}`).forEach((elt) => {
+    elt.classList.remove(profileToCheckClass);
+  });
+  document.querySelectorAll(`.${profileCheckedClass}`).forEach((elt) => {
+    elt.classList.remove(profileCheckedClass);
+  });
+  document.querySelectorAll(`.${tableFormattedClass}`).forEach((elt) => {
+    elt.classList.remove(tableFormattedClass);
+  });
+  
+  if (config.gameType !== 'all') {
+    filterText.style.display = 'block';
+    filterText.textContent = `You have chosen to see only ${config.gameType} games. You can change it in "Set API Key and options".`;
+  } else {
+    filterText.style.display = 'none';
+  }
+
+  checkbansTextsResults.textContent = 'You need to rescan players when changing game type filter.';
+  checkbansPlayersList.textContent = '';
+  formatMatchsTable();
+  setTimeout(() => {
+    updateFunStats();
+    setTimeout(() => {
+      updateGlobalStats();
+    }, 200);
+  }, 200);
+}
+
 function saveSettings() {
   const apiKey = document.getElementById('yourapikey').value;
   const apiKeySet = apiKey && !config.yourapikey;
@@ -169,9 +231,7 @@ function saveSettings() {
   }
 
   if (gamesFilterChanged) {
-    disableAllButtons(true);
-    updateResults([{ text: 'You need to reload the page if you changed games filter.', important: true }]);
-    historyLoadTextsResults.textContent = document.querySelector('.load_more_history_area').textContent = document.querySelector('.csgo_scoreboard_root').textContent = '';
+    resetUI();
   }
 
   updateFormValues();

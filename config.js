@@ -52,7 +52,7 @@ const matchIndexWithBans = [];
 let startDate = '';
 let endDate = '';
 
-// array of steamid34
+// array of { steamid34, checked }
 const playersList = [];
 
 /**
@@ -79,9 +79,8 @@ const longGameClass = 'csgo-history-long-game';
 const shortGameClass = 'csgo-history-short-game';
 const abortedGameClass = 'csgo-history-aborted-game';
 
-const profileToCheckClass = 'csgo-history-check-profile';
-const profileCheckedClass = 'vchecked';
 
+const playerFormattedClass = 'csgo-history-formatted-profile';
+const tableFormattedClass = 'csgo-history-result-formatted';
 const columnBanResultAddedClass = 'csgo-history-ban-column-added';
 const columnBanResultClass = 'csgo-history-column-ban';
-const tableFormattedClass = 'csgo-history-result-formatted';

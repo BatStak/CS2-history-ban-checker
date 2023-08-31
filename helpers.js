@@ -141,11 +141,6 @@ function showSettings() {
 }
 
 function resetUI() {
-  banStats = {
-    vacBans: 0,
-    gameBans: 0,
-    recentBans: 0,
-  };
   funStats = {
     numberOfMatches: 0,
     totalKills: 0,
@@ -157,9 +152,6 @@ function resetUI() {
   };
   mapsStats.splice(0, mapsStats.length);
   matchIndexWithBans.splice(0, matchIndexWithBans.length);
-  playersList.splice(0, playersList.length);
-  bannedPlayers.splice(0, bannedPlayers.length);
-  checkBanStarted = false;
   matchIndex = 1;
 
   const scoreboardRoot = document.querySelector('.csgo_scoreboard_root');
@@ -174,16 +166,13 @@ function resetUI() {
   document.querySelectorAll(`.${myProfileStatsCheckedClass}`).forEach((elt) => {
     elt.classList.remove(myProfileStatsCheckedClass);
   });
-  document.querySelectorAll(`.${profileToCheckClass}`).forEach((elt) => {
-    elt.classList.remove(profileToCheckClass);
-  });
-  document.querySelectorAll(`.${profileCheckedClass}`).forEach((elt) => {
-    elt.classList.remove(profileCheckedClass);
+  document.querySelectorAll(`.${playerFormattedClass}`).forEach((elt) => {
+    elt.classList.remove(playerFormattedClass);
   });
   document.querySelectorAll(`.${tableFormattedClass}`).forEach((elt) => {
     elt.classList.remove(tableFormattedClass);
   });
-  
+
   if (config.gameType !== 'all') {
     filterText.style.display = 'block';
     filterText.textContent = `You have chosen to see only ${config.gameType} games. You can change it in "Set API Key and options".`;
@@ -191,8 +180,6 @@ function resetUI() {
     filterText.style.display = 'none';
   }
 
-  checkbansTextsResults.textContent = 'You need to rescan players when changing game type filter.';
-  checkbansPlayersList.textContent = '';
   formatMatchsTable();
   setTimeout(() => {
     updateFunStats();

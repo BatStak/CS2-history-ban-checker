@@ -263,13 +263,13 @@ function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
 
 function formatMatchsTable() {
   if (isCommendOrReportsSection()) {
-    for (let report of document.querySelectorAll(`.generic_kv_table > tbody > tr:not(:first-child):not(.${profileToCheckClass})`)) {
+    for (let report of document.querySelectorAll(`.generic_kv_table > tbody > tr:not(:first-child):not(.${playerFormattedClass})`)) {
       const dateEl = report.querySelector('td:first-child');
       const daysSinceMatch = getDaysSinceAndUpdatePeriod(dateEl.innerText).daysSinceMatch;
       const minProfileId = report.querySelector('.linkTitle').dataset.miniprofile;
       report.dataset.steamid64 = getSteamID64(minProfileId);
       report.dataset.dayssince = daysSinceMatch;
-      report.classList.add(profileToCheckClass);
+      report.classList.add(playerFormattedClass);
       report.classList.add(tableFormattedClass);
     }
   } else {
@@ -318,9 +318,12 @@ function formatMatchsTable() {
         tr.dataset.dayssince = results.daysSinceMatch;
         tr.dataset.datesince = results.dateAsString;
         tr.dataset.matchindex = matchIndex;
-        tr.classList.add(profileToCheckClass);
-        if (!playersList.includes(steamid64) && gameNotFiltered) {
-          playersList.push(steamid64);
+        tr.classList.add(playerFormattedClass);
+        if (!playersList.some((x) => x.steamid64 === steamid64) && gameNotFiltered) {
+          playersList.push({
+            steamid64: steamid64,
+            checked: false,
+          });
         }
       });
       rightPanel.classList.add(tableFormattedClass);
@@ -393,44 +396,38 @@ function checkLoadedMatchesForBans() {
   stopCheckBan = false;
   toggleStopButton(stopCheckBansButton, true);
   disableAllButtons(true);
-  let selector = `.${profileToCheckClass}:not(.${profileCheckedClass})`;
-  if (is5v5CompetitiveSection()) {
-    selector = addFilterGameSelector(selector);
-  }
-  let players = [];
-  for (let player of document.querySelectorAll(selector)) {
-    players.push(player.dataset.steamid64);
-  }
 
-  const uniquePlayers = [...new Set(players)];
-  let batches = uniquePlayers.reduce((arr, player, i) => {
-    const batchIndex = Math.floor(i / 100);
-    if (!arr[batchIndex]) {
-      arr[batchIndex] = [player];
-    } else {
-      arr[batchIndex].push(player);
-    }
-    return arr;
-  }, []);
+  let playersToCheck = playersList.filter((x) => !x.checked);
+  const maxPlayers = 100;
+  let requestIndex = 1;
+
+  let requestsCount = Math.floor(playersToCheck.length / 100);
+  if (playersToCheck.length % maxPlayers !== 0) {
+    requestsCount++;
+  }
 
   const stop = () => {
     disableAllButtons(false);
     toggleStopButton(stopCheckBansButton, false);
   };
 
-  const checkBansOnApi = (requestIndex, retryCount) => {
+  const checkBansOnApi = (retryCount) => {
     updateResults([
-      { text: `Loaded unchecked matches contain ${uniquePlayers.length} players.` },
-      { text: `We can scan 100 players at a time so we're sending ${batches.length} request${batches.length > 1 ? 's' : ''}` },
-      { text: `${requestIndex} successful request${requestIndex === 1 ? '' : 's'} so far...` },
+      { text: `Loaded unchecked matches contain ${playersToCheck.length} players.` },
+      { text: `We can scan ${maxPlayers} players at a time so we're sending ${requestsCount} request${requestsCount > 1 ? 's' : ''}` },
+      { text: `${requestIndex - 1} successful request${requestIndex === 1 ? '' : 's'} so far...` },
     ]);
 
+    const start = (requestIndex - 1) * maxPlayers;
+    const end = start + maxPlayers;
+    const ids = playersToCheck.slice(start, end).map((x) => x.steamid64);
+    console.log(ids);
     chrome.runtime.sendMessage(
       chrome.runtime.id,
       {
         action: 'fetchBans',
         apikey: config.yourapikey,
-        batch: batches[requestIndex],
+        batch: ids,
       },
       (json, error) => {
         if (error || !json) {
@@ -448,11 +445,12 @@ function checkLoadedMatchesForBans() {
             true
           );
           if (retryCount > 0) {
-            setTimeout(() => checkBansOnApi(requestIndex, retryCount - 1), 3000);
+            setTimeout(() => checkBansOnApi(retryCount - 1), 3000);
           }
           return;
         }
         for (let player of json.players) {
+          playersToCheck.find((x) => x.steamid64 === player.SteamId).checked = true;
           const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
           const playerEl = playerEls[0];
           const daySinceLastMatch = playerEl ? parseInt(playerEl.dataset.dayssince, 10) : 0;
@@ -499,7 +497,6 @@ function checkLoadedMatchesForBans() {
             });
           }
           for (let playerEl of playerEls) {
-            playerEl.classList.add(profileCheckedClass);
             verdictEl = playerEl.querySelector(`.${columnBanResultClass}`);
             if (verdict) {
               playerEl.classList.add('player-banned');
@@ -536,8 +533,9 @@ function checkLoadedMatchesForBans() {
         if (stopCheckBan) {
           displayBanCheckResult(false);
           stop();
-        } else if (batches.length > requestIndex + 1) {
-          setTimeout(() => checkBansOnApi(requestIndex + 1, maxRetries), 1000);
+        } else if (requestsCount > requestIndex) {
+          requestIndex++;
+          setTimeout(() => checkBansOnApi(maxRetries), 1000);
         } else {
           displayBanCheckResult(true);
           stop();
@@ -545,8 +543,8 @@ function checkLoadedMatchesForBans() {
       }
     );
   };
-  if (uniquePlayers.length > 0) {
-    checkBansOnApi(0, maxRetries);
+  if (playersToCheck.length > 0) {
+    checkBansOnApi(maxRetries);
   } else {
     stop();
   }

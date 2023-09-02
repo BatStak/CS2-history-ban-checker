@@ -6,6 +6,15 @@ function isCommendOrReportsSection() {
   return ['playerreports', 'playercommends'].includes(section);
 }
 
+function addPlayer(steamid64) {
+  if (!playersList.some((x) => x.steamid64 === steamid64)) {
+    playersList.push({
+      steamid64: steamid64,
+      checked: false,
+    });
+  }
+}
+
 function saveHistoryDate() {
   let historyDate = document.getElementById('historyload-input-date').value.trim();
   // if date invalid we rollback to previous date

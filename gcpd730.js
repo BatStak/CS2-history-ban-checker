@@ -319,11 +319,8 @@ function formatMatchsTable() {
         tr.dataset.datesince = results.dateAsString;
         tr.dataset.matchindex = matchIndex;
         tr.classList.add(playerFormattedClass);
-        if (!playersList.some((x) => x.steamid64 === steamid64) && gameNotFiltered) {
-          playersList.push({
-            steamid64: steamid64,
-            checked: false,
-          });
+        if (gameNotFiltered) {
+          addPlayer(steamid64);
         }
       });
       rightPanel.classList.add(tableFormattedClass);
@@ -385,7 +382,7 @@ function displayBanCheckResult(done) {
     },
     { text: '' },
     {
-      text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CSGO).`,
+      text: `${plural ? `There were ` : `There is `}${banStats.recentBans} player${plural ? `s ` : ``} who got banned after playing with you (more likely to be on CS).`,
       important: banStats.recentBans > 0,
     },
   ]);

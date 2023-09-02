@@ -1,7 +1,7 @@
 {
   "name": "CSGO history ban checker",
   "description": "Check ban status of players you encountered in CSGO matchmaking.",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "permissions": ["storage", "contextMenus"],
   "host_permissions": ["*://steamcommunity.com/*", "https://api.steampowered.com/*"],
   "optional_host_permissions": ["*://*/*"],
@@ -29,6 +29,8 @@
         "*://steamcommunity.com/id/*/following",
         "*://steamcommunity.com/profiles/*/following",
         "*://steamcommunity.com/groups/*",
+        "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorypremier",
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorypremier",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitive",
         "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorycompetitive",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorywingman",

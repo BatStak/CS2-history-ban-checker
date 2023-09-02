@@ -294,8 +294,8 @@ function formatMatchsTable() {
       }
 
       const maxScore = Math.max(scoreTeam1, scoreTeam2);
-      const isLong = maxScore === 15 || maxScore === 16;
-      const isShort = maxScore === 8 || maxScore === 9;
+      const isLong = (scoreTeam1 === scoreTeam2 && maxScore === 15) || maxScore === 16;
+      const isShort = (scoreTeam1 === scoreTeam2 && maxScore === 8) || maxScore === 9;
       const isAborted = !isLong && !isShort;
       if (isLong) {
         matchRow.classList.add(longGameClass);

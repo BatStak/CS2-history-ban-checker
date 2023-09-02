@@ -54,6 +54,7 @@ let endDate = '';
 
 // array of { steamid34, checked }
 const playersList = [];
+let playersToCheck = [];
 
 /**
  * Array of {} with those attributes :
@@ -78,7 +79,6 @@ const matchLoseClass = 'csgo-history-match-lose';
 const longGameClass = 'csgo-history-long-game';
 const shortGameClass = 'csgo-history-short-game';
 const abortedGameClass = 'csgo-history-aborted-game';
-
 
 const playerFormattedClass = 'csgo-history-formatted-profile';
 const tableFormattedClass = 'csgo-history-result-formatted';

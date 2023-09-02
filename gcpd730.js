@@ -391,37 +391,8 @@ function displayBanCheckResult(done) {
   ]);
 }
 
-function checkLoadedMatchesForBans() {
-  checkBanStarted = true;
-  stopCheckBan = false;
-  toggleStopButton(stopCheckBansButton, true);
-  disableAllButtons(true);
-
-  let playersToCheck = playersList.filter((x) => !x.checked);
-  const maxPlayers = 100;
-  let requestIndex = 1;
-
-  let requestsCount = Math.floor(playersToCheck.length / 100);
-  if (playersToCheck.length % maxPlayers !== 0) {
-    requestsCount++;
-  }
-
-  const stop = () => {
-    disableAllButtons(false);
-    toggleStopButton(stopCheckBansButton, false);
-  };
-
-  const checkBansOnApi = (retryCount) => {
-    updateResults([
-      { text: `Loaded unchecked matches contain ${playersToCheck.length} players.` },
-      { text: `We can scan ${maxPlayers} players at a time so we're sending ${requestsCount} request${requestsCount > 1 ? 's' : ''}` },
-      { text: `${requestIndex - 1} successful request${requestIndex === 1 ? '' : 's'} so far...` },
-    ]);
-
-    const start = (requestIndex - 1) * maxPlayers;
-    const end = start + maxPlayers;
-    const ids = playersToCheck.slice(start, end).map((x) => x.steamid64);
-    console.log(ids);
+function checkBansOnApi(ids) {
+  return new Promise((resolve) => {
     chrome.runtime.sendMessage(
       chrome.runtime.id,
       {
@@ -431,123 +402,160 @@ function checkLoadedMatchesForBans() {
       },
       (json, error) => {
         if (error || !json) {
-          updateResults(
-            [
-              {
-                text: `Error while scanning players for bans: ${
-                  retryCount > 0
-                    ? `Retrying to scan... ${maxRetries - retryCount + 1}/3`
-                    : `Couldn't scan for bans after ${maxRetries} retries. Are your sure you set a valid API key ?`
-                }`,
-                important: true,
-              },
-            ],
-            true
-          );
-          if (retryCount > 0) {
-            setTimeout(() => checkBansOnApi(retryCount - 1), 3000);
-          }
-          return;
-        }
-        for (let player of json.players) {
-          playersToCheck.find((x) => x.steamid64 === player.SteamId).checked = true;
-          const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
-          const playerEl = playerEls[0];
-          const daySinceLastMatch = playerEl ? parseInt(playerEl.dataset.dayssince, 10) : 0;
-          let verdict = '';
-          let verdictPeople = '';
-          if (player.NumberOfVACBans > 0) {
-            verdict += 'VAC';
-            verdictPeople += 'VAC';
-            banStats.vacBans++;
-          }
-          if (player.NumberOfGameBans > 0) {
-            if (verdict) {
-              verdict += ' &\n';
-              verdictPeople += ' & ';
-            }
-            verdict += 'Game';
-            verdictPeople += 'Game ban';
-            banStats.gameBans++;
-          }
-          if (verdict) {
-            const bannedAfter = daySinceLastMatch > player.DaysSinceLastBan;
-            const linkTitle = playerEl ? playerEl.querySelector('.linkTitle') : '';
-            const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
-            if (bannedAfter) {
-              banStats.recentBans++;
-            }
-            if (daysAfter >= 0) {
-              verdict += '+' + daysAfter;
-            } else {
-              verdict += daysAfter;
-            }
-            verdictPeople += `, last ban ${player.DaysSinceLastBan} days ago`;
-            bannedPlayers.push({
-              verdict: verdict,
-              verdictPeople: verdictPeople,
-              steamid: player.SteamId,
-              daySinceLastBan: player.DaysSinceLastBan,
-              daySinceLastMatch: daySinceLastMatch,
-              dateSinceLastMatch: playerEl ? playerEl.dataset.datesince : 0,
-              after: bannedAfter,
-              profileUrl: linkTitle ? linkTitle.href : '',
-              profileName: linkTitle ? linkTitle.innerText.trim() : '',
-              profileAvatar: playerEl ? playerEl.querySelector('.playerAvatar img').src : '',
-            });
-          }
-          for (let playerEl of playerEls) {
-            verdictEl = playerEl.querySelector(`.${columnBanResultClass}`);
-            if (verdict) {
-              playerEl.classList.add('player-banned');
-              const mapStats = mapsStats.find((mapStats) => mapStats.name === playerEl.dataset.map);
-              const matchBanAlreadyCounted = matchIndexWithBans.includes(playerEl.dataset.matchindex);
-              matchIndexWithBans.push(playerEl.dataset.matchindex);
-              if (!matchBanAlreadyCounted && mapStats) {
-                mapStats.bans++;
-              }
-              if (daySinceLastMatch > player.DaysSinceLastBan) {
-                playerEl.classList.add('after');
-                verdictEl.style.color = 'red';
-                if (!isCommendOrReportsSection()) {
-                  playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
-                }
-                if (!matchBanAlreadyCounted && mapStats) {
-                  mapStats.bansAfter++;
-                }
-              } else {
-                verdictEl.style.color = 'yellow';
-              }
-              verdictEl.style.cursor = 'help';
-              verdictEl.innerText = verdict;
-              verdictEl.title = `Days since last ban: ${player.DaysSinceLastBan}`;
-            } else {
-              verdictEl.innerText = '';
-            }
-          }
-        }
-        updateGlobalStats();
-        displayBannedPlayers();
-        updatePeopleList();
-        updateGroupMembersList();
-        if (stopCheckBan) {
-          displayBanCheckResult(false);
-          stop();
-        } else if (requestsCount > requestIndex) {
-          requestIndex++;
-          setTimeout(() => checkBansOnApi(maxRetries), 1000);
+          resolve(false);
         } else {
-          displayBanCheckResult(true);
-          stop();
+          for (let player of json.players) {
+            playersToCheck.find((x) => x.steamid64 === player.SteamId).checked = true;
+            const playerEls = document.querySelectorAll(`tr[data-steamid64="${player.SteamId}"]`);
+            const playerEl = playerEls[0];
+            const daySinceLastMatch = playerEl ? parseInt(playerEl.dataset.dayssince, 10) : 0;
+            let verdict = '';
+            let verdictPeople = '';
+            if (player.NumberOfVACBans > 0) {
+              verdict += 'VAC';
+              verdictPeople += 'VAC';
+              banStats.vacBans++;
+            }
+            if (player.NumberOfGameBans > 0) {
+              if (verdict) {
+                verdict += ' &\n';
+                verdictPeople += ' & ';
+              }
+              verdict += 'Game';
+              verdictPeople += 'Game ban';
+              banStats.gameBans++;
+            }
+            if (verdict) {
+              const bannedAfter = daySinceLastMatch > player.DaysSinceLastBan;
+              const linkTitle = playerEl ? playerEl.querySelector('.linkTitle') : '';
+              const daysAfter = daySinceLastMatch - player.DaysSinceLastBan;
+              if (bannedAfter) {
+                banStats.recentBans++;
+              }
+              if (daysAfter >= 0) {
+                verdict += '+' + daysAfter;
+              } else {
+                verdict += daysAfter;
+              }
+              verdictPeople += `, last ban ${player.DaysSinceLastBan} days ago`;
+              bannedPlayers.push({
+                verdict: verdict,
+                verdictPeople: verdictPeople,
+                steamid: player.SteamId,
+                daySinceLastBan: player.DaysSinceLastBan,
+                daySinceLastMatch: daySinceLastMatch,
+                dateSinceLastMatch: playerEl ? playerEl.dataset.datesince : 0,
+                after: bannedAfter,
+                profileUrl: linkTitle ? linkTitle.href : '',
+                profileName: linkTitle ? linkTitle.innerText.trim() : '',
+                profileAvatar: playerEl ? playerEl.querySelector('.playerAvatar img').src : '',
+              });
+            }
+            for (let playerEl of playerEls) {
+              verdictEl = playerEl.querySelector(`.${columnBanResultClass}`);
+              if (verdict) {
+                playerEl.classList.add('player-banned');
+                const mapStats = mapsStats.find((mapStats) => mapStats.name === playerEl.dataset.map);
+                const matchBanAlreadyCounted = matchIndexWithBans.includes(playerEl.dataset.matchindex);
+                matchIndexWithBans.push(playerEl.dataset.matchindex);
+                if (!matchBanAlreadyCounted && mapStats) {
+                  mapStats.bans++;
+                }
+                if (daySinceLastMatch > player.DaysSinceLastBan) {
+                  playerEl.classList.add('after');
+                  verdictEl.style.color = 'red';
+                  if (!isCommendOrReportsSection()) {
+                    playerEl.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#583a3a';
+                  }
+                  if (!matchBanAlreadyCounted && mapStats) {
+                    mapStats.bansAfter++;
+                  }
+                } else {
+                  verdictEl.style.color = 'yellow';
+                }
+                verdictEl.style.cursor = 'help';
+                verdictEl.innerText = verdict;
+                verdictEl.title = `Days since last ban: ${player.DaysSinceLastBan}`;
+              } else {
+                verdictEl.innerText = '';
+              }
+            }
+          }
+          setTimeout(() => {
+            resolve(true);
+          }, 500);
         }
       }
     );
-  };
-  if (playersToCheck.length > 0) {
-    checkBansOnApi(maxRetries);
-  } else {
-    stop();
+  });
+}
+
+async function checkLoadedMatchesForBans() {
+  checkBanStarted = true;
+  stopCheckBan = false;
+  toggleStopButton(stopCheckBansButton, true);
+  disableAllButtons(true);
+
+  playersToCheck = playersList.filter((x) => !x.checked);
+  const maxPlayers = 100;
+
+  let requestsCount = Math.floor(playersToCheck.length / 100);
+  if (playersToCheck.length % maxPlayers !== 0) {
+    requestsCount++;
   }
+
+  for (let requestIndex = 0; requestIndex < requestsCount; requestIndex++) {
+    updateResults([
+      { text: `Loaded unchecked matches contain ${playersToCheck.length} players.` },
+      { text: `We can scan ${maxPlayers} players at a time so we're sending ${requestsCount} request${requestsCount > 1 ? 's' : ''}` },
+      { text: `${requestIndex} successful request${requestIndex <= 1 ? '' : 's'} so far...` },
+    ]);
+    const start = requestIndex * maxPlayers;
+    const end = start + maxPlayers;
+    const ids = playersToCheck.slice(start, end).map((x) => x.steamid64);
+
+    let result = false;
+    let retry = 0;
+    while (retry < maxRetries && !result) {
+      result = await checkBansOnApi(ids);
+      if (!result) {
+        updateResults(
+          [
+            {
+              text: `Error while scanning players for bans: ${
+                retry < maxRetries
+                  ? `Retrying to scan... ${retry + 1}/${maxRetries}`
+                  : `Couldn't scan for bans after ${maxRetries} retries. Are your sure you set a valid API key ?`
+              }`,
+              important: true,
+            },
+          ],
+          true
+        );
+      }
+      retry++;
+    }
+
+    updateGlobalStats();
+    displayBannedPlayers();
+    updatePeopleList();
+    updateGroupMembersList();
+
+    if (!result) {
+      break;
+    }
+
+    if (stopCheckBan) {
+      displayBanCheckResult(false);
+      break;
+    }
+  }
+
+  if (!stopCheckBan) {
+    displayBanCheckResult(true);
+  }
+  disableAllButtons(false);
+  toggleStopButton(stopCheckBansButton, false);
 }
 
 function stopTimerLoadMatchHistory() {

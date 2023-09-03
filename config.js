@@ -25,7 +25,7 @@ const config = {
 const profileURI = document.querySelector('.profile_small_header_texture > a')?.href;
 const section = new URLSearchParams(window.location.search).get('tab');
 
-const mapNameRegex = /(Competitive|Wingman) (.+)/;
+const mapNameRegex = /(Premier|Competitive|Wingman) (.+)/;
 const waitTimeRegex = /Wait Time\: (\d+)\:(\d+)/;
 const matchTimeRegex = /Match Duration\: (\d+)\:(\d+)/;
 const scoreRegex = /(\d+) : (\d+)/;

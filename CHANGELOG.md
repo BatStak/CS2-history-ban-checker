@@ -1,3 +1,7 @@
+# v1.2.4
+
+Fix maps stats in Premier mode
+
 # v1.2.3
 
 Add compatibility for CS2 Premium matchmaking.  

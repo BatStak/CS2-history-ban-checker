@@ -22,7 +22,7 @@ function genericOnClick(info) {
       break;
     case 'github':
       chrome.tabs.create({
-        url: 'https://github.com/BatStak/CSGO-history-ban-checker',
+        url: 'https://github.com/BatStak/CS2-and-CSGO-history-ban-checker',
       });
       break;
   }

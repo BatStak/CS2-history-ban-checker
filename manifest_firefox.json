@@ -1,7 +1,7 @@
 {
   "name": "CS2 and CSGO history ban checker",
   "description": "Check ban status of players you encountered in CS2 and CSGO matchmaking.",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "permissions": ["storage", "contextMenus", "*://steamcommunity.com/*", "https://api.steampowered.com/*"],
   "icons": {
     "16": "icon-16.png",

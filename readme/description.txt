@@ -11,4 +11,4 @@ The most important statistics I wanted to add in the first place :
 
 You can also check ban status on players reported, commends you received, your friends list, people you are following, recently played with and group members list.
 
-Link of the source : https://github.com/BatStak/CSGO-history-ban-checker
+Link of the source : https://github.com/BatStak/CS2-and-CSGO-history-ban-checker

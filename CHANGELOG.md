@@ -1,3 +1,8 @@
+# v1.2.6
+
+Fix link to github.  
+Fix ban checkon comments/reports.  
+
 # v1.2.5
 
 Remove game type filter.  

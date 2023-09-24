@@ -2,7 +2,7 @@
 
 This is a fork of [Ban-Checker-for-Steam](https://github.com/ge-ku/Ban-Checker-for-Steam).
 
-The extension is published for [Chrome](https://chrome.google.com/webstore/detail/csgo-history-ban-checker/pniajbbemhplaefaikpgfipmopopjeob) and [Firefox](https://addons.mozilla.org/fr/firefox/addon/csgo-history-ban-checker/).
+The extension is published for [Chrome](https://chrome.google.com/webstore/detail/cs2-and-csgo-history-ban/pniajbbemhplaefaikpgfipmopopjeob) and [Firefox](https://addons.mozilla.org/fr/firefox/addon/cs2-csgo-history-ban-checker/).
 
 I focus on improving analysing about https://steamcommunity.com/my/gcpd/730
 

@@ -328,10 +328,12 @@ function formatMatchsTable() {
       const dateEl = report.querySelector('td:first-child');
       const daysSinceMatch = getDaysSinceAndUpdatePeriod(dateEl.innerText).daysSinceMatch;
       const minProfileId = report.querySelector('.linkTitle').dataset.miniprofile;
-      report.dataset.steamid64 = getSteamID64(minProfileId);
+      const steamid64 = getSteamID64(minProfileId);
+      report.dataset.steamid64 = steamid64;
       report.dataset.dayssince = daysSinceMatch;
       report.classList.add(playerFormattedClass);
       report.classList.add(tableFormattedClass);
+      addPlayer(steamid64);
     }
   } else {
     for (let rightPanel of document.querySelectorAll(`.csgo_scoreboard_inner_right:not(.${tableFormattedClass})`)) {
@@ -742,7 +744,7 @@ function init() {
   } else {
     updateStatus([
       {
-        text: `This page lacks of one of those elements, we can't continue : unable to  profile link or it is an unknow section. You can create issue on https://github.com/BatStak/CSGO-history-ban-checker`,
+        text: `This page lacks of one of those elements, we can't continue : unable to find profile link or it is an unknow section. You can create issue on https://github.com/BatStak/CS2-and-CSGO-history-ban-checker`,
         important: true,
       },
     ]);

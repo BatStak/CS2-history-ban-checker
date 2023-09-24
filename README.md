@@ -6,7 +6,7 @@ The extension is published for [Chrome](https://chrome.google.com/webstore/detai
 
 I focus on improving analysing about https://steamcommunity.com/my/gcpd/730
 
-Load your matchmaking history and find if players have been banned (VAC or Game ban). You can filter your games between short and long games.
+Load your matchmaking history and find if players have been banned (VAC or Game ban).
 
 I provide the list of banned players after playing with you and some statistics.
 
@@ -25,8 +25,7 @@ What this version add to the original version :
 - you can provide a max date for history load,
 - list of players banned,
 - maps statistics,
-- winrate,
-- add option to filter games between short and long games.
+- winrate.
 
 Here are some screeshots :
 

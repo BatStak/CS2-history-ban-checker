@@ -52,10 +52,10 @@
 #banchecker-options {
   box-sizing: border-box;
   z-index: 501;
-  top: calc(50% - 90px);
-  left: calc(50% - 300px);
-  width: 600px;
-  height: 180px;
+  top: calc(50% - 75px);
+  left: calc(50% - 225px);
+  width: 450px;
+  height: 150px;
   background: #fff;
   display: none;
 }
@@ -82,13 +82,6 @@
   left: 0;
   z-index: 10;
   background: rgba(0, 0, 0, 0.3);
-}
-
-.csgo_scoreboard_root.hide-long-games .csgo-history-long-game,
-.csgo_scoreboard_root.hide-short-games .csgo-history-short-game,
-.csgo_scoreboard_root.hide-long-games .csgo-history-aborted-game,
-.csgo_scoreboard_root.hide-short-games .csgo-history-aborted-game {
-  display: none !important;
 }
 
 .csgo-history-table {

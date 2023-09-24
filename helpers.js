@@ -1,7 +1,3 @@
-function is5v5CompetitiveSection() {
-  return section === 'matchhistorycompetitive';
-}
-
 function isCommendOrReportsSection() {
   return ['playerreports', 'playercommends'].includes(section);
 }
@@ -28,19 +24,6 @@ function saveHistoryDate() {
 
 function updateFormValues() {
   document.getElementById('yourapikey').value = config.yourapikey;
-  if (is5v5CompetitiveSection()) {
-    switch (config.gameType) {
-      case 'long':
-        document.getElementById('gameType-long').checked = true;
-        break;
-      case 'short':
-        document.getElementById('gameType-short').checked = true;
-        break;
-      default:
-        document.getElementById('gameType-all').checked = true;
-        break;
-    }
-  }
   document.getElementById('historyload-input-date').value = config.historyDate;
 }
 
@@ -48,18 +31,6 @@ function onGCPDSection() {
   if (typeof content !== 'undefined') fetch = content.fetch; // fix for Firefox with disabled third-party cookies
 
   return !!profileURI && !!section;
-}
-
-function addFilterGameSelector(selector) {
-  let editedSelector = selector;
-
-  if (config.gameType === 'long') {
-    editedSelector = `.${longGameClass} ${editedSelector}`;
-  } else if (config.gameType === 'short') {
-    editedSelector = `.${shortGameClass} ${editedSelector}`;
-  }
-
-  return editedSelector;
 }
 
 function getResultsNodeList() {
@@ -149,68 +120,12 @@ function showSettings() {
   optionsContainer.style.display = 'block';
 }
 
-function resetUI() {
-  funStats = {
-    numberOfMatches: 0,
-    totalKills: 0,
-    totalAssists: 0,
-    totalDeaths: 0,
-    totalWins: 0,
-    totalWaitTime: 0,
-    totalTime: 0,
-  };
-  mapsStats.splice(0, mapsStats.length);
-  matchIndexWithBans.splice(0, matchIndexWithBans.length);
-  matchIndex = 1;
-
-  const scoreboardRoot = document.querySelector('.csgo_scoreboard_root');
-  scoreboardRoot.classList.remove('hide-long-games');
-  scoreboardRoot.classList.remove('hide-short-games');
-  if (config.gameType === 'short') {
-    scoreboardRoot.classList.add('hide-long-games');
-  } else if (config.gameType === 'long') {
-    scoreboardRoot.classList.add('hide-short-games');
-  }
-
-  document.querySelectorAll(`.${myProfileStatsCheckedClass}`).forEach((elt) => {
-    elt.classList.remove(myProfileStatsCheckedClass);
-  });
-  document.querySelectorAll(`.${playerFormattedClass}`).forEach((elt) => {
-    elt.classList.remove(playerFormattedClass);
-  });
-  document.querySelectorAll(`.${tableFormattedClass}`).forEach((elt) => {
-    elt.classList.remove(tableFormattedClass);
-  });
-
-  if (config.gameType !== 'all') {
-    filterText.style.display = 'block';
-    filterText.textContent = `You have chosen to see only ${config.gameType} games. You can change it in "Set API Key and options".`;
-  } else {
-    filterText.style.display = 'none';
-  }
-
-  formatMatchsTable();
-  setTimeout(() => {
-    updateFunStats();
-    setTimeout(() => {
-      updateGlobalStats();
-    }, 200);
-  }, 200);
-}
-
 function saveSettings() {
   const apiKey = document.getElementById('yourapikey').value;
   const apiKeySet = apiKey && !config.yourapikey;
   config.yourapikey = apiKey;
-  let gamesFilterChanged = false;
 
   const configToSave = { yourapikey: config.yourapikey };
-  if (is5v5CompetitiveSection()) {
-    const gameType = document.getElementById('gameType-long').checked ? 'long' : document.getElementById('gameType-short').checked ? 'short' : 'all';
-    gamesFilterChanged = gameType !== config.gameType;
-    config.gameType = gameType;
-    configToSave.gameType = config.gameType;
-  }
 
   // save
   chrome.storage.sync.set(configToSave);
@@ -221,13 +136,9 @@ function saveSettings() {
       checkbansTextsResults.textContent = '';
     }
   } else {
-    updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
+    updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key" !`, important: true }]);
     disableAllButtons(true);
     bancheckerSettingsButton.disabled = false;
-  }
-
-  if (gamesFilterChanged) {
-    resetUI();
   }
 
   updateFormValues();
@@ -289,46 +200,6 @@ function createOptionsContainer() {
   linkForApiKey.href = 'https://steamcommunity.com/dev/apikey';
   linkForApiKey.textContent = 'Get your API Key here';
   inner.appendChild(linkForApiKey);
-
-  if (is5v5CompetitiveSection()) {
-    inner.appendChild(create('br'));
-    inner.appendChild(create('br'));
-
-    const ignoreGamesLabel = create('span');
-    ignoreGamesLabel.textContent = 'Filter games by type : ';
-    inner.appendChild(ignoreGamesLabel);
-    const ignoreGamesRadioAll = create('input');
-    ignoreGamesRadioAll.type = 'radio';
-    ignoreGamesRadioAll.name = 'gameType';
-    ignoreGamesRadioAll.value = 'all';
-    ignoreGamesRadioAll.id = 'gameType-all';
-    ignoreGamesRadioAll.checked = true;
-    const ignoreGamesRadioAllLabel = create('label');
-    ignoreGamesRadioAllLabel.setAttribute('for', 'gameType-all');
-    ignoreGamesRadioAllLabel.textContent = 'all games (no filter)';
-    inner.appendChild(ignoreGamesRadioAll);
-    inner.appendChild(ignoreGamesRadioAllLabel);
-    const ignoreGamesRadioLong = create('input');
-    ignoreGamesRadioLong.type = 'radio';
-    ignoreGamesRadioLong.name = 'gameType';
-    ignoreGamesRadioLong.value = 'long';
-    ignoreGamesRadioLong.id = 'gameType-long';
-    const ignoreGamesRadioLongLabel = create('label');
-    ignoreGamesRadioLongLabel.setAttribute('for', 'gameType-long');
-    ignoreGamesRadioLongLabel.textContent = 'long games only';
-    inner.appendChild(ignoreGamesRadioLong);
-    inner.appendChild(ignoreGamesRadioLongLabel);
-    const ignoreGamesRadioShort = create('input');
-    ignoreGamesRadioShort.type = 'radio';
-    ignoreGamesRadioShort.name = 'gameType';
-    ignoreGamesRadioShort.value = 'short';
-    ignoreGamesRadioShort.id = 'gameType-short';
-    const ignoreGamesRadioShortLabel = create('label');
-    ignoreGamesRadioShortLabel.setAttribute('for', 'gameType-short');
-    ignoreGamesRadioShortLabel.textContent = 'short games only';
-    inner.appendChild(ignoreGamesRadioShort);
-    inner.appendChild(ignoreGamesRadioShortLabel);
-  }
 
   inner.appendChild(create('br'));
   inner.appendChild(create('br'));

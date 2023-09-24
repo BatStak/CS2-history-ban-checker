@@ -38,7 +38,7 @@ dateSinceHistoryInput.setAttribute('type', 'text');
 const dateSinceHistoryPlaceholder = create('div', 'historyload-input-date-suffix');
 dateSinceHistoryPlaceholder.textContent = '(YYYY-MM-DD)';
 
-const bancheckerSettingsButton = createSteamButton('Set API Key and options');
+const bancheckerSettingsButton = createSteamButton('Set API Key');
 bancheckerSettingsButton.onclick = () => showSettings();
 
 const historyLoadDescription = create('div', 'historyload-description');
@@ -73,16 +73,9 @@ checkbansMenu.appendChild(stopCheckBansButton);
 
 const optionsContainer = createOptionsContainer();
 
-chrome.storage.sync.get(['yourapikey', 'gameType', 'historyDate'], (storageData) => {
+chrome.storage.sync.get(['yourapikey', 'historyDate'], (storageData) => {
   if (storageData.yourapikey) {
     config.yourapikey = storageData.yourapikey;
-  }
-  if (storageData.gameType) {
-    config.gameType = storageData.gameType;
-    if (config.gameType !== 'all') {
-      filterText.style.display = 'block';
-      filterText.textContent = `You have chosen to see only ${config.gameType} games. You can change it in "Set API Key and options".`;
-    }
   }
   if (storageData.historyDate === undefined) {
     const date = new Date();

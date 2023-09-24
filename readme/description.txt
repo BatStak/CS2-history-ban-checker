@@ -3,8 +3,6 @@ This extension is mainly inspired by Ban Checker for Steam.
 Load your matchmaking history and find if players have been banned (VAC or Game ban).  
 https://steamcommunity.com/my/gcpd/730
 
-You can filter between short and long games for competitive games.
-
 I provide the list of banned players after playing with you and some statistics, including maps.
 
 The most important statistics I wanted to add in the first place :

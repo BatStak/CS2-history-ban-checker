@@ -18,7 +18,6 @@ let funStats = {
 
 const config = {
   yourapikey: '',
-  gameType: 'all',
   historyDate: undefined,
 };
 
@@ -76,9 +75,6 @@ const myProfileStatsCheckedClass = 'csgo-history-mystats-checked';
 const matchWinClass = 'csgo-history-match-win';
 const matchDrawClass = 'csgo-history-match-draw';
 const matchLoseClass = 'csgo-history-match-lose';
-const longGameClass = 'csgo-history-long-game';
-const shortGameClass = 'csgo-history-short-game';
-const abortedGameClass = 'csgo-history-aborted-game';
 
 const playerFormattedClass = 'csgo-history-formatted-profile';
 const tableFormattedClass = 'csgo-history-result-formatted';

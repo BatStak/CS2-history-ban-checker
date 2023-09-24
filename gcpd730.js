@@ -1,7 +1,7 @@
 function updateFunStats() {
   if (isCommendOrReportsSection()) return;
 
-  let selector = addFilterGameSelector(`.inner_name .playerAvatar a[href="${profileURI}"]:not(.${myProfileStatsCheckedClass})`);
+  let selector = `.inner_name .playerAvatar a[href="${profileURI}"]:not(.${myProfileStatsCheckedClass})`;
 
   // we find the links on our profil to get the statistics of the match
   const myProfileLinks = document.querySelectorAll(selector);
@@ -228,7 +228,7 @@ function updateGlobalStats() {
   checkbansGlobalResults.appendChild(mapsTable);
 }
 
-function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
+function getDaysSinceAndUpdatePeriod(dateString) {
   const results = {
     daysSinceMatch: -1,
     dateAsString: null,
@@ -250,12 +250,10 @@ function getDaysSinceAndUpdatePeriod(dateString, updateDates) {
     results.daysSinceMatch = Math.ceil(timePassed / (1000 * 60 * 60 * 24));
     results.dateAsString = formattedDate;
 
-    if (updateDates) {
-      if (!endDate) {
-        endDate = formattedDate;
-      }
-      startDate = formattedDate;
+    if (!endDate) {
+      endDate = formattedDate;
     }
+    startDate = formattedDate;
   }
 
   return results;
@@ -293,22 +291,8 @@ function formatMatchsTable() {
         matchRow.classList.add(matchLoseClass);
       }
 
-      const maxScore = Math.max(scoreTeam1, scoreTeam2);
-      const isLong = (scoreTeam1 === scoreTeam2 && maxScore === 15) || maxScore === 16;
-      const isShort = (scoreTeam1 === scoreTeam2 && maxScore === 8) || maxScore === 9;
-      const isAborted = !isLong && !isShort;
-      if (isLong) {
-        matchRow.classList.add(longGameClass);
-      } else if (isShort) {
-        matchRow.classList.add(shortGameClass);
-      } else if (isAborted) {
-        matchRow.classList.add(abortedGameClass);
-      }
-
-      const gameNotFiltered = config.gameType === 'long' ? isLong : config.gameType === 'short' ? isShort : true;
-
       const leftColumn = matchRow.querySelector('.csgo_scoreboard_inner_left');
-      const results = getDaysSinceAndUpdatePeriod(leftColumn.innerText, gameNotFiltered);
+      const results = getDaysSinceAndUpdatePeriod(leftColumn.innerText);
       rightPanel.querySelectorAll('tbody > tr').forEach((tr, i) => {
         if (i === 0 || tr.childElementCount < 3) return;
         const profileLink = tr.querySelector('.linkTitle');
@@ -319,9 +303,7 @@ function formatMatchsTable() {
         tr.dataset.datesince = results.dateAsString;
         tr.dataset.matchindex = matchIndex;
         tr.classList.add(playerFormattedClass);
-        if (gameNotFiltered) {
-          addPlayer(steamid64);
-        }
+        addPlayer(steamid64);
       });
       rightPanel.classList.add(tableFormattedClass);
       matchIndex++;
@@ -689,17 +671,9 @@ function init() {
   if (onGCPDSection()) {
     updateUI();
 
-    if (is5v5CompetitiveSection()) {
-      if (config.gameType === 'short') {
-        document.querySelector('.csgo_scoreboard_root').classList.add('hide-long-games');
-      } else if (config.gameType === 'long') {
-        document.querySelector('.csgo_scoreboard_root').classList.add('hide-short-games');
-      }
-    }
-
     if (!config.yourapikey) {
       loadMatchHistoryButton.disabled = checkBansButton.disabled = true;
-      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key and options" !`, important: true }]);
+      updateResults([{ text: `You must set your API key first ! Don't worry, this is easy. Just click on the button "Set API Key" !`, important: true }]);
     }
     updateFormValues();
   } else {

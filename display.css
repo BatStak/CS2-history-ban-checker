@@ -119,8 +119,12 @@
   padding: 5px;
 }
 
+.map-stats th {
+  cursor: pointer;
+}
+
 .map-stats .map-sample {
-  width: 50px;
+  width: 70px;
 }
 
 .map-stats .map-name {
@@ -130,7 +134,7 @@
 .map-stats .map-win,
 .map-stats .map-draw,
 .map-stats .map-lose {
-  width: 115px;
+  width: 105px;
 }
 
 .map-stats .map-ban {

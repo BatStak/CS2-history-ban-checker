@@ -80,3 +80,6 @@ const playerFormattedClass = 'csgo-history-formatted-profile';
 const tableFormattedClass = 'csgo-history-result-formatted';
 const columnBanResultAddedClass = 'csgo-history-ban-column-added';
 const columnBanResultClass = 'csgo-history-column-ban';
+
+let sortMapStatsField = 'name';
+let sortMapStatsOrder = 'asc';

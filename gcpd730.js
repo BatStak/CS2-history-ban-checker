@@ -70,6 +70,38 @@ Total wait time: ${timeString(funStats.totalWaitTime)}
 Total match time: ${timeString(funStats.totalTime)}`;
 }
 
+function sortMapsStats(field) {
+  if (sortMapStatsField !== field) {
+    sortMapStatsOrder = 'asc';
+  } else {
+    sortMapStatsOrder = sortMapStatsOrder === 'asc' ? 'desc' : 'asc';
+  }
+  sortMapStatsField = field;
+  updateGlobalStats();
+}
+
+function setSortMaps(header, field, ratioValue) {
+  const func = (a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0);
+  const funcWithRatio = (a, b) => (a[field] / a[ratioValue] > b[field] / b[ratioValue] ? 1 : a[field] / a[ratioValue] < b[field] / b[ratioValue] ? -1 : 0);
+  replaceElt = header.lastChild || header;
+  if (sortMapStatsOrder === 'asc') {
+    replaceElt.textContent = `${replaceElt.textContent} ⇧`;
+    if (ratioValue) {
+      displayedMapsStats = mapsStats.sort((a, b) => funcWithRatio(a, b) || func(a, b));
+    } else {
+      displayedMapsStats = mapsStats.sort((a, b) => func(a, b));
+    }
+  } else {
+    replaceElt.textContent = `${replaceElt.textContent} ⇩`;
+    if (ratioValue) {
+      displayedMapsStats = mapsStats.sort((a, b) => funcWithRatio(b, a) || func(b, a));
+    } else {
+      displayedMapsStats = mapsStats.sort((a, b) => func(b, a));
+    }
+  }
+  return displayedMapsStats;
+}
+
 function updateGlobalStats() {
   if (!mapsStats.length) {
     return;
@@ -141,18 +173,24 @@ function updateGlobalStats() {
   mapsTbody.appendChild(mapsHeaderRow);
 
   mapsTh1.textContent = 'Map';
+  mapsTh1.onclick = () => sortMapsStats('name');
   mapsTh2.textContent = 'Sample';
+  mapsTh2.onclick = () => sortMapsStats('count');
   mapsTh3.textContent = 'Win [%]';
+  mapsTh3.onclick = () => sortMapsStats('wins');
   mapsTh4.textContent = 'Draw [%]';
+  mapsTh4.onclick = () => sortMapsStats('draws');
   mapsTh5.textContent = 'Lose [%]';
+  mapsTh5.onclick = () => sortMapsStats('loses');
   mapsTh6.textContent = 'With someone banned [%]';
-  const text1 = create('span');
+  mapsTh6.onclick = () => sortMapsStats('bans');
+  const text1 = create('div');
   text1.textContent = 'With someone banned';
-  const text2 = create('span');
+  const text2 = create('div');
   text2.textContent = 'after playing with you [%]';
   mapsTh7.appendChild(text1);
-  mapsTh7.appendChild(create('br'));
   mapsTh7.appendChild(text2);
+  mapsTh7.onclick = () => sortMapsStats('bansAfter');
 
   let total = {
     count: 0,
@@ -163,7 +201,32 @@ function updateGlobalStats() {
     bansAfter: 0,
   };
 
-  for (let map of mapsStats.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))) {
+  let displayedMapsStats = [...mapsStats];
+  switch (sortMapStatsField) {
+    case 'name':
+      displayedMapsStats = setSortMaps(mapsTh1, sortMapStatsField);
+      break;
+    case 'count':
+      displayedMapsStats = setSortMaps(mapsTh2, sortMapStatsField);
+      break;
+    case 'wins':
+      displayedMapsStats = setSortMaps(mapsTh3, sortMapStatsField, 'count');
+      break;
+    case 'draws':
+      displayedMapsStats = setSortMaps(mapsTh4, sortMapStatsField, 'count');
+      break;
+    case 'loses':
+      displayedMapsStats = setSortMaps(mapsTh5, sortMapStatsField, 'count');
+      break;
+    case 'bans':
+      displayedMapsStats = setSortMaps(mapsTh6, sortMapStatsField, 'count');
+      break;
+    case 'bansAfter':
+      displayedMapsStats = setSortMaps(mapsTh7, sortMapStatsField, 'count');
+      break;
+  }
+
+  for (let map of displayedMapsStats) {
     const mapRow = create('tr');
     const td1 = create('td');
     const td2 = create('td');

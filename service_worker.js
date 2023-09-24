@@ -1,6 +1,11 @@
 function genericOnClick(info) {
   switch (info.menuItemId) {
-    case 'match-history':
+    case 'premier-history':
+      chrome.tabs.create({
+        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorypremier',
+      });
+      break;
+    case 'mm-history':
       chrome.tabs.create({
         url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
       });
@@ -25,7 +30,12 @@ function genericOnClick(info) {
 
 chrome.contextMenus.removeAll();
 chrome.contextMenus.create({
-  id: 'match-history',
+  id: 'premier-history',
+  title: 'Access to premier history',
+  contexts: ['all'],
+});
+chrome.contextMenus.create({
+  id: 'mm-history',
   title: 'Access to matchmaking history',
   contexts: ['all'],
 });

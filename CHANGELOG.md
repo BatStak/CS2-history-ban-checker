@@ -1,3 +1,9 @@
+# v1.2.5
+
+Remove game type filter.  
+Add sort feature on maps stats table.  
+Add link to premier history in menu.  
+
 # v1.2.4
 
 Fix maps stats in Premier mode

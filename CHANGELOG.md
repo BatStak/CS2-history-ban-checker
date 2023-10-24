@@ -1,3 +1,7 @@
+# v1.2.7
+
+New competitive tab for CS2
+
 # v1.2.6
 
 Fix link to github.  

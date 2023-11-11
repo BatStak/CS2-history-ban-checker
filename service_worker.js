@@ -7,7 +7,7 @@ function genericOnClick(info) {
       break;
     case 'mm-history':
       chrome.tabs.create({
-        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive',
+        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitivepermap',
       });
       break;
     case 'friends':

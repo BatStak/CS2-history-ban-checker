@@ -6,7 +6,9 @@ The extension is published for [Chrome](https://chrome.google.com/webstore/detai
 
 I focus on improving analysing about https://steamcommunity.com/my/gcpd/730
 
-Load your matchmaking history and find if players have been banned (VAC or Game ban).
+Load your matchmaking or premier history and find if players have been banned (VAC or Game ban).
+
+I don't use third party websites (the 2 well known services online) because they alwaays miss some VAC/Game bans for some reason.
 
 I provide the list of banned players after playing with you and some statistics.
 
@@ -21,11 +23,9 @@ I add since 1.2.1 the ban status check about friends list, followed players, rec
 What this version add to the original version :
 - number and pourcentage of matches with someone who has been banned after playing with you,
 - number and pourcentage of players who has been banned after playing with you.
-- you can stop the history load and and ban check,
+- you can stop the history load and ban check,
 - you can provide a max date for history load,
-- list of players banned,
-- maps statistics,
-- winrate.
+- list of players banned, maps statistics and winrate.
 
 Here are some screeshots :
 

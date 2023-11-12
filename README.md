@@ -8,7 +8,7 @@ I focus on improving analysing about https://steamcommunity.com/my/gcpd/730
 
 Load your matchmaking or premier history and find if players have been banned (VAC or Game ban).
 
-I don't use third party websites (the 2 well known services online) because they alwaays miss some VAC/Game bans for some reason.
+I don't use third party websites (the 2 well known services online) because they always miss some VAC/Game bans for some reason.
 
 I provide the list of banned players after playing with you and some statistics.
 

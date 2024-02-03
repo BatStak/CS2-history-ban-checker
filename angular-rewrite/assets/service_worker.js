@@ -1,28 +1,28 @@
 function genericOnClick(info) {
   switch (info.menuItemId) {
-    case 'premier-history':
+    case "premier-history":
       chrome.tabs.create({
-        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorypremier',
+        url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorypremier",
       });
       break;
-    case 'mm-history':
+    case "mm-history":
       chrome.tabs.create({
-        url: 'https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitivepermap',
+        url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitivepermap",
       });
       break;
-    case 'friends':
+    case "friends":
       chrome.tabs.create({
-        url: 'https://steamcommunity.com/my/friends',
+        url: "https://steamcommunity.com/my/friends",
       });
       break;
-    case 'following':
+    case "following":
       chrome.tabs.create({
-        url: 'https://steamcommunity.com/my/following',
+        url: "https://steamcommunity.com/my/following",
       });
       break;
-    case 'github':
+    case "github":
       chrome.tabs.create({
-        url: 'https://github.com/BatStak/CS2-and-CSGO-history-ban-checker',
+        url: "https://github.com/BatStak/CS2-and-CSGO-history-ban-checker",
       });
       break;
   }
@@ -30,37 +30,41 @@ function genericOnClick(info) {
 
 chrome.contextMenus.removeAll();
 chrome.contextMenus.create({
-  id: 'premier-history',
-  title: 'Access to premier history',
-  contexts: ['all'],
+  id: "premier-history",
+  title: "Access to premier history",
+  contexts: ["all"],
 });
 chrome.contextMenus.create({
-  id: 'mm-history',
-  title: 'Access to matchmaking history',
-  contexts: ['all'],
+  id: "mm-history",
+  title: "Access to matchmaking history",
+  contexts: ["all"],
 });
 chrome.contextMenus.create({
-  id: 'friends',
-  title: 'Access to your friends list',
-  contexts: ['all'],
+  id: "friends",
+  title: "Access to your friends list",
+  contexts: ["all"],
 });
 chrome.contextMenus.create({
-  id: 'following',
-  title: 'Access to your following list',
-  contexts: ['all'],
+  id: "following",
+  title: "Access to your following list",
+  contexts: ["all"],
 });
 chrome.contextMenus.create({
-  id: 'github',
-  title: 'Github page',
-  contexts: ['all'],
+  id: "github",
+  title: "Github page",
+  contexts: ["all"],
 });
 
 chrome.contextMenus.onClicked.addListener(genericOnClick);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
-    case 'fetchBans':
-      fetch(`https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${request.apikey}&steamids=${request.batch.join(',')}`)
+    case "fetchBans":
+      fetch(
+        `https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${
+          request.apikey
+        }&steamids=${request.batch.join(",")}`
+      )
         .then((res) => {
           if (res.ok) {
             return res.json();

@@ -26,3 +26,17 @@
 input {
   color: #000;
 }
+
+:host {
+  padding: 17px;
+  margin-top: -20px;
+  border: 1px dashed;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+button ~ button {
+  margin-left: 10px;
+}

@@ -23,15 +23,6 @@
       "css": ["styles.css"],
       "run_at": "document_end",
       "matches": [
-        "*://steamcommunity.com/id/*/friends",
-        "*://steamcommunity.com/profiles/*/friends",
-        "*://steamcommunity.com/id/*/friends/add",
-        "*://steamcommunity.com/profiles/*/friends/add",
-        "*://steamcommunity.com/id/*/following/",
-        "*://steamcommunity.com/profiles/*/following/",
-        "*://steamcommunity.com/id/*/following",
-        "*://steamcommunity.com/profiles/*/following",
-        "*://steamcommunity.com/groups/*",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorypremier",
         "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorypremier",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitivepermap",
@@ -41,11 +32,7 @@
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorywingman",
         "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorywingman",
         "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistoryscrimmage",
-        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistoryscrimmage",
-        "*://steamcommunity.com/id/*/gcpd/730*tab=playerreports",
-        "*://steamcommunity.com/profiles/*/gcpd/730*tab=playerreports",
-        "*://steamcommunity.com/id/*/gcpd/730*tab=playercommends",
-        "*://steamcommunity.com/profiles/*/gcpd/730*tab=playercommends"
+        "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistoryscrimmage"
       ]
     }
   ],

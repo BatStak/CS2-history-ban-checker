@@ -10,16 +10,6 @@ function genericOnClick(info) {
         url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitivepermap",
       });
       break;
-    case "friends":
-      chrome.tabs.create({
-        url: "https://steamcommunity.com/my/friends",
-      });
-      break;
-    case "following":
-      chrome.tabs.create({
-        url: "https://steamcommunity.com/my/following",
-      });
-      break;
     case "github":
       chrome.tabs.create({
         url: "https://github.com/BatStak/CS2-and-CSGO-history-ban-checker",
@@ -37,16 +27,6 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
   id: "mm-history",
   title: "Access to matchmaking history",
-  contexts: ["all"],
-});
-chrome.contextMenus.create({
-  id: "friends",
-  title: "Access to your friends list",
-  contexts: ["all"],
-});
-chrome.contextMenus.create({
-  id: "following",
-  title: "Access to your following list",
   contexts: ["all"],
 });
 chrome.contextMenus.create({

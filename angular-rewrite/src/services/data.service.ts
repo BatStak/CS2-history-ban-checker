@@ -190,7 +190,7 @@ export class DataService {
       this.playersBanned = this.database.players
         ?.filter((p) => banInfos.some((b) => b.SteamId === p.steamID64))
         .sort((a, b) =>
-          a.banInfo!.DaysSinceLastBan < b.banInfo!.DaysSinceLastBan ? 1 : -1
+          a.banInfo!.DaysSinceLastBan < b.banInfo!.DaysSinceLastBan ? -1 : 1
         );
     }
   }

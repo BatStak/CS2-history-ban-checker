@@ -52,6 +52,7 @@ export class ScannerComponent {
     const stop = () => {
       this._utilsService.isScanning = this._stopScan = false;
       this._pageNumber = 0;
+      this._dataService.onSave.next();
     };
     this._utilsService.isScanning = true;
     const startIndex = this._pageNumber * 100;

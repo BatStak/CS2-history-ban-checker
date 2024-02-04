@@ -8,3 +8,22 @@ app-root {
   display: flex;
   justify-content: space-between;
 }
+
+tr.banned {
+  background-color: #7e4040;
+
+  & * {
+    color: #fff !important;
+  }
+}
+
+td.banstatus {
+  min-width: 65px !important;
+
+  &.banned {
+    color: yellow !important;
+    font-weight: 600;
+    font-size: 0.8em;
+    white-space: nowrap;
+  }
+}

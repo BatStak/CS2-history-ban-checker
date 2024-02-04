@@ -78,17 +78,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   private _refreshUI() {
-    this._parseMatches();
+    this._dataService.parseMatches(this._format);
     this._utilsService.getHistoryPeriod();
     this._dataService.onSave.next();
-  }
-
-  private _parseMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      `${this._utilsService.matchesCssSelector}:not(.parsed)`
-    );
-    matches.forEach((match) => {
-      this._dataService.parseMatch(match, this._format);
-    });
   }
 }

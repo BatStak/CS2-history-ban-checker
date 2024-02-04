@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Database } from '../../models';
-import { DataService } from '../../services/data.service';
-import { UtilsService } from '../../services/utils.service';
+import { Database } from '../../../models';
+import { DataService } from '../../../services/data.service';
+import { UtilsService } from '../../../services/utils.service';
 
 @Component({
   selector: 'history-loader',

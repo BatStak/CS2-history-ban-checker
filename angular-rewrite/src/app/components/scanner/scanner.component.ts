@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, booleanAttribute } from '@angular/core';
-import { DataService } from '../../services/data.service';
-import { UtilsService } from '../../services/utils.service';
-import { BanInfo, Database } from '../../models';
-import { SteamService } from '../../services/steam.service';
+import { Component } from '@angular/core';
+import { DataService } from '../../../services/data.service';
+import { UtilsService } from '../../../services/utils.service';
+import { BanInfo, Database } from '../../../models';
+import { SteamService } from '../../../services/steam.service';
 
 @Component({
   selector: 'scanner',

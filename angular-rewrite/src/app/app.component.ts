@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
 
-import { Database, MatchFormat, PlayerInfo } from '../models';
+import { Database, MatchFormat } from '../models';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { SteamService } from '../services/steam.service';
-import { HistoryLoaderComponent } from './components/history-loader.component';
-import { ScannerComponent } from './components/scanner.component';
+import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
+import { ScannerComponent } from './components/scanner/scanner.component';
+import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +19,7 @@ import { ScannerComponent } from './components/scanner.component';
     FormsModule,
     HistoryLoaderComponent,
     ScannerComponent,
+    BanStatisticsComponent,
   ],
   providers: [UtilsService, DataService, SteamService],
   templateUrl: './app.component.html',
@@ -28,10 +30,6 @@ export class AppComponent implements AfterViewInit {
 
   get database(): Database {
     return this._dataService.database;
-  }
-
-  get playersBanned(): PlayerInfo[] {
-    return this._dataService.playersBanned;
   }
 
   private _format = MatchFormat.MR24;

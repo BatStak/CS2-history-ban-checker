@@ -4,8 +4,12 @@
 <div class="container-flex">
   @if (apiKey) {
   <div>
-    <button (click)="loadHistory()" [disabled]="isLoading">Load history</button>
-    <button (click)="stopLoadHistory()" [disabled]="!isLoading">Stop</button>
+    <button (click)="loadHistory()" [disabled]="isLoading || isScanning">
+      Load history
+    </button>
+    <button (click)="stopLoadHistory()" [disabled]="!isLoading || isScanning">
+      Stop
+    </button>
   </div>
   } @else {
   <div>
@@ -14,7 +18,7 @@
   </div>
   }
   <div>
-    <button (click)="showOptions = true">
+    <button (click)="showOptions = true" [disabled]="isLoading || isScanning">
       {{ apiKey ? "Change" : "Set" }} API Key
     </button>
   </div>
@@ -29,16 +33,33 @@
   History loaded from
   {{ startDate | date : "dd/MM/y" }} to {{ endDate | date : "dd/MM/y" }}.
 </p>
-} }
+}
 
 <h2>Results</h2>
 
 <p>Players in database : {{ database.players?.length || 0 }}</p>
 <p>Matches in database : {{ database.matches?.length || 0 }}</p>
+@if (hasPeopleNotScannedYet) {
+<p>There are some players that have not been scanned yet</p>
+} @if (oldestScan) {
+<p>The oldest scan is from {{ oldestScan.LastFetch | date : "dd/MM/y" }}</p>
+} @if (mostRecentScan) {
+<p>
+  The most recent scan is from
+  {{ mostRecentScan.LastFetch | date : "dd/MM/y" }}
+</p>
+}
 
-<button (click)="scan()">Check players</button>
+<button (click)="scanPlayers()" [disabled]="isLoading || isScanning">
+  Scan players
+</button>
+<button (click)="stopScan()" [disabled]="isLoading || !isScanning">Stop</button>
 
-@if (showOptions) {
+@if (error) {
+<p class="error">
+  {{ error }}
+</p>
+} } @if (showOptions) {
 <div id="overlay-options">
   <div>
     <div>

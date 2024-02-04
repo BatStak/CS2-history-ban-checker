@@ -1,10 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Database, MatchFormat } from '../models';
+import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { UtilsService } from './utils.service';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class DataService {
+  onSave = new Subject<void>();
+
   database: Database = {};
+
+  hasPeopleNotScannedYet = false;
+  oldestScan?: BanInfo;
+  mostRecentScan?: BanInfo;
 
   constructor(private _utilsService: UtilsService) {}
 
@@ -13,6 +20,7 @@ export class DataService {
     this.database ??= {};
     this.database.matches ??= [];
     this.database.players ??= [];
+    this._sortPlayers();
   }
 
   parseMatch(match: HTMLElement, format: MatchFormat) {
@@ -117,6 +125,49 @@ export class DataService {
     });
 
     match.classList.add('parsed');
+  }
+
+  parseSteamResults(results: BanInfo[]) {
+    results.forEach((banInfo: BanInfo) => {
+      const playerInfo = this.database.players?.find(
+        (p) => p.steamID64 === banInfo.SteamId
+      );
+      if (playerInfo) {
+        playerInfo.banInfo = banInfo;
+        playerInfo.banInfo.LastFetch = new Date().toISOString();
+        console.log(playerInfo.banInfo);
+      }
+    });
+
+    this.onSave.next();
+  }
+
+  save() {
+    this._sortPlayers();
+    chrome.storage.local.set(this.database);
+  }
+
+  private _sortPlayers() {
+    if (this.database.players) {
+      this.database.players.sort((a, b) =>
+        !a.banInfo?.LastFetch || !b.banInfo?.LastFetch
+          ? 0
+          : a.banInfo.LastFetch < b.banInfo!.LastFetch
+          ? -1
+          : 1
+      );
+
+      this.hasPeopleNotScannedYet =
+        !this.database.players.length ||
+        this.database.players.some((p) => !p.banInfo?.LastFetch);
+      const playersScanned = this.database.players.filter(
+        (p) => p.banInfo?.LastFetch
+      );
+      if (playersScanned.length) {
+        this.oldestScan = playersScanned[0].banInfo;
+        this.mostRecentScan = playersScanned[playersScanned.length - 1].banInfo;
+      }
+    }
   }
 
   private _isFinished(

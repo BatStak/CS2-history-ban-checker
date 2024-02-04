@@ -4,6 +4,7 @@ export interface PlayerInfo {
   profileLink?: string;
   avatarLink?: string;
   lastPlayWith?: string;
+  banInfo?: BanInfo;
   matches: string[];
 }
 
@@ -47,4 +48,7 @@ export interface BanInfo {
   NumberOfVACBans: number;
   SteamId: string;
   VACBanned: boolean;
+
+  /** this one is not from Steam API. To know when the last scan occured. */
+  LastFetch: string;
 }

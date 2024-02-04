@@ -3,15 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
 
-import { Database, MatchFormat } from '../models';
+import { BanInfo, Database, MatchFormat } from '../models';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { SteamService } from '../services/steam.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  providers: [UtilsService, DataService],
+  providers: [UtilsService, DataService, SteamService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -21,9 +22,20 @@ export class AppComponent implements AfterViewInit {
   endDate?: string;
   ready = false;
   showOptions = false;
+  error = '';
+  isScanning = false;
 
   get database(): Database {
     return this._dataService.database;
+  }
+  get hasPeopleNotScannedYet(): boolean {
+    return this._dataService.hasPeopleNotScannedYet;
+  }
+  get oldestScan(): BanInfo | undefined {
+    return this._dataService.oldestScan;
+  }
+  get mostRecentScan(): BanInfo | undefined {
+    return this._dataService.mostRecentScan;
   }
 
   get isLoading(): boolean {
@@ -36,14 +48,15 @@ export class AppComponent implements AfterViewInit {
   private _loadHistoryTimerInMs = 500;
   private _format = MatchFormat.MR24;
   private _pageNumber = 0;
+  private _stopScan = false;
 
   private _onReady = new Subject<void>();
   private _onRefresh = new Subject<void>();
-  private _onSave = new Subject<void>();
 
   constructor(
+    private _utilsService: UtilsService,
     private _dataService: DataService,
-    private _utilsService: UtilsService
+    private _steamService: SteamService
   ) {
     if (
       new URLSearchParams(document.location.search).get('tab') ===
@@ -55,7 +68,7 @@ export class AppComponent implements AfterViewInit {
 
   async ngAfterViewInit() {
     chrome.storage.local.get((database: any) => {
-      this._dataService.init(database);
+      this._dataService.init(database); // {} to reinit
       this._onReady.next();
     });
 
@@ -67,7 +80,7 @@ export class AppComponent implements AfterViewInit {
     this._onRefresh.pipe(debounceTime(250)).subscribe(() => {
       this._refreshUI();
     });
-    this._onSave.pipe(debounceTime(2000)).subscribe(() => {
+    this._dataService.onSave.pipe(debounceTime(2000)).subscribe(() => {
       this._save();
     });
     this._observeNewMatches();
@@ -104,25 +117,38 @@ export class AppComponent implements AfterViewInit {
     this._save();
   }
 
-  scan() {
-    const players = this.database.players?.slice(this._pageNumber * 100, 100);
+  async scanPlayers() {
+    const stop = () => {
+      this.isScanning = this._stopScan = false;
+      this._pageNumber = 0;
+    };
+    this.isScanning = true;
+    const startIndex = this._pageNumber * 100;
+    const players = this.database.players?.slice(startIndex, startIndex + 100);
     if (players?.length) {
       const steamIds = players.map((p) => p.steamID64);
-      fetch(
-        `https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${
-          this.database.apiKey
-        }&steamids=${steamIds.join(',')}`
-      )
-        .then((res) => {
-          if (res.ok) {
-            return res.json();
-          } else {
-            throw Error(`Code ${res.status}. ${res.statusText}`);
-          }
-        })
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
+      try {
+        const results = await this._steamService.scanPlayers(steamIds);
+        this._dataService.parseSteamResults(results);
+
+        if (this._stopScan) {
+          stop();
+        } else {
+          this._pageNumber++;
+          setTimeout(() => this.scanPlayers(), 500);
+        }
+      } catch (e) {
+        this.error = 'Error while trying to scan ban status of players';
+        console.error(e);
+        stop();
+      }
+    } else {
+      stop();
     }
+  }
+
+  stopScan() {
+    this._stopScan = true;
   }
 
   private _observeNewMatches() {
@@ -138,11 +164,11 @@ export class AppComponent implements AfterViewInit {
   private _refreshUI() {
     this._parseMatches();
     this._getHistoryPeriod();
-    this._onSave.next();
+    this._dataService.onSave.next();
   }
 
   private _save() {
-    chrome.storage.local.set(this.database);
+    this._dataService.save();
   }
 
   private _parseMatches() {

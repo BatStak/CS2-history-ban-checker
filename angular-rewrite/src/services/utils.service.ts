@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Database, MatchFormat } from '../models';
 
 @Injectable()
 export class UtilsService {

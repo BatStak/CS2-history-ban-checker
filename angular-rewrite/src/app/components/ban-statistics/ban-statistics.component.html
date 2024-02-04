@@ -1,4 +1,17 @@
 @if(playersBanned.length) {
+<p>
+  Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been
+  banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>).
+  <sup>*</sup>
+</p>
+<p>
+  Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with
+  players banned after the game (<strong>{{ matchPourcentage }}%</strong>).
+  <sup>*</sup>
+</p>
+
+<em>*bans can occur on other games though</em>
+
 <table class="results">
   <tr>
     <th>Avatar</th>

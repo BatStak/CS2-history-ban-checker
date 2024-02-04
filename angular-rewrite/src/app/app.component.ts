@@ -1,58 +1,77 @@
-import { AfterViewInit, ChangeDetectorRef, Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
+import { DataService } from '../services/data.service';
 
-import { Database } from '../models';
-import { Subject, firstValueFrom } from 'rxjs';
+import { Database, MatchFormat } from '../models';
+import { Subject, debounceTime, firstValueFrom } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule],
-  providers: [UtilsService],
+  imports: [CommonModule, FormsModule],
+  providers: [UtilsService, DataService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
-  loadHistoryInterval?: any;
-  loadHistoryTimerInMs = 500;
-
+  apiKey?: string;
   startDate?: string;
   endDate?: string;
-
+  ready = false;
   showOptions = false;
 
-  apiKey?: string;
-  database: Database = {};
+  get database(): Database {
+    return this._dataService.database;
+  }
 
-  loaded = false;
-
-  get hasKey(): boolean {
-    return !!this.database?.apiKey;
+  get isLoading(): boolean {
+    return !!this._loadHistoryInterval;
   }
 
   private _matchesCssSelector =
     '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
+  private _loadHistoryInterval?: any;
+  private _loadHistoryTimerInMs = 500;
+  private _format = MatchFormat.MR24;
+  private _pageNumber = 0;
 
-  private _ready = new Subject<void>();
+  private _onReady = new Subject<void>();
+  private _onRefresh = new Subject<void>();
+  private _onSave = new Subject<void>();
 
-  constructor(private _utilsService: UtilsService) {}
+  constructor(
+    private _dataService: DataService,
+    private _utilsService: UtilsService
+  ) {
+    if (
+      new URLSearchParams(document.location.search).get('tab') ===
+      'matchhistorywingman'
+    ) {
+      this._format = MatchFormat.MR16;
+    }
+  }
 
   async ngAfterViewInit() {
-    chrome.storage.sync.get((cshistorydb: any) => {
-      this.database = cshistorydb;
-      this._ready.next();
+    chrome.storage.local.get((database: any) => {
+      this._dataService.init(database);
+      this._onReady.next();
     });
 
-    await firstValueFrom(this._ready);
+    await firstValueFrom(this._onReady);
 
-    this.database ??= {};
-    this.database.matches ??= [];
-    this.database.players ??= [];
     this.apiKey = this.database.apiKey;
 
-    this.loaded = true;
+    this._refreshUI();
+    this._onRefresh.pipe(debounceTime(250)).subscribe(() => {
+      this._refreshUI();
+    });
+    this._onSave.pipe(debounceTime(2000)).subscribe(() => {
+      this._save();
+    });
     this._observeNewMatches();
+    this.ready = true;
   }
 
   loadHistory() {
@@ -71,29 +90,59 @@ export class AppComponent implements AfterViewInit {
       }
     };
     next();
-    this.loadHistoryInterval = setInterval(next, this.loadHistoryTimerInMs);
+    this._loadHistoryInterval = setInterval(next, this._loadHistoryTimerInMs);
   }
 
   stopLoadHistory() {
-    clearInterval(this.loadHistoryInterval);
-    this.loadHistoryInterval = undefined;
+    clearInterval(this._loadHistoryInterval);
+    this._loadHistoryInterval = undefined;
   }
 
   closeOptions() {
     this.showOptions = false;
     this.database.apiKey = this.apiKey;
-    chrome.storage.sync.set(this.database);
+    this._save();
+  }
+
+  scan() {
+    const players = this.database.players?.slice(this._pageNumber * 100, 100);
+    if (players?.length) {
+      const steamIds = players.map((p) => p.steamID64);
+      fetch(
+        `https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${
+          this.database.apiKey
+        }&steamids=${steamIds.join(',')}`
+      )
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            throw Error(`Code ${res.status}. ${res.statusText}`);
+          }
+        })
+        .then((data) => console.log(data))
+        .catch((error) => console.error(error));
+    }
   }
 
   private _observeNewMatches() {
     const results = document.querySelector('.csgo_scoreboard_root > tbody');
     if (results) {
       const observer = new MutationObserver(() => {
-        this._parseMatches();
-        this._getHistoryPeriod();
+        this._onRefresh.next();
       });
       observer.observe(results, { childList: true });
     }
+  }
+
+  private _refreshUI() {
+    this._parseMatches();
+    this._getHistoryPeriod();
+    this._onSave.next();
+  }
+
+  private _save() {
+    chrome.storage.local.set(this.database);
   }
 
   private _parseMatches() {
@@ -101,39 +150,7 @@ export class AppComponent implements AfterViewInit {
       `${this._matchesCssSelector}:not(.parsed)`
     );
     matches.forEach((match) => {
-      const matchId = this._utilsService.getDateOfMatch(match);
-
-      // ajout d'un nouveau match dans la bdd
-      if (matchId && !this.database.matches?.some((m) => m.id === matchId)) {
-        this.database.matches!.push({
-          id: matchId,
-          map: this._utilsService.getMap(match),
-          replayLink: this._utilsService.getReplayLink(match),
-          playersSteamID64: [],
-        });
-      }
-
-      const matchInfo = this.database.matches?.find((m) => m.id === matchId);
-
-      const players = match.querySelectorAll(
-        '.csgo_scoreboard_inner_right > tbody > tr'
-      );
-
-      players.forEach((player, index) => {
-        // not the score
-        if (player.children.length > 1) {
-          const lastColumn = player.children[player.children.length - 1];
-          lastColumn.after(lastColumn.cloneNode(true));
-          const newColumn = player.children[player.children.length - 1];
-          if (index === 0) {
-            newColumn.textContent = 'Ban?';
-          } else {
-            newColumn.textContent = '-';
-          }
-        }
-      });
-
-      match.classList.add('parsed');
+      this._dataService.parseMatch(match, this._format);
     });
   }
 
@@ -142,12 +159,10 @@ export class AppComponent implements AfterViewInit {
       this._matchesCssSelector
     );
     if (matches.length) {
-      this.endDate = this._utilsService
-        .getDateOfMatch(matches[0])
-        ?.substring(0, 10);
-      this.startDate = this._utilsService
-        .getDateOfMatch(matches[matches.length - 1])
-        ?.substring(0, 10);
+      this.endDate = this._utilsService.getDateOfMatch(matches[0]);
+      this.startDate = this._utilsService.getDateOfMatch(
+        matches[matches.length - 1]
+      );
     }
   }
 }

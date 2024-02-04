@@ -3,6 +3,7 @@
   "description": "Check ban status of players you encountered in CS2 and CSGO matchmaking.",
   "version": "1.2.8",
   "permissions": [
+    "unlimitedStorage",
     "storage",
     "contextMenus",
     "*://steamcommunity.com/*",

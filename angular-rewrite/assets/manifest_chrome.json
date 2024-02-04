@@ -2,7 +2,7 @@
   "name": "CS2 history ban checker",
   "description": "Check ban status of players you encountered in CS2 matchmaking.",
   "version": "2.0.0",
-  "permissions": ["storage", "contextMenus"],
+  "permissions": ["unlimitedStorage", "storage", "contextMenus"],
   "host_permissions": [
     "*://steamcommunity.com/*",
     "https://api.steampowered.com/*"

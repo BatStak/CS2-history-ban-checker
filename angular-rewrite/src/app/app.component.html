@@ -1,15 +1,11 @@
 <h2>CS History Ban Checker</h2>
 
-@if (loaded) {
+@if (ready) {
 <div class="container-flex">
-  @if (hasKey) {
+  @if (apiKey) {
   <div>
-    <button (click)="loadHistory()" [disabled]="loadHistoryInterval">
-      Load history
-    </button>
-    <button (click)="stopLoadHistory()" [disabled]="!loadHistoryInterval">
-      Stop
-    </button>
+    <button (click)="loadHistory()" [disabled]="isLoading">Load history</button>
+    <button (click)="stopLoadHistory()" [disabled]="!isLoading">Stop</button>
   </div>
   } @else {
   <div>
@@ -19,18 +15,30 @@
   }
   <div>
     <button (click)="showOptions = true">
-      {{ hasKey ? "Change" : "Set" }} API Key
+      {{ apiKey ? "Change" : "Set" }} API Key
     </button>
   </div>
 </div>
 
-@if (hasKey) { @if (loadHistoryInterval) {
+@if (apiKey) { @if (isLoading) {
 <p>Loading...</p>
 } @if (!startDate || !endDate) {
 <p>No history loaded.</p>
 } @if (startDate && endDate) {
-<p>History loaded from {{ startDate }} to {{ endDate }}.</p>
-} } @if (showOptions) {
+<p>
+  History loaded from
+  {{ startDate | date : "dd/MM/y" }} to {{ endDate | date : "dd/MM/y" }}.
+</p>
+} }
+
+<h2>Results</h2>
+
+<p>Players in database : {{ database.players?.length || 0 }}</p>
+<p>Matches in database : {{ database.matches?.length || 0 }}</p>
+
+<button (click)="scan()">Check players</button>
+
+@if (showOptions) {
 <div id="overlay-options">
   <div>
     <div>

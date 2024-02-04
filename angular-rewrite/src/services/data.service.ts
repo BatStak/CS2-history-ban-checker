@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { UtilsService } from './utils.service';
-import { Subject } from 'rxjs';
+import { Subject, debounceTime } from 'rxjs';
 
 @Injectable()
 export class DataService {
@@ -15,7 +15,11 @@ export class DataService {
   mostRecentScan?: BanInfo;
   playersBanned: PlayerInfo[] = [];
 
-  constructor(private _utilsService: UtilsService) {}
+  constructor(private _utilsService: UtilsService) {
+    this.onSave.pipe(debounceTime(2000)).subscribe(() => {
+      this.save();
+    });
+  }
 
   init(database: any) {
     this.database = database;

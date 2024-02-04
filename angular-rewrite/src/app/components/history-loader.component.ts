@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  booleanAttribute,
-} from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Database } from '../../models';
 import { DataService } from '../../services/data.service';
@@ -18,10 +12,8 @@ import { UtilsService } from '../../services/utils.service';
   templateUrl: './history-loader.component.html',
   styleUrl: './history-loader.component.scss',
 })
-export class HistoryLoaderComponent implements OnChanges {
-  @Input({ transform: booleanAttribute }) ready = false;
-  @Input({ transform: booleanAttribute }) isScanning = false;
-  @Input() apiKey?: string;
+export class HistoryLoaderComponent {
+  apiKey?: string;
 
   showOptions = false;
 
@@ -41,18 +33,18 @@ export class HistoryLoaderComponent implements OnChanges {
     return this._utilsService.isLoadingHistory;
   }
 
+  get isScanning(): boolean {
+    return this._utilsService.isScanning;
+  }
+
   private _loadHistoryInterval?: any;
   private _loadHistoryTimerInMs = 500;
 
   constructor(
     private _utilsService: UtilsService,
     private _dataService: DataService
-  ) {}
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (!!changes['ready']) {
-      this.apiKey = this._dataService.database.apiKey;
-    }
+  ) {
+    this.apiKey = this._dataService.database?.apiKey;
   }
 
   loadHistory() {
@@ -83,10 +75,6 @@ export class HistoryLoaderComponent implements OnChanges {
   closeOptions() {
     this.showOptions = false;
     this.database.apiKey = this.apiKey;
-    this._save();
-  }
-
-  private _save() {
     this._dataService.save();
   }
 }

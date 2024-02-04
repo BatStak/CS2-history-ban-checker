@@ -94,7 +94,9 @@ export class DataService {
       if (playerRow.children.length > 1) {
         const lastColumn = playerRow.children[playerRow.children.length - 1];
         lastColumn.after(lastColumn.cloneNode(true));
-        const newColumn = playerRow.children[playerRow.children.length - 1];
+        const newColumn = playerRow.children[
+          playerRow.children.length - 1
+        ] as HTMLElement;
         if (index === 0) {
           newColumn.textContent = 'Ban?';
         } else {
@@ -106,6 +108,10 @@ export class DataService {
           const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(
             profileLink.dataset['miniprofile']!
           );
+
+          // set html attributes
+          newColumn.dataset['steamid64'] = steamID64;
+          newColumn.classList.add('playerbanned');
 
           // add steamId to matchInfo players list
           if (!matchInfo!.playersSteamID64.includes(steamID64)) {
@@ -156,6 +162,18 @@ export class DataService {
           }
           matchInfo!.finished = this._isFinished(scoreA, scoreB, format);
         }
+      }
+    });
+
+    // we update BAN status
+    matchInfo.playersSteamID64.forEach((steamID64: string) => {
+      const banInfo = this.playersBanned.find((p) => p.steamID64 === steamID64);
+      if (banInfo) {
+        match.classList.add('banned');
+        const playerBannedColumn = document.querySelectorAll<HTMLElement>(
+          `.playerbanned[data-steamid64="${steamID64}"]`
+        );
+        playerBannedColumn.forEach((elt: HTMLElement) => {});
       }
     });
 

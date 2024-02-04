@@ -7,6 +7,7 @@ import { Subject, debounceTime } from 'rxjs';
 export class DataService {
   onSave = new Subject<void>();
   onReady = new Subject<void>();
+  onReset = new Subject<void>();
 
   database: Database = {};
 
@@ -16,17 +17,45 @@ export class DataService {
   playersBanned: PlayerInfo[] = [];
 
   constructor(private _utilsService: UtilsService) {
-    this.onSave.pipe(debounceTime(2000)).subscribe(() => {
+    this.onSave.pipe(debounceTime(1000)).subscribe(() => {
       this.save();
     });
   }
 
-  init(database: any) {
+  init(database?: any) {
     this.database = database;
     this.database ??= {};
     this.database.matches ??= [];
     this.database.players ??= [];
     this._updateStatistics();
+  }
+
+  reset() {
+    const matches = document.querySelectorAll<HTMLElement>(
+      `${this._utilsService.matchesCssSelector}.parsed`
+    );
+
+    // we delete everything element we added and class "parsed"
+    matches.forEach((match) => {
+      const players = match.querySelectorAll(
+        this._utilsService.playersCssSelector
+      );
+      players.forEach((playerRow) => {
+        if (playerRow.children.length > 1) {
+          playerRow.children[playerRow.children.length - 1].remove();
+        }
+      });
+      match.classList.remove('parsed');
+    });
+
+    // we remove storage but keep apiKey
+    chrome.storage.local.clear();
+    this.database = {
+      apiKey: this.database.apiKey,
+    };
+    this.init();
+
+    this.onReset.next();
   }
 
   parseMatch(match: HTMLElement, format: MatchFormat) {
@@ -57,7 +86,7 @@ export class DataService {
     matchInfo.playersSteamID64 ??= [];
 
     const players = match.querySelectorAll(
-      '.csgo_scoreboard_inner_right > tbody > tr'
+      this._utilsService.playersCssSelector
     );
 
     let isTeamA = true;

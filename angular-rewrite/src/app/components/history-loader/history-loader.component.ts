@@ -77,4 +77,8 @@ export class HistoryLoaderComponent {
     this.database.apiKey = this.apiKey;
     this._dataService.save();
   }
+
+  resetDatabase() {
+    this._dataService.reset();
+  }
 }

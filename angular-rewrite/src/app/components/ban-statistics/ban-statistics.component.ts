@@ -29,7 +29,7 @@ export class BanStatisticsComponent {
   }
 
   constructor(private _dataService: DataService) {
-    this._dataService.onSave.pipe(debounceTime(2000)).subscribe(() => {
+    this._dataService.onSave.pipe(debounceTime(1000)).subscribe(() => {
       this.update();
     });
 

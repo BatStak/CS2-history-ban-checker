@@ -9,6 +9,7 @@ export class UtilsService {
   endDate?: string;
 
   matchesCssSelector = '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
+  playersCssSelector = '.csgo_scoreboard_inner_right > tbody > tr';
 
   getMap(matchNode: HTMLElement) {
     return matchNode

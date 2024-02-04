@@ -45,6 +45,10 @@ export class AppComponent implements AfterViewInit {
     ) {
       this._format = MatchFormat.MR16;
     }
+
+    this._dataService.onReset.subscribe(() => {
+      this._refreshUI();
+    });
   }
 
   async ngAfterViewInit() {

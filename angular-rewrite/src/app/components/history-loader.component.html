@@ -1,0 +1,57 @@
+@if (ready) {
+<div class="container-flex">
+  @if (apiKey) {
+  <div>
+    <button (click)="loadHistory()" [disabled]="isLoadingHistory || isScanning">
+      Load history
+    </button>
+    <button
+      (click)="stopLoadHistory()"
+      [disabled]="!isLoadingHistory || isScanning"
+    >
+      Stop
+    </button>
+  </div>
+  } @else {
+  <div>
+    First, you need to set an API key to be able to check BAN status of players
+    :
+  </div>
+  }
+  <div>
+    <button
+      (click)="showOptions = true"
+      [disabled]="isLoadingHistory || isScanning"
+    >
+      {{ apiKey ? "Change" : "Set" }} API Key
+    </button>
+  </div>
+</div>
+
+@if (apiKey) { @if (isLoadingHistory) {
+<p>Loading...</p>
+} @if (!startDate || !endDate) {
+<p>No history loaded.</p>
+} @if (startDate && endDate) {
+<p>
+  History loaded from
+  {{ startDate | date : "dd/MM/y" }} to {{ endDate | date : "dd/MM/y" }}.
+</p>
+} } } @if (showOptions) {
+<div id="overlay-options">
+  <div>
+    <div>
+      <label for="apikey"> Enter your Api KEY </label>
+      <input id="apikey" type="text" [(ngModel)]="apiKey" />
+    </div>
+    <div>
+      <a href="https://steamcommunity.com/dev/apikey" target="_blank">
+        Retrieve your API KEY here
+      </a>
+    </div>
+    <div>
+      <button (click)="closeOptions()">Close</button>
+    </div>
+  </div>
+</div>
+}

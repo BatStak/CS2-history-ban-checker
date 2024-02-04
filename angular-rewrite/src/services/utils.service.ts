@@ -2,6 +2,13 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class UtilsService {
+  isLoadingHistory = false;
+
+  startDate?: string;
+  endDate?: string;
+
+  matchesCssSelector = '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
+
   getMap(matchNode: HTMLElement) {
     return matchNode
       .querySelector<HTMLElement>(
@@ -28,5 +35,15 @@ export class UtilsService {
 
   getSteamID64FromMiniProfileId(miniprofileId: string) {
     return '76' + (parseInt(miniprofileId, 10) + 561197960265728);
+  }
+
+  getHistoryPeriod() {
+    const matches = document.querySelectorAll<HTMLElement>(
+      this.matchesCssSelector
+    );
+    if (matches.length) {
+      this.endDate = this.getDateOfMatch(matches[0]);
+      this.startDate = this.getDateOfMatch(matches[matches.length - 1]);
+    }
   }
 }

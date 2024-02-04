@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 @Injectable()
 export class DataService {
   onSave = new Subject<void>();
+  onReady = new Subject<void>();
 
   database: Database = {};
 

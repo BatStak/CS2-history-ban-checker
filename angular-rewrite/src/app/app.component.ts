@@ -7,26 +7,26 @@ import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { SteamService } from '../services/steam.service';
+import { HistoryLoaderComponent } from './components/history-loader.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HistoryLoaderComponent],
   providers: [UtilsService, DataService, SteamService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
-  apiKey?: string;
-  startDate?: string;
-  endDate?: string;
   ready = false;
-  showOptions = false;
   error = '';
   isScanning = false;
 
   get database(): Database {
     return this._dataService.database;
+  }
+  get isLoadingHistory(): boolean {
+    return this._utilsService.isLoadingHistory;
   }
   get hasPeopleNotScannedYet(): boolean {
     return this._dataService.hasPeopleNotScannedYet;
@@ -41,19 +41,9 @@ export class AppComponent implements AfterViewInit {
     return this._dataService.playersBanned;
   }
 
-  get isLoadingHistory(): boolean {
-    return !!this._loadHistoryInterval;
-  }
-
-  private _matchesCssSelector =
-    '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
-  private _loadHistoryInterval?: any;
-  private _loadHistoryTimerInMs = 500;
   private _format = MatchFormat.MR24;
   private _pageNumber = 0;
   private _stopScan = false;
-
-  private _onReady = new Subject<void>();
   private _onRefresh = new Subject<void>();
 
   constructor(
@@ -72,12 +62,10 @@ export class AppComponent implements AfterViewInit {
   async ngAfterViewInit() {
     chrome.storage.local.get((database: any) => {
       this._dataService.init(database); // {} to reinit
-      this._onReady.next();
+      this._dataService.onReady.next();
     });
 
-    await firstValueFrom(this._onReady);
-
-    this.apiKey = this.database.apiKey;
+    await firstValueFrom(this._dataService.onReady);
 
     this._refreshUI();
     this._onRefresh.pipe(debounceTime(250)).subscribe(() => {
@@ -88,36 +76,6 @@ export class AppComponent implements AfterViewInit {
     });
     this._observeNewMatches();
     this.ready = true;
-  }
-
-  loadHistory() {
-    let historyButtonAttemps = 0;
-    const button =
-      document.querySelector<HTMLButtonElement>('#load_more_button');
-    const next = () => {
-      if (button && button.offsetParent !== null) {
-        historyButtonAttemps = 0;
-        button.click();
-      } else {
-        historyButtonAttemps++;
-        if (historyButtonAttemps > 5) {
-          this.stopLoadHistory();
-        }
-      }
-    };
-    next();
-    this._loadHistoryInterval = setInterval(next, this._loadHistoryTimerInMs);
-  }
-
-  stopLoadHistory() {
-    clearInterval(this._loadHistoryInterval);
-    this._loadHistoryInterval = undefined;
-  }
-
-  closeOptions() {
-    this.showOptions = false;
-    this.database.apiKey = this.apiKey;
-    this._save();
   }
 
   async scanPlayers() {
@@ -167,7 +125,7 @@ export class AppComponent implements AfterViewInit {
 
   private _refreshUI() {
     this._parseMatches();
-    this._getHistoryPeriod();
+    this._utilsService.getHistoryPeriod();
     this._dataService.onSave.next();
   }
 
@@ -177,22 +135,10 @@ export class AppComponent implements AfterViewInit {
 
   private _parseMatches() {
     const matches = document.querySelectorAll<HTMLElement>(
-      `${this._matchesCssSelector}:not(.parsed)`
+      `${this._utilsService.matchesCssSelector}:not(.parsed)`
     );
     matches.forEach((match) => {
       this._dataService.parseMatch(match, this._format);
     });
-  }
-
-  private _getHistoryPeriod() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      this._matchesCssSelector
-    );
-    if (matches.length) {
-      this.endDate = this._utilsService.getDateOfMatch(matches[0]);
-      this.startDate = this._utilsService.getDateOfMatch(
-        matches[matches.length - 1]
-      );
-    }
   }
 }

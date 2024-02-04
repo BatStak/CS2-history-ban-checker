@@ -38,7 +38,7 @@ export class AppComponent implements AfterViewInit {
     return this._dataService.mostRecentScan;
   }
 
-  get isLoading(): boolean {
+  get isLoadingHistory(): boolean {
     return !!this._loadHistoryInterval;
   }
 

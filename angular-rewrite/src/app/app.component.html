@@ -4,10 +4,13 @@
 <div class="container-flex">
   @if (apiKey) {
   <div>
-    <button (click)="loadHistory()" [disabled]="isLoading || isScanning">
+    <button (click)="loadHistory()" [disabled]="isLoadingHistory || isScanning">
       Load history
     </button>
-    <button (click)="stopLoadHistory()" [disabled]="!isLoading || isScanning">
+    <button
+      (click)="stopLoadHistory()"
+      [disabled]="!isLoadingHistory || isScanning"
+    >
       Stop
     </button>
   </div>
@@ -18,13 +21,16 @@
   </div>
   }
   <div>
-    <button (click)="showOptions = true" [disabled]="isLoading || isScanning">
+    <button
+      (click)="showOptions = true"
+      [disabled]="isLoadingHistory || isScanning"
+    >
       {{ apiKey ? "Change" : "Set" }} API Key
     </button>
   </div>
 </div>
 
-@if (apiKey) { @if (isLoading) {
+@if (apiKey) { @if (isLoadingHistory) {
 <p>Loading...</p>
 } @if (!startDate || !endDate) {
 <p>No history loaded.</p>
@@ -50,10 +56,12 @@
 </p>
 }
 
-<button (click)="scanPlayers()" [disabled]="isLoading || isScanning">
+<button (click)="scanPlayers()" [disabled]="isLoadingHistory || isScanning">
   Scan players
 </button>
-<button (click)="stopScan()" [disabled]="isLoading || !isScanning">Stop</button>
+<button (click)="stopScan()" [disabled]="isLoadingHistory || !isScanning">
+  Stop
+</button>
 
 @if (error) {
 <p class="error">

@@ -12,6 +12,7 @@ export class DataService {
   hasPeopleNotScannedYet = false;
   oldestScan?: BanInfo;
   mostRecentScan?: BanInfo;
+  playersBanned: PlayerInfo[] = [];
 
   constructor(private _utilsService: UtilsService) {}
 
@@ -20,7 +21,7 @@ export class DataService {
     this.database ??= {};
     this.database.matches ??= [];
     this.database.players ??= [];
-    this._sortPlayers();
+    this._updateStatistics();
   }
 
   parseMatch(match: HTMLElement, format: MatchFormat) {
@@ -133,9 +134,11 @@ export class DataService {
         (p) => p.steamID64 === banInfo.SteamId
       );
       if (playerInfo) {
+        banInfo.LastFetch = new Date().toISOString();
+        banInfo.LastBanOn = new Date(
+          new Date().setDate(new Date().getDate() - banInfo.DaysSinceLastBan)
+        ).toISOString();
         playerInfo.banInfo = banInfo;
-        playerInfo.banInfo.LastFetch = new Date().toISOString();
-        console.log(playerInfo.banInfo);
       }
     });
 
@@ -143,11 +146,11 @@ export class DataService {
   }
 
   save() {
-    this._sortPlayers();
+    this._updateStatistics();
     chrome.storage.local.set(this.database);
   }
 
-  private _sortPlayers() {
+  private _updateStatistics() {
     if (this.database.players) {
       this.database.players.sort((a, b) =>
         !a.banInfo?.LastFetch || !b.banInfo?.LastFetch
@@ -157,9 +160,9 @@ export class DataService {
           : 1
       );
 
-      this.hasPeopleNotScannedYet =
-        !this.database.players.length ||
-        this.database.players.some((p) => !p.banInfo?.LastFetch);
+      this.hasPeopleNotScannedYet = this.database.players.some(
+        (p) => !p.banInfo?.LastFetch
+      );
       const playersScanned = this.database.players.filter(
         (p) => p.banInfo?.LastFetch
       );
@@ -167,6 +170,23 @@ export class DataService {
         this.oldestScan = playersScanned[0].banInfo;
         this.mostRecentScan = playersScanned[playersScanned.length - 1].banInfo;
       }
+
+      const banInfos = this.database.players
+        .filter(
+          (p) =>
+            p.banInfo &&
+            p.lastPlayWith &&
+            (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0) &&
+            // we take only people banned after playing with them
+            p.banInfo.LastBanOn > p.lastPlayWith
+        )
+        .map((p) => p.banInfo!);
+
+      this.playersBanned = this.database.players
+        ?.filter((p) => banInfos.some((b) => b.SteamId === p.steamID64))
+        .sort((a, b) =>
+          a.banInfo!.DaysSinceLastBan < b.banInfo!.DaysSinceLastBan ? 1 : -1
+        );
     }
   }
 

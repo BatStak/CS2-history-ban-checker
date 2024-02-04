@@ -41,7 +41,7 @@
 </p>
 }
 
-<h2>Results</h2>
+<h2>Database</h2>
 
 <p>Players in database : {{ database.players?.length || 0 }}</p>
 <p>Matches in database : {{ database.matches?.length || 0 }}</p>
@@ -67,6 +67,44 @@
 <p class="error">
   {{ error }}
 </p>
+}
+
+<h2>Results</h2>
+
+@if(playersBanned.length) {
+<table class="results">
+  <tr>
+    <th>Avatar</th>
+    <th>Name</th>
+    <th>Last played with on</th>
+    <th>Banned since</th>
+  </tr>
+  @for (playerBanned of playersBanned; track $index) {
+  <tr>
+    <td>
+      <a [href]="playerBanned.profileLink" target="_blank"
+        ><img [src]="playerBanned.avatarLink"
+      /></a>
+    </td>
+    <td>
+      <a [href]="playerBanned.profileLink" target="_blank">{{
+        playerBanned.name
+      }}</a>
+    </td>
+    <td>
+      {{ playerBanned.lastPlayWith | date : "dd/MM/y" }}
+    </td>
+    <td>
+      ~{{ playerBanned.banInfo?.LastBanOn | date : "dd/MM/y" }} ({{
+        playerBanned.banInfo?.DaysSinceLastBan
+      }}
+      days)
+    </td>
+  </tr>
+  }
+</table>
+} @else {
+<p>No banned player</p>
 } } @if (showOptions) {
 <div id="overlay-options">
   <div>

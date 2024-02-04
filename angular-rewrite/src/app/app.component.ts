@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
 
-import { BanInfo, Database, MatchFormat } from '../models';
+import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { SteamService } from '../services/steam.service';
@@ -36,6 +36,9 @@ export class AppComponent implements AfterViewInit {
   }
   get mostRecentScan(): BanInfo | undefined {
     return this._dataService.mostRecentScan;
+  }
+  get playersBanned(): PlayerInfo[] {
+    return this._dataService.playersBanned;
   }
 
   get isLoadingHistory(): boolean {
@@ -131,6 +134,7 @@ export class AppComponent implements AfterViewInit {
         const results = await this._steamService.scanPlayers(steamIds);
         this._dataService.parseSteamResults(results);
 
+        this.error = '';
         if (this._stopScan) {
           stop();
         } else {

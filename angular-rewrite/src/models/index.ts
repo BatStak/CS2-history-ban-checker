@@ -42,13 +42,15 @@ export enum MatchFormat {
  */
 export interface BanInfo {
   CommunityBanned: boolean;
-  DaysSinceLastBan: boolean;
+  DaysSinceLastBan: number;
   EconomyBan: string;
   NumberOfGameBans: number;
   NumberOfVACBans: number;
   SteamId: string;
   VACBanned: boolean;
 
+  /** approximative date of ban */
+  LastBanOn: string;
   /** this one is not from Steam API. To know when the last scan occured. */
   LastFetch: string;
 }

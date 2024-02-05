@@ -18,7 +18,7 @@ export class DataService {
 
   database: Database = {};
 
-  hasPeopleNotScannedYet = false;
+  playersNotScannedYet?: PlayerInfo[];
   oldestScan?: BanInfo;
   mostRecentScan?: BanInfo;
   oldestMatch?: MatchInfo;
@@ -219,7 +219,7 @@ export class DataService {
     if (this.database.players) {
       this.database.players.sort((a, b) => this._sortPlayers(a, b));
 
-      this.hasPeopleNotScannedYet = this.database.players.some(
+      this.playersNotScannedYet = this.database.players.filter(
         (p) => !p.banInfo?.LastFetch
       );
       const playersScanned = this.database.players.filter(

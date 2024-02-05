@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
-import { BanInfo, Database, MatchInfo } from '../../../models';
+import { BanInfo, Database, MatchInfo, PlayerInfo } from '../../../models';
 import { SteamService } from '../../../services/steam.service';
 
 @Component({
@@ -27,8 +27,8 @@ export class ScannerComponent {
     return this._dataService.database;
   }
 
-  get hasPeopleNotScannedYet(): boolean {
-    return this._dataService.hasPeopleNotScannedYet;
+  get playersNotScannedYet(): PlayerInfo[] | undefined {
+    return this._dataService.playersNotScannedYet;
   }
 
   get oldestScan(): BanInfo | undefined {
@@ -43,7 +43,9 @@ export class ScannerComponent {
     return this._dataService.oldestMatch;
   }
 
-  private _pageNumber = 0;
+  numberOfPages = 0;
+  pageNumber = 0;
+
   private _stopScan = false;
 
   constructor(
@@ -52,17 +54,32 @@ export class ScannerComponent {
     private _steamService: SteamService
   ) {}
 
-  async scanPlayers() {
+  startScan(type: 'new' | 'all') {
+    if (this.database.players) {
+      const players =
+        type === 'new'
+          ? this.database.players.filter((p) => !p.banInfo?.LastFetch)
+          : this.database.players;
+
+      this.numberOfPages =
+        Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
+
+      this.scanPlayers(players);
+    }
+  }
+
+  async scanPlayers(players: PlayerInfo[]) {
     const stop = () => {
       this._utilsService.isScanning = this._stopScan = false;
-      this._pageNumber = 0;
+      this.pageNumber = this.numberOfPages = 0;
       this._dataService.onSave.next();
     };
+
     this._utilsService.isScanning = true;
-    const startIndex = this._pageNumber * 100;
-    const players = this.database.players?.slice(startIndex, startIndex + 100);
-    if (players?.length) {
-      const steamIds = players.map((p) => p.steamID64);
+    const startIndex = this.pageNumber * 100;
+    const scannedPlayers = players.slice(startIndex, startIndex + 100);
+    if (scannedPlayers.length) {
+      const steamIds = scannedPlayers.map((p) => p.steamID64);
       try {
         const results = await this._steamService.scanPlayers(steamIds);
         this._dataService.parseSteamResults(results);
@@ -71,8 +88,12 @@ export class ScannerComponent {
         if (this._stopScan) {
           stop();
         } else {
-          this._pageNumber++;
-          setTimeout(() => this.scanPlayers(), 500);
+          this.pageNumber++;
+          if (this.pageNumber >= this.numberOfPages) {
+            stop();
+          } else {
+            setTimeout(() => this.scanPlayers(players), 500);
+          }
         }
       } catch (e) {
         this.error = 'Error while trying to scan ban status of players';

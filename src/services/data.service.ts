@@ -329,9 +329,12 @@ export class DataService {
           if (banInfo.NumberOfGameBans) {
             text += `${banInfo.NumberOfGameBans} GAME ban`;
           }
-          text += `<br />last is ${banInfo.DaysSinceLastBan} days ago`;
+          const text2 = `last is ${banInfo.DaysSinceLastBan} days ago`;
+          const div = document.createElement('div');
+          div.textContent = text2;
           for (let elt of Array.from(playerBannedColumn)) {
-            elt.innerHTML = text;
+            elt.textContent = text;
+            elt.appendChild(div);
             elt.classList.add('banned');
             if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
               elt.classList.add('after');
@@ -344,7 +347,7 @@ export class DataService {
           }
         } else {
           for (let elt of Array.from(playerBannedColumn)) {
-            elt.innerHTML = 'clean';
+            elt.textContent = 'clean';
             elt.classList.add('not-banned');
           }
         }

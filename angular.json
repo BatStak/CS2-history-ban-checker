@@ -29,6 +29,8 @@
           },
           "configurations": {
             "production": {
+              "optimization": false,
+              "sourceMap": false,
               "outputHashing": "none"
             },
             "development": {

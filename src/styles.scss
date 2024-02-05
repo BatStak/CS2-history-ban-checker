@@ -23,7 +23,8 @@ td.banstatus {
   font-size: 0.8em;
   white-space: nowrap;
 
-  &.banned.after {
+  &.banned.after,
+  &.banned.after * {
     color: yellow !important;
   }
 

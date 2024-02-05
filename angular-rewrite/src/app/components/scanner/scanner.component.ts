@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
-import { BanInfo, Database } from '../../../models';
+import { BanInfo, Database, MatchInfo } from '../../../models';
 import { SteamService } from '../../../services/steam.service';
 
 @Component({
@@ -37,6 +37,10 @@ export class ScannerComponent {
 
   get mostRecentScan(): BanInfo | undefined {
     return this._dataService.mostRecentScan;
+  }
+
+  get oldestMatch(): MatchInfo | undefined {
+    return this._dataService.oldestMatch;
   }
 
   private _pageNumber = 0;

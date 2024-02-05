@@ -33,7 +33,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private _format = MatchFormat.MR24;
-  private _onRefresh = new Subject<void>();
+  private _onDomUpdated = new Subject<void>();
 
   constructor(
     private _utilsService: UtilsService,
@@ -60,7 +60,7 @@ export class AppComponent implements AfterViewInit {
     await firstValueFrom(this._dataService.onReady);
 
     this._refreshUI();
-    this._onRefresh.pipe(debounceTime(250)).subscribe(() => {
+    this._onDomUpdated.pipe(debounceTime(250)).subscribe(() => {
       this._refreshUI();
     });
     this._observeNewMatches();
@@ -71,7 +71,7 @@ export class AppComponent implements AfterViewInit {
     const results = document.querySelector('.csgo_scoreboard_root > tbody');
     if (results) {
       const observer = new MutationObserver(() => {
-        this._onRefresh.next();
+        this._onDomUpdated.next();
       });
       observer.observe(results, { childList: true });
     }

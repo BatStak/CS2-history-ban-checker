@@ -1,12 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
+import {
+  BanInfo,
+  Database,
+  MatchFormat,
+  MatchInfo,
+  PlayerInfo,
+} from '../models';
 import { UtilsService } from './utils.service';
 import { Subject, debounceTime } from 'rxjs';
 
 @Injectable()
 export class DataService {
-  onSave = new Subject<void>();
   onReady = new Subject<void>();
+  onSave = new Subject<void>();
+  onStatisticsUpdated = new Subject<void>();
   onReset = new Subject<void>();
 
   database: Database = {};
@@ -14,7 +21,10 @@ export class DataService {
   hasPeopleNotScannedYet = false;
   oldestScan?: BanInfo;
   mostRecentScan?: BanInfo;
+  oldestMatch?: MatchInfo;
+
   playersBanned: PlayerInfo[] = [];
+  playersBannedAfter: PlayerInfo[] = [];
 
   constructor(private _utilsService: UtilsService) {
     this.onSave.pipe(debounceTime(1000)).subscribe(() => {
@@ -36,17 +46,17 @@ export class DataService {
     );
 
     // we delete everything element we added and class "parsed"
-    matches.forEach((match) => {
+    for (let match of Array.from(matches)) {
       const players = match.querySelectorAll(
         this._utilsService.playersCssSelector
       );
-      players.forEach((playerRow) => {
+      for (let playerRow of Array.from(players)) {
         if (playerRow.children.length > 1) {
           playerRow.children[playerRow.children.length - 1].remove();
         }
-      });
+      }
       match.classList.remove('parsed', 'banned');
-    });
+    }
 
     // we remove storage but keep apiKey
     chrome.storage.local.clear();
@@ -62,13 +72,13 @@ export class DataService {
     const matches = document.querySelectorAll<HTMLElement>(
       `${this._utilsService.matchesCssSelector}:not(.parsed)`
     );
-    matches.forEach((match) => {
+    for (let match of Array.from(matches)) {
       this._parseMatch(match, format);
-    });
+    }
   }
 
   parseSteamResults(results: BanInfo[]) {
-    results.forEach((banInfo: BanInfo) => {
+    for (let banInfo of results) {
       const playerInfo = this.database.players?.find(
         (p) => p.steamID64 === banInfo.SteamId
       );
@@ -79,7 +89,7 @@ export class DataService {
         ).toISOString();
         playerInfo.banInfo = banInfo;
       }
-    });
+    }
 
     this.onSave.next();
   }
@@ -120,7 +130,8 @@ export class DataService {
     );
 
     let isTeamA = true;
-    players.forEach((playerRow, index) => {
+    for (let index = 0; index < players.length; index++) {
+      const playerRow = players[index];
       if (playerRow.children.length > 1) {
         const lastColumn = playerRow.children[playerRow.children.length - 1];
         lastColumn.after(lastColumn.cloneNode(true));
@@ -199,20 +210,15 @@ export class DataService {
           matchInfo!.finished = this._isFinished(scoreA, scoreB, format);
         }
       }
-    });
+    }
 
     match.classList.add('parsed');
   }
 
   private _updateStatistics() {
     if (this.database.players) {
-      this.database.players.sort((a, b) =>
-        !a.banInfo?.LastFetch || !b.banInfo?.LastFetch
-          ? 0
-          : a.banInfo.LastFetch < b.banInfo!.LastFetch
-          ? -1
-          : 1
-      );
+      this.database.players.sort((a, b) => this._sortPlayers(a, b));
+      console.log(this.database.players);
 
       this.hasPeopleNotScannedYet = this.database.players.some(
         (p) => !p.banInfo?.LastFetch
@@ -225,34 +231,78 @@ export class DataService {
         this.mostRecentScan = playersScanned[playersScanned.length - 1].banInfo;
       }
 
-      const banInfos = this.database.players
+      this.database.matches?.sort((a, b) => this._sortMatches(a, b));
+      this.oldestMatch = this.database.matches?.[0];
+
+      const banInfosList = this.database.players
         .filter(
           (p) =>
             p.banInfo &&
             p.lastPlayWith &&
-            (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0) &&
-            // we take only people banned after playing with them
-            p.banInfo.LastBanOn > p.lastPlayWith
+            (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0)
         )
         .map((p) => p.banInfo!);
 
       this.playersBanned = this.database.players
-        ?.filter((p) => banInfos.some((b) => b.SteamId === p.steamID64))
-        .sort((a, b) =>
-          a.banInfo!.DaysSinceLastBan < b.banInfo!.DaysSinceLastBan ? -1 : 1
-        );
+        ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
+        .sort((a, b) => this._sortBannedPlayers(a, b));
 
-      this._updatesBans();
+      this.playersBannedAfter = this.playersBanned.filter(
+        (p) =>
+          // we take only people banned after playing with them
+          p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
+      );
+
+      this._updateBanStatus();
+
+      this.onStatisticsUpdated.next();
     }
   }
 
-  private _updatesBans() {
+  /**
+   * we sort player : the ones we did not scan yet, then the older scanned first
+   */
+  private _sortPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+    let result = 0;
+
+    if (playerA.banInfo?.LastFetch || playerB.banInfo?.LastFetch) {
+      if (!playerA.banInfo?.LastFetch) {
+        result = -1;
+      } else if (!playerB.banInfo?.LastFetch) {
+        result = 1;
+      } else if (playerA.banInfo!.LastFetch < playerB.banInfo!.LastFetch) {
+        result = -1;
+      } else {
+        result = 1;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * we sort matchs by date ascending
+   */
+  private _sortMatches(matchA: MatchInfo, matchB: MatchInfo) {
+    return matchA.id! < matchB.id! ? -1 : 1;
+  }
+
+  /**
+   * we sort by most recent bans first
+   */
+  private _sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+    return playerA.banInfo!.DaysSinceLastBan < playerB.banInfo!.DaysSinceLastBan
+      ? -1
+      : 1;
+  }
+
+  private _updateBanStatus() {
     const matches = document.querySelectorAll<HTMLElement>(
       `${this._utilsService.matchesCssSelector}.parsed`
     );
-    matches.forEach((match) => {
+    for (let match of Array.from(matches)) {
       this._updateMatchBans(match);
-    });
+    }
   }
 
   private _updateMatchBans(match: HTMLElement) {
@@ -260,33 +310,47 @@ export class DataService {
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
 
-    matchInfo!.playersSteamID64.forEach((steamID64: string) => {
-      const playerInfo = this.playersBanned.find(
+    for (let steamID64 of matchInfo!.playersSteamID64) {
+      const playerInfo = this.database.players?.find(
         (p) => p.steamID64 === steamID64
       );
-      if (playerInfo?.banInfo) {
+      const playerBannedColumn = document.querySelectorAll<HTMLElement>(
+        `.banstatus[data-steamid64="${steamID64}"]`
+      );
+      if (playerInfo?.lastPlayWith && playerInfo?.banInfo) {
         const banInfo = playerInfo.banInfo;
-        const playerBannedColumn = document.querySelectorAll<HTMLElement>(
-          `.banstatus[data-steamid64="${steamID64}"]`
-        );
-        let text = '';
-        if (banInfo.NumberOfVACBans) {
-          text += `${banInfo.NumberOfVACBans} VAC ban`;
+        if (banInfo.NumberOfVACBans > 0 || banInfo.NumberOfGameBans > 0) {
+          let text = '';
+          if (banInfo.NumberOfVACBans) {
+            text += `${banInfo.NumberOfVACBans} VAC ban`;
+          }
+          if (banInfo.NumberOfVACBans && banInfo.NumberOfGameBans) {
+            text += ' & ';
+          }
+          if (banInfo.NumberOfGameBans) {
+            text += `${banInfo.NumberOfGameBans} GAME ban`;
+          }
+          text += `<br />last is ${banInfo.DaysSinceLastBan} days ago`;
+          for (let elt of Array.from(playerBannedColumn)) {
+            elt.innerHTML = text;
+            elt.classList.add('banned');
+            if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
+              elt.classList.add('after');
+            }
+          }
+
+          // we display red the match only if ban occured after the game
+          if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
+            match.classList.add('banned');
+          }
+        } else {
+          for (let elt of Array.from(playerBannedColumn)) {
+            elt.innerHTML = 'clean';
+            elt.classList.add('not-banned');
+          }
         }
-        if (banInfo.NumberOfVACBans && banInfo.NumberOfGameBans) {
-          text += ' & ';
-        }
-        if (banInfo.NumberOfGameBans) {
-          text += `${banInfo.NumberOfGameBans} GAME ban`;
-        }
-        text += `<br />last is ${banInfo.DaysSinceLastBan} days ago`;
-        playerBannedColumn.forEach((elt: HTMLElement) => {
-          elt.innerHTML = text;
-          elt.classList.add('banned');
-        });
-        match.classList.add('banned');
       }
-    });
+    }
   }
 
   private _isFinished(

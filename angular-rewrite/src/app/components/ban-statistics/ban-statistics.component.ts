@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Database, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
-import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'ban-statistics',
@@ -24,12 +23,12 @@ export class BanStatisticsComponent {
     return this._dataService.database;
   }
 
-  get playersBanned(): PlayerInfo[] {
-    return this._dataService.playersBanned;
+  get playersBannedAfter(): PlayerInfo[] {
+    return this._dataService.playersBannedAfter;
   }
 
   constructor(private _dataService: DataService) {
-    this._dataService.onSave.pipe(debounceTime(1000)).subscribe(() => {
+    this._dataService.onStatisticsUpdated.subscribe(() => {
       this.update();
     });
 
@@ -42,13 +41,13 @@ export class BanStatisticsComponent {
       this._dataService.database?.matches?.length
     ) {
       this.playersCount = this._dataService.database.players.length;
-      this.bannedCount = this.playersBanned.length;
+      this.bannedCount = this.playersBannedAfter.length;
       this.bannedPourcentage =
         Math.round((this.bannedCount / this.playersCount) * 10000) / 100;
 
       this.matchesCount = this._dataService.database.matches.length;
       const filteredMatches = this._dataService.database.matches.filter((m) =>
-        this._dataService.playersBanned.some((p) =>
+        this._dataService.playersBannedAfter.some((p) =>
           m.playersSteamID64.includes(p.steamID64)
         )
       );

@@ -19,11 +19,15 @@ tr.banned {
 
 td.banstatus {
   min-width: 65px !important;
+  font-weight: 600;
+  font-size: 0.8em;
+  white-space: nowrap;
 
-  &.banned {
+  &.banned.after {
     color: yellow !important;
-    font-weight: 600;
-    font-size: 0.8em;
-    white-space: nowrap;
+  }
+
+  &.not-banned {
+    color: #19ff00 !important;
   }
 }

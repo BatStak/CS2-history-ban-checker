@@ -1,4 +1,4 @@
-@if(playersBanned.length) {
+@if(playersBannedAfter.length) {
 <p>
   Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been
   banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>).
@@ -19,7 +19,7 @@
     <th>Last played with on</th>
     <th>Banned since</th>
   </tr>
-  @for (playerBanned of playersBanned; track $index) {
+  @for (playerBanned of playersBannedAfter; track $index) {
   <tr>
     <td>
       <a [href]="playerBanned.profileLink" target="_blank"

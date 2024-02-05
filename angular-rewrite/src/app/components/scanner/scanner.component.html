@@ -3,14 +3,15 @@
   : {{ database.matches?.length || 0 }}.
 </p>
 @if (hasPeopleNotScannedYet) {
-<p class="warning">There are some players that have not been scanned yet</p>
+<p class="warning">There are some players that have not been scanned yet.</p>
+} @if (oldestMatch) {
+<p>The oldest match is from {{ oldestMatch.id | date : "dd/MM/y" }}.</p>
 } @if (oldestScan && mostRecentScan) {
 <p>
   The oldest scan is from {{ oldestScan.LastFetch | date : "dd/MM/y" }}, the
   most recent scan is from {{ mostRecentScan.LastFetch | date : "dd/MM/y" }}.
 </p>
 }
-
 <button (click)="scanPlayers()" [disabled]="isLoadingHistory || isScanning">
   Scan players
 </button>

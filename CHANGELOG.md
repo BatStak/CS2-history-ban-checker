@@ -1,3 +1,8 @@
+# v2.0.0
+
+I recode everything in Angular.
+I remove the friends/groups check and per map statistics for now.
+
 # v1.2.7
 
 New competitive tab for CS2
@@ -5,13 +10,13 @@ New competitive tab for CS2
 # v1.2.6
 
 Fix link to github.  
-Fix ban checkon comments/reports.  
+Fix ban checkon comments/reports.
 
 # v1.2.5
 
 Remove game type filter.  
 Add sort feature on maps stats table.  
-Add link to premier history in menu.  
+Add link to premier history in menu.
 
 # v1.2.4
 

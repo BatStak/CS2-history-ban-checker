@@ -1,6 +1,6 @@
 {
-  "name": "CS2 and CSGO history ban checker",
-  "description": "Check ban status of players you encountered in CS2 and CSGO matchmaking.",
+  "name": "CS2 history ban checker",
+  "description": "Check ban status of players you encountered in CS2 matchmaking.",
   "version": "1.2.8",
   "permissions": [
     "unlimitedStorage",

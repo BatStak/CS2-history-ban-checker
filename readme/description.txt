@@ -1,14 +1,6 @@
-This extension is mainly inspired by Ban Checker for Steam.
-
-Load your matchmaking history and find if players have been banned (VAC or Game ban).  
+Load your matchmaking, wingman or premier history and find if players have been banned (VAC or Game ban) after playing with you by checking
 https://steamcommunity.com/my/gcpd/730
 
-I provide the list of banned players after playing with you and some statistics, including maps.
+I provide the list of banned players after playing with you and some statistics.
 
-The most important statistics I wanted to add in the first place :
-- number and pourcentage of matches with someone who has been banned after playing with you,
-- number and pourcentage of players who has been banned after playing with you.
-
-You can also check ban status on players reported, commends you received, your friends list, people you are following, recently played with and group members list.
-
-Link of the source : https://github.com/BatStak/CS2-and-CSGO-history-ban-checker
+Link of the source : https://github.com/BatStak/CS2-history-ban-checker

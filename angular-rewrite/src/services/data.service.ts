@@ -27,7 +27,7 @@ export class DataService {
   playersBannedAfter: PlayerInfo[] = [];
 
   constructor(private _utilsService: UtilsService) {
-    this.onSave.pipe(debounceTime(1000)).subscribe(() => {
+    this.onSave.pipe(debounceTime(250)).subscribe(() => {
       this.save();
     });
   }
@@ -218,7 +218,6 @@ export class DataService {
   private _updateStatistics() {
     if (this.database.players) {
       this.database.players.sort((a, b) => this._sortPlayers(a, b));
-      console.log(this.database.players);
 
       this.hasPeopleNotScannedYet = this.database.players.some(
         (p) => !p.banInfo?.LastFetch
@@ -301,11 +300,11 @@ export class DataService {
       `${this._utilsService.matchesCssSelector}.parsed`
     );
     for (let match of Array.from(matches)) {
-      this._updateMatchBans(match);
+      this._updateMatchBanStatus(match);
     }
   }
 
-  private _updateMatchBans(match: HTMLElement) {
+  private _updateMatchBanStatus(match: HTMLElement) {
     this.database.matches ??= [];
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);

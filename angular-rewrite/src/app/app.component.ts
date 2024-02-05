@@ -8,7 +8,7 @@ import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { SteamService } from '../services/steam.service';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
-import { ScannerComponent } from './components/scanner/scanner.component';
+import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 
 @Component({

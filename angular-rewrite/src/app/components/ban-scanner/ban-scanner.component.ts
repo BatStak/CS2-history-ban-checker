@@ -9,8 +9,8 @@ import { SteamService } from '../../../services/steam.service';
   selector: 'scanner',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './scanner.component.html',
-  styleUrl: './scanner.component.scss',
+  templateUrl: './ban-scanner.component.html',
+  styleUrl: './ban-scanner.component.scss',
 })
 export class ScannerComponent {
   error = '';

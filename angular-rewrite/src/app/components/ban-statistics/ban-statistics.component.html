@@ -1,18 +1,15 @@
 @if(playersBannedAfter.length) {
 <p>
   Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been
-  banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>).
-  <sup>*</sup>
+  banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>)*
 </p>
 <p>
   Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with
-  players banned after the game (<strong>{{ matchPourcentage }}%</strong>).
-  <sup>*</sup>
+  players banned after the game (<strong>{{ matchPourcentage }}%</strong>)*
 </p>
 
 <em>
-  <sup>*</sup>
-  bans can occur on other games. We only know that the bans occured after you
+  *bans can occur on other games. We only know that the bans occurred after you
   play with them.
 </em>
 

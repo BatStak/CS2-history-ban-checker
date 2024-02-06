@@ -1,3 +1,11 @@
+# v2.0.4
+
+huge performance improvements on big history
+
+# v2.0.3
+
+handle deleted steam profiles
+
 # v2.0.2
 
 ### There is now a database to keep results

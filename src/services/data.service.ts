@@ -60,31 +60,14 @@ export class DataService {
   }
 
   reset() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      `${this._utilsService.matchesCssSelector}.parsed`
-    );
-
-    // we delete everything element we added and class "parsed"
-    for (let match of Array.from(matches)) {
-      const players = match.querySelectorAll(
-        this._utilsService.playersCssSelector
-      );
-      for (let playerRow of Array.from(players)) {
-        if (playerRow.children.length > 1) {
-          playerRow.children[playerRow.children.length - 1].remove();
-        }
-      }
-      match.classList.remove('parsed', 'banned');
-    }
-
     // we remove storage but keep apiKey
-    chrome.storage.local.clear();
     this.database = {
       apiKey: this.database.apiKey,
+      matches: [],
+      players: [],
     };
-    this.init();
-
-    this.onReset.next();
+    chrome.storage.local.set(this.database);
+    document.location.reload();
   }
 
   parseMatches() {
@@ -107,6 +90,20 @@ export class DataService {
           new Date().setDate(new Date().getDate() - banInfo.DaysSinceLastBan)
         ).toISOString();
         playerInfo.banInfo = banInfo;
+
+        // for each column of the player ban status, we get the match row and update ban status on the table row of the match
+        const playerBanStatusList = document.querySelectorAll(
+          `.banstatus[data-steamid64="${playerInfo.steamID64}"]`
+        );
+        if (playerBanStatusList?.length) {
+          for (let playerBanStatus of Array.from(playerBanStatusList)) {
+            const matchTableRow =
+              playerBanStatus.closest<HTMLElement>('tr.parsed');
+            if (matchTableRow) {
+              this._updateMatchBanStatus(matchTableRow);
+            }
+          }
+        }
       }
     }
 
@@ -231,6 +228,7 @@ export class DataService {
     }
 
     match.classList.add('parsed');
+    this._updateMatchBanStatus(match);
   }
 
   private _updateStatistics() {
@@ -278,8 +276,6 @@ export class DataService {
           p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
       );
 
-      this._updateBanStatus();
-
       this.onStatisticsUpdated.next();
     }
   }
@@ -319,15 +315,6 @@ export class DataService {
     return playerA.banInfo!.DaysSinceLastBan < playerB.banInfo!.DaysSinceLastBan
       ? -1
       : 1;
-  }
-
-  private _updateBanStatus() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      `${this._utilsService.matchesCssSelector}.parsed`
-    );
-    for (let match of Array.from(matches)) {
-      this._updateMatchBanStatus(match);
-    }
   }
 
   private _updateMatchBanStatus(match: HTMLElement) {

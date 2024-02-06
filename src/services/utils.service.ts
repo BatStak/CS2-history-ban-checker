@@ -42,12 +42,17 @@ export class UtilsService {
   }
 
   getHistoryPeriod() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      this.matchesCssSelector
+    const startMatch = document.querySelector<HTMLElement>(
+      '.csgo_scoreboard_root > tbody > tr:last-child'
     );
-    if (matches.length) {
-      this.endDate = this.getDateOfMatch(matches[0]);
-      this.startDate = this.getDateOfMatch(matches[matches.length - 1]);
+    const endMatch = document.querySelector<HTMLElement>(
+      '.csgo_scoreboard_root > tbody > tr:nth-child(2)'
+    );
+    if (startMatch) {
+      this.startDate = this.getDateOfMatch(startMatch);
+    }
+    if (endMatch) {
+      this.endDate = this.getDateOfMatch(endMatch);
     }
   }
 }

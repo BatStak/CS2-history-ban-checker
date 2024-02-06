@@ -33,8 +33,9 @@ export interface Database {
 }
 
 export enum MatchFormat {
-  MR24 = 'MR24',
-  MR16 = 'MR16',
+  MR12 = 'MR12',
+  MR8 = 'MR8',
+  MR15 = 'MR15',
 }
 
 /**

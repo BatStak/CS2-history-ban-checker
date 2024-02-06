@@ -18,10 +18,7 @@
   </div>
   }
   <div>
-    <button
-      (click)="showOptions = true"
-      [disabled]="isLoadingHistory || isScanning"
-    >
+    <button (click)="openOptions()" [disabled]="isLoadingHistory || isScanning">
       {{ apiKey ? "Change" : "Set" }} API Key
     </button>
   </div>

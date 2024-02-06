@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Database } from '../../../models';
 import { DataService } from '../../../services/data.service';
@@ -70,6 +70,10 @@ export class HistoryLoaderComponent {
   stopLoadHistory() {
     clearInterval(this._loadHistoryInterval);
     this._utilsService.isLoadingHistory = false;
+  }
+
+  openOptions() {
+    this.showOptions = true;
   }
 
   closeOptions() {

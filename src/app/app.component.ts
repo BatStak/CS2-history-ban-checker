@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
@@ -10,6 +10,7 @@ import { SteamService } from '../services/steam.service';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
+import Bowser from 'bowser';
 
 @Component({
   selector: 'app-root',
@@ -32,23 +33,34 @@ export class AppComponent implements AfterViewInit {
     return this._dataService.database;
   }
 
-  private _format = MatchFormat.MR24;
+  private _format: MatchFormat;
   private _onDomUpdated = new Subject<void>();
 
   constructor(
     private _utilsService: UtilsService,
-    private _dataService: DataService
+    private _dataService: DataService,
+    private _applicationRef: ApplicationRef
   ) {
-    if (
-      new URLSearchParams(document.location.search).get('tab') ===
-      'matchhistorywingman'
-    ) {
-      this._format = MatchFormat.MR16;
+    const tab = new URLSearchParams(document.location.search).get('tab');
+    if (tab === 'matchhistorywingman') {
+      this._format = MatchFormat.MR8;
+    } else if (tab === 'matchhistorycompetitive') {
+      this._format = MatchFormat.MR15;
+    } else {
+      this._format = MatchFormat.MR12;
     }
 
     this._dataService.onReset.subscribe(() => {
       this._refreshUI();
     });
+
+    // for some reason, change detection does not work in firefox extension
+    if (
+      Bowser.getParser(window.navigator.userAgent).getBrowserName() ===
+      'Firefox'
+    ) {
+      setInterval(() => this._applicationRef.tick(), 100);
+    }
   }
 
   async ngAfterViewInit() {

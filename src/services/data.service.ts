@@ -204,9 +204,7 @@ export class DataService {
           matchInfo!.teamA!.win = this._getWin(scoreA, scoreB);
           matchInfo!.teamB!.win = this._getWin(scoreB, scoreA);
 
-          if (matchInfo!.format === MatchFormat.MR24 && scoreA + scoreB > 24) {
-            matchInfo!.overtime = true;
-          }
+          matchInfo!.overtime = this._isOvertime(scoreA, scoreB, format);
           matchInfo!.finished = this._isFinished(scoreA, scoreB, format);
         }
       }
@@ -355,22 +353,45 @@ export class DataService {
     }
   }
 
+  private _isOvertime(
+    scoreA: number,
+    scoreB: number,
+    format: MatchFormat
+  ): boolean {
+    let isOvertime = false;
+    switch (format) {
+      case MatchFormat.MR12:
+        isOvertime = scoreA >= 12 && scoreB >= 12;
+        break;
+    }
+    return isOvertime;
+  }
+
   private _isFinished(
     scoreA: number,
     scoreB: number,
     format: MatchFormat
   ): boolean {
-    if (format === MatchFormat.MR24) {
-      if (scoreA === scoreB && scoreA === 15) {
-        return true;
-      }
-      return scoreA !== scoreB && (scoreA === 13 || scoreB === 13);
-    } else {
-      if (scoreA === scoreB && scoreA === 8) {
-        return true;
-      }
-      return scoreA !== scoreB && (scoreA === 9 || scoreB === 9);
+    let drawScore: number;
+    let winScore: number;
+    switch (format) {
+      case MatchFormat.MR12:
+        drawScore = 15;
+        winScore = 13;
+        break;
+      case MatchFormat.MR15:
+        drawScore = 15;
+        winScore = 16;
+        break;
+      case MatchFormat.MR8:
+        drawScore = 8;
+        winScore = 9;
+        break;
     }
+    if (scoreA === scoreB && scoreA === drawScore) {
+      return true;
+    }
+    return scoreA !== scoreB && (scoreA === winScore || scoreB === winScore);
   }
 
   private _getWin(teamScore: number, oppositeTeamScore: number) {

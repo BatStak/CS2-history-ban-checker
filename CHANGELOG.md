@@ -1,7 +1,18 @@
+# v2.0.2
+
+### There is now a database to keep results
+
+Release on Chrome and Firefox, this version is the real working 2.0.0.
+
+I recoded everything in Angular. I removed the friends/groups features and per map statistics for now. Code is way easier to maintain.
+
+# v2.0.1
+
+Fix release for firefox, not release yet on Chrome.
+
 # v2.0.0
 
-I recode everything in Angular.
-I remove the friends/groups check and per map statistics for now.
+broken version.
 
 # v1.2.7
 

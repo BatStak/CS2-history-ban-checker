@@ -6,7 +6,6 @@ import { DataService } from '../services/data.service';
 import { Database, MatchFormat } from '../models';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { SteamService } from '../services/steam.service';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
@@ -32,7 +31,6 @@ export class AppComponent implements AfterViewInit {
     return this._dataService.database;
   }
 
-  private _format: MatchFormat;
   private _onDomUpdated = new Subject<void>();
 
   constructor(
@@ -40,19 +38,6 @@ export class AppComponent implements AfterViewInit {
     private _dataService: DataService,
     private _applicationRef: ApplicationRef
   ) {
-    const tab = new URLSearchParams(document.location.search).get('tab');
-    if (tab === 'matchhistorywingman') {
-      this._format = MatchFormat.MR8;
-    } else if (tab === 'matchhistorycompetitive') {
-      this._format = MatchFormat.MR15;
-    } else {
-      this._format = MatchFormat.MR12;
-    }
-
-    this._dataService.onReset.subscribe(() => {
-      this._refreshUI();
-    });
-
     // for some reason, change detection does not work in firefox extension
     if (
       Bowser.getParser(window.navigator.userAgent).getBrowserName() ===
@@ -63,8 +48,20 @@ export class AppComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
+    const section = new URLSearchParams(document.location.search).get('tab')!;
+    let format = MatchFormat.MR12;
+    if (section === 'matchhistorywingman') {
+      format = MatchFormat.MR8;
+    } else if (section === 'matchhistorycompetitive') {
+      format = MatchFormat.MR15;
+    }
+
+    this._dataService.onReset.subscribe(() => {
+      this._refreshUI();
+    });
+
     const database = await chrome.storage.local.get();
-    this._dataService.init(database);
+    this._dataService.init(database, section, format);
 
     this._refreshUI();
     this._onDomUpdated.pipe(debounceTime(250)).subscribe(() => {
@@ -85,7 +82,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private _refreshUI() {
-    this._dataService.parseMatches(this._format);
+    this._dataService.parseMatches();
     this._utilsService.getHistoryPeriod();
     this._dataService.onSave.next();
   }

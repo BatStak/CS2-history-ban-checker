@@ -16,6 +16,7 @@ export interface TeamInfo {
 
 export interface MatchInfo {
   id?: string;
+  section?: string;
   map?: string;
   format?: MatchFormat;
   overtime?: boolean;

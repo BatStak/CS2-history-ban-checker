@@ -16,6 +16,11 @@ export class DataService {
   onReset = new Subject<void>();
 
   database: Database = {};
+  section?: string;
+  format?: MatchFormat;
+
+  players?: PlayerInfo[];
+  matches?: MatchInfo[];
 
   playersNotScannedYet?: PlayerInfo[];
   oldestScan?: BanInfo;
@@ -31,13 +36,27 @@ export class DataService {
     });
   }
 
-  init(database?: any) {
-    this.database = database;
+  init(database?: any, section?: string, format?: MatchFormat) {
+    if (database) {
+      this.database = database;
+    }
+    if (section) {
+      this.section = section;
+    }
+    if (format) {
+      this.format = format;
+    }
+
     this.database ??= {};
     this.database.matches ??= [];
     this.database.players ??= [];
-    console.log(this.database);
-    this._updateStatistics();
+
+    // to avoid having empty results on next version because we add "section" attributes between 2 versions
+    if (this.database.matches.some((m) => !m.section)) {
+      this.reset();
+    } else {
+      this._updateStatistics();
+    }
   }
 
   reset() {
@@ -68,12 +87,12 @@ export class DataService {
     this.onReset.next();
   }
 
-  parseMatches(format: MatchFormat) {
+  parseMatches() {
     const matches = document.querySelectorAll<HTMLElement>(
       `${this._utilsService.matchesCssSelector}:not(.parsed)`
     );
     for (let match of Array.from(matches)) {
-      this._parseMatch(match, format);
+      this._parseMatch(match, this.format!);
     }
   }
 
@@ -106,6 +125,7 @@ export class DataService {
     if (!matchInfo) {
       matchInfo = {
         id: matchId,
+        section: this.section,
         map: this._utilsService.getMap(match),
         finished: true,
         format: format,
@@ -214,24 +234,32 @@ export class DataService {
   }
 
   private _updateStatistics() {
-    if (this.database.players) {
+    if (this.database.players && this.database.matches) {
       this.database.players.sort((a, b) => this._sortPlayers(a, b));
+      this.database.matches?.sort((a, b) => this._sortMatches(a, b));
 
-      this.playersNotScannedYet = this.database.players.filter(
+      // filter matches from the section we are on
+      this.matches = this.database.matches.filter(
+        (m) => m.section === this.section
+      );
+
+      // filter players from the section we are on
+      this.players = this.database.players.filter((p) =>
+        this.matches?.some((m) => m.playersSteamID64?.includes(p.steamID64))
+      );
+
+      this.playersNotScannedYet = this.players.filter(
         (p) => !p.banInfo?.LastFetch
       );
-      const playersScanned = this.database.players.filter(
-        (p) => p.banInfo?.LastFetch
-      );
+      const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
       if (playersScanned.length) {
         this.oldestScan = playersScanned[0].banInfo;
         this.mostRecentScan = playersScanned[playersScanned.length - 1].banInfo;
       }
 
-      this.database.matches?.sort((a, b) => this._sortMatches(a, b));
-      this.oldestMatch = this.database.matches?.[0];
+      this.oldestMatch = this.matches?.[0];
 
-      const banInfosList = this.database.players
+      const banInfosList = this.players
         .filter(
           (p) =>
             p.banInfo &&
@@ -240,7 +268,7 @@ export class DataService {
         )
         .map((p) => p.banInfo!);
 
-      this.playersBanned = this.database.players
+      this.playersBanned = this.players
         ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
         .sort((a, b) => this._sortBannedPlayers(a, b));
 

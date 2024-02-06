@@ -37,16 +37,16 @@ export class BanStatisticsComponent {
 
   update() {
     if (
-      this._dataService.database?.players?.length &&
-      this._dataService.database?.matches?.length
+      this._dataService.players?.length &&
+      this._dataService.matches?.length
     ) {
-      this.playersCount = this._dataService.database.players.length;
+      this.playersCount = this._dataService.players.length;
       this.bannedCount = this.playersBannedAfter.length;
       this.bannedPourcentage =
         Math.round((this.bannedCount / this.playersCount) * 10000) / 100;
 
-      this.matchesCount = this._dataService.database.matches.length;
-      const filteredMatches = this._dataService.database.matches.filter((m) =>
+      this.matchesCount = this._dataService.matches.length;
+      const filteredMatches = this._dataService.matches.filter((m) =>
         this._dataService.playersBannedAfter.some((p) =>
           m.playersSteamID64.includes(p.steamID64)
         )

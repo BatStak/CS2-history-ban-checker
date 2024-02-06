@@ -15,6 +15,11 @@ function genericOnClick(info) {
         url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorywingman",
       });
       break;
+    case "csgo-history":
+      chrome.tabs.create({
+        url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitive",
+      });
+      break;
     case "github":
       chrome.tabs.create({
         url: "https://github.com/BatStak/CS2-history-ban-checker",
@@ -37,6 +42,11 @@ chrome.contextMenus.create({
 chrome.contextMenus.create({
   id: "wingman-history",
   title: "Access to Wingman history",
+  contexts: ["all"],
+});
+chrome.contextMenus.create({
+  id: "csgo-history",
+  title: "Access to CSGO Matchmaking history",
   contexts: ["all"],
 });
 chrome.contextMenus.create({

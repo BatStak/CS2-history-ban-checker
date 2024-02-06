@@ -23,8 +23,12 @@ export class ScannerComponent {
     return this._utilsService.isScanning;
   }
 
-  get database(): Database {
-    return this._dataService.database;
+  get matches(): MatchInfo[] | undefined {
+    return this._dataService.matches;
+  }
+
+  get players(): PlayerInfo[] | undefined {
+    return this._dataService.players;
   }
 
   get playersNotScannedYet(): PlayerInfo[] | undefined {
@@ -55,11 +59,11 @@ export class ScannerComponent {
   ) {}
 
   startScan(type: 'new' | 'all') {
-    if (this.database.players) {
+    if (this.players) {
       const players =
         type === 'new'
-          ? this.database.players.filter((p) => !p.banInfo?.LastFetch)
-          : this.database.players;
+          ? this.players.filter((p) => !p.banInfo?.LastFetch)
+          : this.players;
 
       this.numberOfPages =
         Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);

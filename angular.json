@@ -30,8 +30,9 @@
           "configurations": {
             "production": {
               "optimization": false,
+              "outputHashing": "none",
               "sourceMap": false,
-              "outputHashing": "none"
+              "allowedCommonJsDependencies": ["bowser"]
             },
             "development": {
               "optimization": false,

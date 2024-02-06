@@ -11,7 +11,6 @@ import { Subject, debounceTime } from 'rxjs';
 
 @Injectable()
 export class DataService {
-  onReady = new Subject<void>();
   onSave = new Subject<void>();
   onStatisticsUpdated = new Subject<void>();
   onReset = new Subject<void>();
@@ -37,6 +36,7 @@ export class DataService {
     this.database ??= {};
     this.database.matches ??= [];
     this.database.players ??= [];
+    console.log(this.database);
     this._updateStatistics();
   }
 

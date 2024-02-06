@@ -22,7 +22,6 @@ import Bowser from 'bowser';
     ScannerComponent,
     BanStatisticsComponent,
   ],
-  providers: [UtilsService, DataService, SteamService],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -64,12 +63,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
-    chrome.storage.local.get((database: any) => {
-      this._dataService.init(database); // {} to reinit
-      this._dataService.onReady.next();
-    });
-
-    await firstValueFrom(this._dataService.onReady);
+    const database = await chrome.storage.local.get();
+    this._dataService.init(database);
 
     this._refreshUI();
     this._onDomUpdated.pipe(debounceTime(250)).subscribe(() => {

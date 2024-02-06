@@ -17,7 +17,9 @@ export class UtilsService {
         '.csgo_scoreboard_inner_left > tbody > tr:nth-child(1)'
       )
       ?.textContent?.trim()
-      ?.replace('Premier ', '');
+      ?.replace('Premier ', '')
+      ?.replace('Wingman ', '')
+      ?.replace('Competitive ', '');
   }
 
   getReplayLink(matchNode: HTMLElement) {

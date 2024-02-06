@@ -86,6 +86,8 @@ export class ScannerComponent {
       const steamIds = scannedPlayers.map((p) => p.steamID64);
       try {
         const results = await this._steamService.scanPlayers(steamIds);
+        this._handleDeletedProfiles(results, steamIds);
+
         this._dataService.parseSteamResults(results);
 
         this.error = '';
@@ -111,5 +113,24 @@ export class ScannerComponent {
 
   stopScan() {
     this._stopScan = true;
+  }
+
+  private _handleDeletedProfiles(results: BanInfo[], steamIds: string[]) {
+    let allPlayers = this._dataService.database.players;
+    if (allPlayers) {
+      const deletedPlayers = allPlayers.filter(
+        (p) =>
+          steamIds.includes(p.steamID64) &&
+          !results.some((r) => r.SteamId === p.steamID64)
+      );
+      for (const deleted of deletedPlayers) {
+        const index = allPlayers.findIndex(
+          (p) => p.steamID64 === deleted.steamID64
+        );
+        if (index >= 0) {
+          allPlayers.splice(index, 1);
+        }
+      }
+    }
   }
 }

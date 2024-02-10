@@ -1,4 +1,9 @@
-import { AfterViewInit, ApplicationRef, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  ApplicationRef,
+  Component,
+  HostBinding,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
@@ -10,6 +15,7 @@ import { HistoryLoaderComponent } from './components/history-loader/history-load
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 import Bowser from 'bowser';
+import { OptionsComponent } from './components/options/options.component';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +23,7 @@ import Bowser from 'bowser';
   imports: [
     CommonModule,
     FormsModule,
+    OptionsComponent,
     HistoryLoaderComponent,
     ScannerComponent,
     BanStatisticsComponent,
@@ -26,6 +33,13 @@ import Bowser from 'bowser';
 })
 export class AppComponent implements AfterViewInit {
   ready = false;
+
+  isOnGCPDSection = false;
+
+  @HostBinding('class.add-margin')
+  get addMarginClass(): boolean {
+    return !this.isOnGCPDSection;
+  }
 
   get database(): Database {
     return this._dataService.database;
@@ -48,17 +62,22 @@ export class AppComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
-    const section = new URLSearchParams(document.location.search).get('tab')!;
-    let format = MatchFormat.MR12;
-    if (section === 'matchhistorywingman') {
-      format = MatchFormat.MR8;
-    } else if (section === 'matchhistorycompetitive') {
-      format = MatchFormat.MR15;
-    }
+    const section =
+      new URLSearchParams(document.location.search).get('tab') || undefined;
+    this.isOnGCPDSection = !!section;
 
-    this._dataService.onReset.subscribe(() => {
-      this._refreshUI();
-    });
+    let format: MatchFormat | undefined = undefined;
+    if (this.isOnGCPDSection) {
+      format = MatchFormat.MR12;
+      if (section === 'matchhistorywingman') {
+        format = MatchFormat.MR8;
+      } else if (section === 'matchhistorycompetitive') {
+        format = MatchFormat.MR15;
+      }
+      this._dataService.onReset.subscribe(() => {
+        this._refreshUI();
+      });
+    }
 
     const database = await chrome.storage.local.get();
     this._dataService.init(database, section, format);
@@ -67,25 +86,42 @@ export class AppComponent implements AfterViewInit {
     this._onDomUpdated.pipe(debounceTime(250)).subscribe(() => {
       this._refreshUI();
     });
-    this._observeNewMatches();
+    this._observeDomChanges();
+
     this.ready = true;
   }
 
-  private _observeNewMatches() {
-    const results = document.querySelector('.csgo_scoreboard_root > tbody');
-    if (results) {
-      const observer = new MutationObserver(() => {
-        this._onDomUpdated.next();
-      });
-      observer.observe(results, { childList: true });
+  private _observeDomChanges() {
+    if (this.isOnGCPDSection) {
+      const matchResults = document.querySelector(
+        '.csgo_scoreboard_root > tbody'
+      );
+      if (matchResults) {
+        const observer = new MutationObserver(() => {
+          this._onDomUpdated.next();
+        });
+        observer.observe(matchResults, { childList: true });
+      }
+    } else {
+      const friendsResults = document.querySelector('.friends_content');
+      if (friendsResults) {
+        const observer = new MutationObserver(() => {
+          this._onDomUpdated.next();
+        });
+        observer.observe(friendsResults, { childList: true });
+      }
     }
   }
 
   private _refreshUI() {
-    this._dataService.parseMatches();
-    this._utilsService.getHistoryPeriod();
-    if (this.database.hideHistoryTable) {
-      this._dataService.cleanParsedMatches();
+    if (this.isOnGCPDSection) {
+      this._dataService.parseMatches();
+      this._utilsService.getHistoryPeriod();
+      if (this.database.hideHistoryTable) {
+        this._dataService.cleanParsedMatches();
+      }
+    } else {
+      this._dataService.parseFriends();
     }
     this._dataService.onSave.next();
   }

@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input, booleanAttribute } from '@angular/core';
 import { Database, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 
 @Component({
-  selector: 'ban-statistics',
+  selector: 'cs2-history-ban-statistics',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ban-statistics.component.html',
   styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent {
+  @Input({ transform: booleanAttribute }) isOnGCPDSection = false;
+
   playersCount = 0;
   bannedCount = 0;
   bannedPourcentage = 0;
@@ -36,10 +38,7 @@ export class BanStatisticsComponent {
   }
 
   update() {
-    if (
-      this._dataService.players?.length &&
-      this._dataService.matches?.length
-    ) {
+    if (this._dataService.players.length && this._dataService.matches.length) {
       this.playersCount = this._dataService.players.length;
       this.bannedCount = this.playersBannedAfter.length;
       this.bannedPourcentage =

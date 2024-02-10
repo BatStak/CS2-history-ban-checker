@@ -6,7 +6,7 @@ import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
 
 @Component({
-  selector: 'history-loader',
+  selector: 'cs2-history-loader',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './history-loader.component.html',
@@ -45,8 +45,8 @@ export class HistoryLoaderComponent {
     private _utilsService: UtilsService,
     private _dataService: DataService
   ) {
-    this.apiKey = this._dataService.database?.apiKey;
-    this.hideHistoryTable = this._dataService.database?.hideHistoryTable;
+    this.apiKey = this._dataService.database.apiKey;
+    this.hideHistoryTable = this._dataService.database.hideHistoryTable;
   }
 
   toggleHideHistoryTable(event: Event) {

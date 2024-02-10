@@ -15,14 +15,18 @@ export class DataService {
   onStatisticsUpdated = new Subject<void>();
   onReset = new Subject<void>();
 
-  database: Database = {};
+  database: Database = {
+    matches: [],
+    players: [],
+  };
+
   section?: string;
   format?: MatchFormat;
 
-  players?: PlayerInfo[];
-  matches?: MatchInfo[];
+  players: PlayerInfo[] = [];
+  matches: MatchInfo[] = [];
 
-  playersNotScannedYet?: PlayerInfo[];
+  playersNotScannedYet: PlayerInfo[] = [];
   oldestScan?: BanInfo;
   oldestMatch?: MatchInfo;
 
@@ -48,7 +52,7 @@ export class DataService {
       this.format = format;
     }
 
-    this.database ??= {};
+    this.database ??= { matches: [], players: [] };
     this.database.matches ??= [];
     this.database.players ??= [];
 
@@ -64,6 +68,7 @@ export class DataService {
     // we remove storage but keep apiKey
     this.database = {
       apiKey: this.database.apiKey,
+      hideHistoryTable: false,
       matches: [],
       players: [],
     };
@@ -80,6 +85,34 @@ export class DataService {
     }
   }
 
+  parseFriends() {
+    this.players = [];
+    const players = document.querySelectorAll<HTMLElement>(
+      '.persona[data-steamid]'
+    );
+    for (let player of Array.from(players)) {
+      const steamID64 = player.dataset['steamid']!;
+      // add playerInfo to global list
+      let playerInfo = this.database.players.find(
+        (p) => p.steamID64 === steamID64
+      );
+      if (!playerInfo) {
+        playerInfo = {
+          steamID64: steamID64,
+          name: player
+            .querySelector('.friend_block_content')
+            ?.childNodes[0]?.textContent?.trim(),
+          profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
+          avatarLink:
+            player.querySelector<HTMLImageElement>('.player_avatar img')?.src,
+          matches: [],
+        };
+        this.database.players.push(playerInfo);
+      }
+      this.players.push(playerInfo);
+    }
+  }
+
   cleanParsedMatches() {
     const matches = document.querySelectorAll<HTMLElement>(
       `${this._utilsService.matchesCssSelector}.parsed:not(.banned)`
@@ -91,7 +124,7 @@ export class DataService {
 
   parseSteamResults(results: BanInfo[]) {
     for (let banInfo of results) {
-      const playerInfo = this.database.players?.find(
+      const playerInfo = this.database.players.find(
         (p) => p.steamID64 === banInfo.SteamId
       );
       if (playerInfo) {
@@ -126,7 +159,6 @@ export class DataService {
   }
 
   private _parseMatch(match: HTMLElement, format: MatchFormat) {
-    this.database.matches ??= [];
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
     if (!matchInfo) {
@@ -193,7 +225,7 @@ export class DataService {
           }
 
           // add playerInfo to global list
-          let playerInfo = this.database.players!.find(
+          let playerInfo = this.database.players.find(
             (p) => p.steamID64 === steamID64
           );
           if (!playerInfo) {
@@ -207,8 +239,8 @@ export class DataService {
               lastPlayWith: matchInfo!.id,
               matches: [matchInfo!.id!],
             };
-            this.database.players?.push(playerInfo);
-          } else if (playerInfo.matches.includes(matchInfo!.id!)) {
+            this.database.players.push(playerInfo);
+          } else if (!playerInfo.matches.includes(matchInfo!.id!)) {
             playerInfo.matches.push(matchInfo!.id!);
           }
         }
@@ -242,10 +274,11 @@ export class DataService {
   }
 
   private _updateStatistics(updateFlags = true) {
-    if (this.database.players && this.database.matches) {
-      this.database.players.sort((a, b) => this._sortPlayers(a, b));
-      this.database.matches?.sort((a, b) => this._sortMatches(a, b));
+    this.database.players.sort((a, b) => this._sortPlayers(a, b));
 
+    this.database.matches.sort((a, b) => this._sortMatches(a, b));
+
+    if (this.section) {
       // filter matches from the section we are on
       this.matches = this.database.matches.filter(
         (m) => m.section === this.section
@@ -253,53 +286,55 @@ export class DataService {
 
       // filter players from the section we are on
       this.players = this.database.players.filter((p) =>
-        this.matches?.some((m) => m.playersSteamID64?.includes(p.steamID64))
+        this.matches.some((m) => m.playersSteamID64?.includes(p.steamID64))
       );
-
-      // get players that has no ban information
-      this.playersNotScannedYet = this.players.filter(
-        (p) => !p.banInfo?.LastFetch
-      );
-      const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
-      if (playersScanned.length) {
-        this.oldestScan = playersScanned[0].banInfo;
-      }
-
-      // get oldest match of history
-      this.oldestMatch = this.matches?.[0];
-
-      // get player banned
-      const banInfosList = this.players
-        .filter(
-          (p) =>
-            p.banInfo &&
-            p.lastPlayWith &&
-            (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0)
-        )
-        .map((p) => p.banInfo!);
-
-      this.playersBanned = this.players
-        ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
-        .sort((a, b) => this._sortBannedPlayers(a, b));
-
-      // get players banned after playing with them
-      const playersBannedAfter = this.playersBanned.filter(
-        (p) =>
-          // we take only people banned after playing with them
-          p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
-      );
-
-      // update flag to know that there are new people banned
-      if (
-        updateFlags &&
-        playersBannedAfter.length !== this.playersBannedAfter.length
-      ) {
-        this.newPlayersBanned = true;
-      }
-      this.playersBannedAfter = playersBannedAfter;
-
-      this.onStatisticsUpdated.next();
+    } else {
+      this.parseFriends();
     }
+
+    // get players that has no ban information
+    this.playersNotScannedYet = this.players.filter(
+      (p) => !p.banInfo?.LastFetch
+    );
+    const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
+    if (playersScanned.length) {
+      this.oldestScan = playersScanned[0].banInfo;
+    }
+
+    // get oldest match of history
+    this.oldestMatch = this.matches[0];
+
+    // get player banned
+    const banInfosList = this.players
+      .filter(
+        (p) =>
+          p.banInfo &&
+          p.lastPlayWith &&
+          (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0)
+      )
+      .map((p) => p.banInfo!);
+
+    this.playersBanned = this.players
+      ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
+      .sort((a, b) => this._sortBannedPlayers(a, b));
+
+    // get players banned after playing with them
+    const playersBannedAfter = this.playersBanned.filter(
+      (p) =>
+        // we take only people banned after playing with them
+        p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
+    );
+
+    // update flag to know that there are new people banned
+    if (
+      updateFlags &&
+      playersBannedAfter.length !== this.playersBannedAfter.length
+    ) {
+      this.newPlayersBanned = true;
+    }
+    this.playersBannedAfter = playersBannedAfter;
+
+    this.onStatisticsUpdated.next();
   }
 
   /**
@@ -340,12 +375,11 @@ export class DataService {
   }
 
   private _updateMatchBanStatus(match: HTMLElement) {
-    this.database.matches ??= [];
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
 
     for (let steamID64 of matchInfo!.playersSteamID64) {
-      const playerInfo = this.database.players?.find(
+      const playerInfo = this.database.players.find(
         (p) => p.steamID64 === steamID64
       );
       const playerBannedColumn = document.querySelectorAll<HTMLElement>(

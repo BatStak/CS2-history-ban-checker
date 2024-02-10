@@ -1,0 +1,33 @@
+<button
+  id="open-options"
+  (click)="openOptions()"
+  [disabled]="isLoadingHistory || isScanning"
+>
+  {{ apiKey ? "Change" : "Set" }} API Key
+</button>
+
+@if (!apiKey) {
+<div>
+  First, you need to set an API key to be able to check BAN status of players :
+</div>
+} @if (showOptions) {
+<div id="overlay-options">
+  <div>
+    <div>
+      <label for="apikey"> Enter your Api KEY </label>
+      <input id="apikey" type="text" [(ngModel)]="apiKey" />
+    </div>
+    <div>
+      <a href="https://steamcommunity.com/dev/apikey" target="_blank">
+        Retrieve your API KEY here
+      </a>
+    </div>
+    <div>
+      <button (click)="closeOptions()">Close</button>
+    </div>
+    <div [style.text-align]="'right'">
+      <button (click)="resetDatabase()">Reset Database</button>
+    </div>
+  </div>
+</div>
+}

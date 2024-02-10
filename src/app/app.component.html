@@ -1,14 +1,25 @@
-<h2>CS2 History Ban Checker</h2>
-
 @if(ready) {
-<history-loader></history-loader>
 
-@if(database.apiKey) {
-<h2>Database</h2>
+<div class="cs2-history-ban-checker-container">
+  <h2>CS2 History Ban Checker</h2>
 
-<scanner></scanner>
+  <cs2-history-options></cs2-history-options>
 
-<h2>Results</h2>
+  @if(database.apiKey) { @if(isOnGCPDSection) {
+  <cs2-history-loader></cs2-history-loader>
+  }
 
-<ban-statistics></ban-statistics>
-}}
+  <h3>Database</h3>
+
+  <cs2-history-ban-scanner
+    [isOnGCPDSection]="isOnGCPDSection"
+  ></cs2-history-ban-scanner>
+
+  <h3>Results</h3>
+
+  <cs2-history-ban-statistics
+    [isOnGCPDSection]="isOnGCPDSection"
+  ></cs2-history-ban-statistics>
+  }
+</div>
+}

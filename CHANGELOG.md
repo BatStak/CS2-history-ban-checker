@@ -1,3 +1,7 @@
+# v2.0.6
+
+Add feature to scan players on friends page.
+
 # v2.0.5
 
 Add feature to hide clean games in the list for performance and lisibility.

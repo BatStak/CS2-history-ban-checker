@@ -1,6 +1,8 @@
 <p>
-  Players in database : {{ players?.length || 0 }}, matches in database :
-  {{ matches?.length || 0 }}.
+  @if(isOnGCPDSection) { Players in database for this section :
+  {{ players.length || 0 }}, matches in database for this section :
+  {{ matches.length || 0 }}. } @else { Players in database for this section :
+  {{ players.length || 0 }}. }
 </p>
 @if (playersNotScannedYet && playersNotScannedYet.length) {
 <p class="warning">

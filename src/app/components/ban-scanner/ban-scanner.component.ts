@@ -1,18 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input, booleanAttribute } from '@angular/core';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
-import { BanInfo, Database, MatchInfo, PlayerInfo } from '../../../models';
+import { BanInfo, MatchInfo, PlayerInfo } from '../../../models';
 import { SteamService } from '../../../services/steam.service';
 
 @Component({
-  selector: 'scanner',
+  selector: 'cs2-history-ban-scanner',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ban-scanner.component.html',
   styleUrl: './ban-scanner.component.scss',
 })
 export class ScannerComponent {
+  @Input({ transform: booleanAttribute }) isOnGCPDSection = false;
+
   error = '';
 
   get isLoadingHistory(): boolean {
@@ -23,15 +25,15 @@ export class ScannerComponent {
     return this._utilsService.isScanning;
   }
 
-  get matches(): MatchInfo[] | undefined {
+  get matches(): MatchInfo[] {
     return this._dataService.matches;
   }
 
-  get players(): PlayerInfo[] | undefined {
+  get players(): PlayerInfo[] {
     return this._dataService.players;
   }
 
-  get playersNotScannedYet(): PlayerInfo[] | undefined {
+  get playersNotScannedYet(): PlayerInfo[] {
     return this._dataService.playersNotScannedYet;
   }
 
@@ -46,7 +48,7 @@ export class ScannerComponent {
   get showNewPlayersBannedWarning(): boolean {
     return (
       this._dataService.newPlayersBanned &&
-      !!this._dataService.database?.hideHistoryTable
+      !!this._dataService.database.hideHistoryTable
     );
   }
 

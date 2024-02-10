@@ -1,12 +1,28 @@
-:host {
+:host.add-margin .cs2-history-ban-checker-container {
+  margin-left: 28px;
+}
+
+.cs2-history-ban-checker-container {
+  position: relative;
   padding: 17px;
   margin-top: -20px;
   border: 1px dashed;
+  background: rgba(0, 0, 0, 50%);
+
+  h2,
+  h3 {
+    margin: 10px 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
 
   & ::ng-deep {
     .error {
       color: #f00 !important;
     }
+
     .warning {
       color: rgb(207, 111, 0) !important;
     }
@@ -14,13 +30,5 @@
     button ~ button {
       margin-left: 10px;
     }
-  }
-}
-
-h2 {
-  margin: 20px 0;
-
-  &:first-child {
-    margin-top: 0;
   }
 }

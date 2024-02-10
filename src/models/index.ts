@@ -30,8 +30,8 @@ export interface MatchInfo {
 export interface Database {
   apiKey?: string;
   hideHistoryTable?: boolean;
-  players?: PlayerInfo[];
-  matches?: MatchInfo[];
+  players: PlayerInfo[];
+  matches: MatchInfo[];
 }
 
 export enum MatchFormat {

@@ -1,6 +1,7 @@
 # v2.0.6
 
 Add feature to scan players on friends page.
+Fix some bugs.
 
 # v2.0.5
 

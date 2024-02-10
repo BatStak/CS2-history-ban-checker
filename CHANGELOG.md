@@ -1,3 +1,7 @@
+# v2.0.5
+
+Add feature to hide clean games in the list for performance and lisibility.
+
 # v2.0.4
 
 huge performance improvements on big history

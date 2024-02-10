@@ -121,24 +121,25 @@ export class ScannerComponent implements DoCheck {
 
   /**
    * If steam API does not return the players, it is because steam profiles have been deleted
-   * @param results the results from steam API
-   * @param steamIds the steam IDs we send
+   * @param steamApiResults the results from steam API
+   * @param steamIdsScanned the steam IDs we send
    */
-  private _handleDeletedProfiles(results: BanInfo[], steamIds: string[]) {
+  private _handleDeletedProfiles(
+    steamApiResults: BanInfo[],
+    steamIdsScanned: string[]
+  ) {
     let allPlayers = this._dataService.database.players;
-    if (allPlayers) {
-      const deletedPlayers = allPlayers.filter(
-        (p) =>
-          steamIds.includes(p.steamID64) &&
-          !results.some((r) => r.SteamId === p.steamID64)
+    const deletedPlayers = allPlayers.filter(
+      (p) =>
+        steamIdsScanned.includes(p.steamID64) &&
+        !steamApiResults.some((r) => r.SteamId === p.steamID64)
+    );
+    for (const deleted of deletedPlayers) {
+      const playerInfo = allPlayers.find(
+        (p) => p.steamID64 === deleted.steamID64
       );
-      for (const deleted of deletedPlayers) {
-        const index = allPlayers.findIndex(
-          (p) => p.steamID64 === deleted.steamID64
-        );
-        if (index >= 0) {
-          allPlayers.splice(index, 1);
-        }
+      if (playerInfo) {
+        playerInfo.deleted = true;
       }
     }
   }

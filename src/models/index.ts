@@ -6,6 +6,7 @@ export interface PlayerInfo {
   lastPlayWith?: string;
   banInfo?: BanInfo;
   matches: string[];
+  deleted?: boolean;
 }
 
 export interface TeamInfo {

@@ -284,8 +284,10 @@ export class DataService {
       );
 
       // filter players from the section we are on
-      this.players = this.database.players.filter((p) =>
-        this.matches.some((m) => m.playersSteamID64?.includes(p.steamID64))
+      this.players = this.database.players.filter(
+        (p) =>
+          !p.deleted &&
+          this.matches.some((m) => m.playersSteamID64?.includes(p.steamID64))
       );
     } else {
       this.parseFriends();

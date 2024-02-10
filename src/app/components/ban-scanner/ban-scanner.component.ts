@@ -39,10 +39,6 @@ export class ScannerComponent {
     return this._dataService.oldestScan;
   }
 
-  get mostRecentScan(): BanInfo | undefined {
-    return this._dataService.mostRecentScan;
-  }
-
   get oldestMatch(): MatchInfo | undefined {
     return this._dataService.oldestMatch;
   }

@@ -9,10 +9,9 @@
 </p>
 } @if (oldestMatch) {
 <p>The oldest match is from {{ oldestMatch.id | date : "dd/MM/y" }}.</p>
-} @if (oldestScan && mostRecentScan) {
+} @if (oldestScan ) {
 <p>
-  The oldest scan is from {{ oldestScan.LastFetch | date : "dd/MM/y" }}, the
-  most recent scan is from {{ mostRecentScan.LastFetch | date : "dd/MM/y" }}.
+  The oldest scan has been on {{ oldestScan.LastFetch | date : "dd/MM/y" }}.
 </p>
 } @if (playersNotScannedYet && playersNotScannedYet.length) {
 <button (click)="startScan('new')" [disabled]="isLoadingHistory || isScanning">

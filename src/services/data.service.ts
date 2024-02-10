@@ -24,7 +24,6 @@ export class DataService {
 
   playersNotScannedYet?: PlayerInfo[];
   oldestScan?: BanInfo;
-  mostRecentScan?: BanInfo;
   oldestMatch?: MatchInfo;
 
   playersBanned: PlayerInfo[] = [];
@@ -261,7 +260,6 @@ export class DataService {
       const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
       if (playersScanned.length) {
         this.oldestScan = playersScanned[0].banInfo;
-        this.mostRecentScan = playersScanned[playersScanned.length - 1].banInfo;
       }
 
       this.oldestMatch = this.matches?.[0];

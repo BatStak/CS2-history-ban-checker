@@ -275,7 +275,6 @@ export class DataService {
 
   private _updateStatistics(updateFlags = true) {
     this.database.players.sort((a, b) => this._sortPlayers(a, b));
-
     this.database.matches.sort((a, b) => this._sortMatches(a, b));
 
     if (this.section) {
@@ -299,6 +298,8 @@ export class DataService {
     const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
     if (playersScanned.length) {
       this.oldestScan = playersScanned[0].banInfo;
+    } else {
+      this.oldestScan = undefined;
     }
 
     // get oldest match of history

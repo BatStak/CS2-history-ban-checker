@@ -46,7 +46,10 @@ export class UtilsService {
       '.csgo_scoreboard_root > tbody > tr:not(:first-child):last-child'
     );
     if (startMatch) {
-      this.startDate = this.getDateOfMatch(startMatch);
+      const startDate = this.getDateOfMatch(startMatch);
+      if (!this.startDate || (startDate && startDate < this.startDate)) {
+        this.startDate = startDate;
+      }
     }
     if (!this.endDate) {
       const endMatch = document.querySelector<HTMLElement>(

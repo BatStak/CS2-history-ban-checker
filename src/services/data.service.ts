@@ -29,6 +29,8 @@ export class DataService {
   playersBanned: PlayerInfo[] = [];
   playersBannedAfter: PlayerInfo[] = [];
 
+  newPlayersBanned = false;
+
   constructor(private _utilsService: UtilsService) {
     this.onSave.pipe(debounceTime(250)).subscribe(() => {
       this.save();
@@ -54,7 +56,7 @@ export class DataService {
     if (this.database.matches.some((m) => !m.section)) {
       this.reset();
     } else {
-      this._updateStatistics();
+      this._updateStatistics(false);
     }
   }
 
@@ -239,7 +241,7 @@ export class DataService {
     this._updateMatchBanStatus(match);
   }
 
-  private _updateStatistics() {
+  private _updateStatistics(updateFlags = true) {
     if (this.database.players && this.database.matches) {
       this.database.players.sort((a, b) => this._sortPlayers(a, b));
       this.database.matches?.sort((a, b) => this._sortMatches(a, b));
@@ -254,6 +256,7 @@ export class DataService {
         this.matches?.some((m) => m.playersSteamID64?.includes(p.steamID64))
       );
 
+      // get players that has no ban information
       this.playersNotScannedYet = this.players.filter(
         (p) => !p.banInfo?.LastFetch
       );
@@ -262,8 +265,10 @@ export class DataService {
         this.oldestScan = playersScanned[0].banInfo;
       }
 
+      // get oldest match of history
       this.oldestMatch = this.matches?.[0];
 
+      // get player banned
       const banInfosList = this.players
         .filter(
           (p) =>
@@ -277,11 +282,21 @@ export class DataService {
         ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
         .sort((a, b) => this._sortBannedPlayers(a, b));
 
-      this.playersBannedAfter = this.playersBanned.filter(
+      // get players banned after playing with them
+      const playersBannedAfter = this.playersBanned.filter(
         (p) =>
           // we take only people banned after playing with them
           p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
       );
+
+      // update flag to know that there are new people banned
+      if (
+        updateFlags &&
+        playersBannedAfter.length !== this.playersBannedAfter.length
+      ) {
+        this.newPlayersBanned = true;
+      }
+      this.playersBannedAfter = playersBannedAfter;
 
       this.onStatisticsUpdated.next();
     }

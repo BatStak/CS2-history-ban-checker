@@ -49,12 +49,15 @@ export class HistoryLoaderComponent {
     this.hideHistoryTable = this._dataService.database?.hideHistoryTable;
   }
 
-  toggle(event: Event) {
+  toggleHideHistoryTable(event: Event) {
     if (event?.target) {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
       if (this._dataService.database) {
         this._dataService.database.hideHistoryTable = this.hideHistoryTable;
         this._dataService.save();
+        if (this.hideHistoryTable) {
+          this._dataService.cleanParsedMatches();
+        }
       }
     }
   }

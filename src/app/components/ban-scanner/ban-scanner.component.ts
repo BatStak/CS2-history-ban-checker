@@ -43,6 +43,13 @@ export class ScannerComponent {
     return this._dataService.oldestMatch;
   }
 
+  get showNewPlayersBannedWarning(): boolean {
+    return (
+      this._dataService.newPlayersBanned &&
+      !!this._dataService.database?.hideHistoryTable
+    );
+  }
+
   numberOfPages = 0;
   pageNumber = 0;
 

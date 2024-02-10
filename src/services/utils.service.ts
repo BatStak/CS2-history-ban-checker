@@ -43,16 +43,18 @@ export class UtilsService {
 
   getHistoryPeriod() {
     const startMatch = document.querySelector<HTMLElement>(
-      '.csgo_scoreboard_root > tbody > tr:last-child'
-    );
-    const endMatch = document.querySelector<HTMLElement>(
-      '.csgo_scoreboard_root > tbody > tr:nth-child(2)'
+      '.csgo_scoreboard_root > tbody > tr:not(:first-child):last-child'
     );
     if (startMatch) {
       this.startDate = this.getDateOfMatch(startMatch);
     }
-    if (endMatch) {
-      this.endDate = this.getDateOfMatch(endMatch);
+    if (!this.endDate) {
+      const endMatch = document.querySelector<HTMLElement>(
+        '.csgo_scoreboard_root > tbody > tr:nth-child(2)'
+      );
+      if (endMatch) {
+        this.endDate = this.getDateOfMatch(endMatch);
+      }
     }
   }
 }

@@ -84,6 +84,9 @@ export class AppComponent implements AfterViewInit {
   private _refreshUI() {
     this._dataService.parseMatches();
     this._utilsService.getHistoryPeriod();
+    if (this.database.hideHistoryTable) {
+      this._dataService.cleanParsedMatches();
+    }
     this._dataService.onSave.next();
   }
 }

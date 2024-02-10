@@ -1,6 +1,6 @@
-<div class="container-flex">
+<div class="container-flex space">
   @if (apiKey) {
-  <div>
+  <div class="container-flex vcenter">
     <button (click)="loadHistory()" [disabled]="isLoadingHistory || isScanning">
       Load history
     </button>
@@ -10,6 +10,15 @@
     >
       Stop
     </button>
+    <input
+      id="hide-history-table"
+      type="checkbox"
+      [checked]="hideHistoryTable"
+      (change)="toggle($event)"
+    />
+    <label for="hide-history-table">
+      Display only games with bans for better performance. Remove others.
+    </label>
   </div>
   } @else {
   <div>

@@ -79,6 +79,15 @@ export class DataService {
     }
   }
 
+  cleanParsedMatches() {
+    const matches = document.querySelectorAll<HTMLElement>(
+      `${this._utilsService.matchesCssSelector}.parsed:not(.banned)`
+    );
+    for (let match of Array.from(matches)) {
+      match.remove();
+    }
+  }
+
   parseSteamResults(results: BanInfo[]) {
     for (let banInfo of results) {
       const playerInfo = this.database.players?.find(

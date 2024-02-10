@@ -14,6 +14,7 @@ import { UtilsService } from '../../../services/utils.service';
 })
 export class HistoryLoaderComponent {
   apiKey?: string;
+  hideHistoryTable?: boolean;
 
   showOptions = false;
 
@@ -45,6 +46,17 @@ export class HistoryLoaderComponent {
     private _dataService: DataService
   ) {
     this.apiKey = this._dataService.database?.apiKey;
+    this.hideHistoryTable = this._dataService.database?.hideHistoryTable;
+  }
+
+  toggle(event: Event) {
+    if (event?.target) {
+      this.hideHistoryTable = (event.target as HTMLInputElement).checked;
+      if (this._dataService.database) {
+        this._dataService.database.hideHistoryTable = this.hideHistoryTable;
+        this._dataService.save();
+      }
+    }
   }
 
   loadHistory() {

@@ -5,16 +5,16 @@ import {
   HostBinding,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { UtilsService } from '../services/utils.service';
 import { DataService } from '../services/data.service';
+import { UtilsService } from '../services/utils.service';
 
-import { Database, MatchFormat } from '../models';
-import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
+import Bowser from 'bowser';
+import { Subject, debounceTime } from 'rxjs';
+import { Database, MatchFormat } from '../models';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
-import Bowser from 'bowser';
+import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
 import { OptionsComponent } from './components/options/options.component';
 
 @Component({
@@ -75,16 +75,16 @@ export class AppComponent implements AfterViewInit {
         format = MatchFormat.MR15;
       }
       this._dataService.onReset.subscribe(() => {
-        this._refreshUI();
+        this._update();
       });
     }
 
     const database = await chrome.storage.local.get();
     this._dataService.init(database, section, format);
 
-    this._refreshUI();
+    this._update();
     this._onDomUpdated.pipe(debounceTime(250)).subscribe(() => {
-      this._refreshUI();
+      this._update();
     });
     this._observeDomChanges();
 
@@ -92,31 +92,23 @@ export class AppComponent implements AfterViewInit {
   }
 
   private _observeDomChanges() {
-    if (this.isOnGCPDSection) {
-      const matchResults = document.querySelector(
-        '.csgo_scoreboard_root > tbody'
-      );
-      if (matchResults) {
-        const observer = new MutationObserver(() => {
-          this._onDomUpdated.next();
-        });
-        observer.observe(matchResults, { childList: true });
-      }
-    } else {
-      const friendsResults = document.querySelector('.friends_content');
-      if (friendsResults) {
-        const observer = new MutationObserver(() => {
-          this._onDomUpdated.next();
-        });
-        observer.observe(friendsResults, { childList: true });
-      }
+    const results = document.querySelector<HTMLElement>(
+      this.isOnGCPDSection
+        ? '.csgo_scoreboard_root > tbody'
+        : '.friends_content'
+    );
+    if (results) {
+      const observer = new MutationObserver(() => {
+        this._onDomUpdated.next();
+      });
+      observer.observe(results, { childList: true });
     }
   }
 
-  private _refreshUI() {
+  private _update() {
     if (this.isOnGCPDSection) {
-      this._dataService.parseMatches();
       this._utilsService.getHistoryPeriod();
+      this._dataService.parseMatches();
       if (this.database.hideHistoryTable) {
         this._dataService.cleanParsedMatches();
       }

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, booleanAttribute } from '@angular/core';
-import { DataService } from '../../../services/data.service';
-import { UtilsService } from '../../../services/utils.service';
+import { Component, DoCheck, Input, booleanAttribute } from '@angular/core';
 import { BanInfo, MatchInfo, PlayerInfo } from '../../../models';
+import { DataService } from '../../../services/data.service';
 import { SteamService } from '../../../services/steam.service';
+import { UtilsService } from '../../../services/utils.service';
 
 @Component({
   selector: 'cs2-history-ban-scanner',
@@ -12,7 +12,7 @@ import { SteamService } from '../../../services/steam.service';
   templateUrl: './ban-scanner.component.html',
   styleUrl: './ban-scanner.component.scss',
 })
-export class ScannerComponent {
+export class ScannerComponent implements DoCheck {
   @Input({ transform: booleanAttribute }) isOnGCPDSection = false;
 
   error = '';
@@ -45,12 +45,7 @@ export class ScannerComponent {
     return this._dataService.oldestMatch;
   }
 
-  get showNewPlayersBannedWarning(): boolean {
-    return (
-      this._dataService.newPlayersBanned &&
-      !!this._dataService.database.hideHistoryTable
-    );
-  }
+  showNewPlayersBannedWarning?: boolean;
 
   numberOfPages = 0;
   pageNumber = 0;
@@ -63,27 +58,29 @@ export class ScannerComponent {
     private _steamService: SteamService
   ) {}
 
-  startScan(type: 'new' | 'all') {
-    if (this.players) {
-      const players =
-        type === 'new'
-          ? this.players.filter((p) => !p.banInfo?.LastFetch)
-          : this.players;
-
-      this.numberOfPages =
-        Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
-
-      this.scanPlayers(players);
-    }
+  ngDoCheck(): void {
+    this.showNewPlayersBannedWarning =
+      this._dataService.newPlayersBanned &&
+      !!this._dataService.database.hideHistoryTable;
   }
 
-  async scanPlayers(players: PlayerInfo[]) {
-    const stop = () => {
-      this._utilsService.isScanning = this._stopScan = false;
-      this.pageNumber = this.numberOfPages = 0;
-      this._dataService.onSave.next();
-    };
+  startScan(type: 'new' | 'all') {
+    const players =
+      type === 'new'
+        ? this.players.filter((p) => !p.banInfo?.LastFetch)
+        : this.players;
 
+    this.numberOfPages =
+      Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
+
+    this._scanPlayers(players);
+  }
+
+  stopScan() {
+    this._stopScan = true;
+  }
+
+  private async _scanPlayers(players: PlayerInfo[]) {
     this._utilsService.isScanning = true;
     const startIndex = this.pageNumber * 100;
     const scannedPlayers = players.slice(startIndex, startIndex + 100);
@@ -97,29 +94,36 @@ export class ScannerComponent {
 
         this.error = '';
         if (this._stopScan) {
-          stop();
+          this._stopScanning();
         } else {
           this.pageNumber++;
           if (this.pageNumber >= this.numberOfPages) {
-            stop();
+            this._stopScanning();
           } else {
-            setTimeout(() => this.scanPlayers(players), 500);
+            setTimeout(() => this._scanPlayers(players), 500);
           }
         }
       } catch (e) {
         this.error = 'Error while trying to scan ban status of players';
         console.error(e);
-        stop();
+        this._stopScanning();
       }
     } else {
-      stop();
+      this._stopScanning();
     }
   }
 
-  stopScan() {
-    this._stopScan = true;
+  private _stopScanning() {
+    this._utilsService.isScanning = this._stopScan = false;
+    this.pageNumber = this.numberOfPages = 0;
+    this._dataService.onSave.next();
   }
 
+  /**
+   * If steam API does not return the players, it is because steam profiles have been deleted
+   * @param results the results from steam API
+   * @param steamIds the steam IDs we send
+   */
   private _handleDeletedProfiles(results: BanInfo[], steamIds: string[]) {
     let allPlayers = this._dataService.database.players;
     if (allPlayers) {

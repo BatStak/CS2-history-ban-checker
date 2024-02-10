@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject, debounceTime } from 'rxjs';
 import {
   BanInfo,
   Database,
@@ -7,7 +8,6 @@ import {
   PlayerInfo,
 } from '../models';
 import { UtilsService } from './utils.service';
-import { Subject, debounceTime } from 'rxjs';
 
 @Injectable()
 export class DataService {
@@ -100,7 +100,7 @@ export class DataService {
         playerInfo = {
           steamID64: steamID64,
           name: player
-            .querySelector('.friend_block_content')
+            .querySelector<HTMLElement>('.friend_block_content')
             ?.childNodes[0]?.textContent?.trim(),
           profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
           avatarLink:
@@ -135,7 +135,7 @@ export class DataService {
         playerInfo.banInfo = banInfo;
 
         // for each column of the player ban status, we get the match row and update ban status on the table row of the match
-        const playerBanStatusList = document.querySelectorAll(
+        const playerBanStatusList = document.querySelectorAll<HTMLElement>(
           `.banstatus[data-steamid64="${playerInfo.steamID64}"]`
         );
         if (playerBanStatusList?.length) {

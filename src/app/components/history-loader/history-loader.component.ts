@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Database } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
 
@@ -13,14 +12,7 @@ import { UtilsService } from '../../../services/utils.service';
   styleUrl: './history-loader.component.scss',
 })
 export class HistoryLoaderComponent {
-  apiKey?: string;
   hideHistoryTable?: boolean;
-
-  showOptions = false;
-
-  get database(): Database {
-    return this._dataService.database;
-  }
 
   get startDate(): string | undefined {
     return this._utilsService.startDate;
@@ -38,18 +30,45 @@ export class HistoryLoaderComponent {
     return this._utilsService.isScanning;
   }
 
-  private _loadHistoryInterval?: any;
-  private _loadHistoryTimerInMs = 500;
+  private _loadHistoryTimer?: any;
+  private _loadHistoryInternvalInMs = 800;
 
   constructor(
     private _utilsService: UtilsService,
     private _dataService: DataService
   ) {
-    this.apiKey = this._dataService.database.apiKey;
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
   }
 
-  toggleHideHistoryTable(event: Event) {
+  startLoadHistory() {
+    this._utilsService.isLoadingHistory = true;
+    let buttonClickAttemps = 0;
+    const loadMoreButton =
+      document.querySelector<HTMLButtonElement>('#load_more_button');
+    const handleTick = () => {
+      if (loadMoreButton && loadMoreButton.offsetParent !== null) {
+        buttonClickAttemps = 0;
+        loadMoreButton.click();
+      } else {
+        buttonClickAttemps++;
+        if (buttonClickAttemps > 5) {
+          this.stopLoadHistory();
+        }
+      }
+    };
+    handleTick();
+    this._loadHistoryTimer = setInterval(
+      handleTick,
+      this._loadHistoryInternvalInMs
+    );
+  }
+
+  stopLoadHistory() {
+    clearInterval(this._loadHistoryTimer);
+    this._utilsService.isLoadingHistory = false;
+  }
+
+  toggleHideCleanMatches(event: Event) {
     if (event?.target) {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
       if (this._dataService.database) {
@@ -60,44 +79,5 @@ export class HistoryLoaderComponent {
         }
       }
     }
-  }
-
-  loadHistory() {
-    this._utilsService.isLoadingHistory = true;
-    let historyButtonAttemps = 0;
-    const button =
-      document.querySelector<HTMLButtonElement>('#load_more_button');
-    const next = () => {
-      if (button && button.offsetParent !== null) {
-        historyButtonAttemps = 0;
-        button.click();
-      } else {
-        historyButtonAttemps++;
-        if (historyButtonAttemps > 5) {
-          this.stopLoadHistory();
-        }
-      }
-    };
-    next();
-    this._loadHistoryInterval = setInterval(next, this._loadHistoryTimerInMs);
-  }
-
-  stopLoadHistory() {
-    clearInterval(this._loadHistoryInterval);
-    this._utilsService.isLoadingHistory = false;
-  }
-
-  openOptions() {
-    this.showOptions = true;
-  }
-
-  closeOptions() {
-    this.showOptions = false;
-    this.database.apiKey = this.apiKey;
-    this._dataService.save();
-  }
-
-  resetDatabase() {
-    this._dataService.reset();
   }
 }

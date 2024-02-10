@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Database } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
 
@@ -16,10 +15,6 @@ export class OptionsComponent {
   apiKey?: string;
 
   showOptions = false;
-
-  get database(): Database {
-    return this._dataService.database;
-  }
 
   get isLoadingHistory(): boolean {
     return this._utilsService.isLoadingHistory;
@@ -42,7 +37,7 @@ export class OptionsComponent {
 
   closeOptions() {
     this.showOptions = false;
-    this.database.apiKey = this.apiKey;
+    this._dataService.database.apiKey = this.apiKey;
     this._dataService.save();
   }
 

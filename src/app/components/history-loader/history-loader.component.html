@@ -1,5 +1,8 @@
 <div class="container-flex vcenter">
-  <button (click)="loadHistory()" [disabled]="isLoadingHistory || isScanning">
+  <button
+    (click)="startLoadHistory()"
+    [disabled]="isLoadingHistory || isScanning"
+  >
     Load history
   </button>
   <button
@@ -12,7 +15,7 @@
     id="hide-history-table"
     type="checkbox"
     [checked]="hideHistoryTable"
-    (change)="toggleHideHistoryTable($event)"
+    (change)="toggleHideCleanMatches($event)"
   />
   <label for="hide-history-table">
     Display only games with bans for better performance. Remove others.

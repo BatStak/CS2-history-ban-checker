@@ -5,16 +5,11 @@ import { SteamService } from '../../../services/steam.service';
 import { UtilsService } from '../../../services/utils.service';
 import { ScannerComponent } from './ban-scanner.component';
 
-class MockUtilsService extends UtilsService {}
-
-class MockDataService extends DataService {}
-
-class MockSteamService extends SteamService {}
-
 describe('ScannerComponent', () => {
-  const utilsService = new MockUtilsService();
-  const dataService = new MockDataService(new DatabaseService(), utilsService);
-  const steamService = new MockSteamService(dataService);
+  const databaseService = new DatabaseService();
+  const utilsService = new UtilsService();
+  const dataService = new DataService(databaseService, utilsService);
+  const steamService = new SteamService(dataService);
 
   it('Test page number with 50 players', () => {
     const players: PlayerInfo[] = [];

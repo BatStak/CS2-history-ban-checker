@@ -23,7 +23,7 @@ export class BanStatisticsComponent {
     return this._dataService.playersBannedAfter;
   }
 
-  constructor(private _dataService: DataService) {
+  constructor(public _dataService: DataService) {
     this._dataService.onStatisticsUpdated.subscribe(() => {
       this._update();
     });
@@ -31,7 +31,7 @@ export class BanStatisticsComponent {
     this._update();
   }
 
-  private _update() {
+  _update() {
     this.playersCount = this._dataService.players.length;
     this.bannedCount = this.playersBannedAfter.length;
     this.bannedPourcentage =

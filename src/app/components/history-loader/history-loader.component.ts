@@ -30,53 +30,59 @@ export class HistoryLoaderComponent {
     return this._utilsService.isScanning;
   }
 
-  private _loadHistoryTimer?: any;
-  private _loadHistoryInternvalInMs = 800;
+  _loadHistoryTimer?: any;
+  _loadHistoryInternvalInMs = 800;
+  _buttonClickAttempts = 0;
+  _buttonClickMaxAttempts = 5;
+  _loadMoreButton?: HTMLButtonElement | null;
 
   constructor(
-    private _utilsService: UtilsService,
-    private _dataService: DataService
+    public _utilsService: UtilsService,
+    public _dataService: DataService
   ) {
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
+    this._loadMoreButton =
+      document.querySelector<HTMLButtonElement>('#load_more_button');
   }
 
   startLoadHistory() {
     this._utilsService.isLoadingHistory = true;
-    let buttonClickAttemps = 0;
-    const loadMoreButton =
-      document.querySelector<HTMLButtonElement>('#load_more_button');
-    const handleTick = () => {
-      if (loadMoreButton && loadMoreButton.offsetParent !== null) {
-        buttonClickAttemps = 0;
-        loadMoreButton.click();
-      } else {
-        buttonClickAttemps++;
-        if (buttonClickAttemps > 5) {
-          this.stopLoadHistory();
-        }
-      }
-    };
-    handleTick();
+    this._buttonClickAttempts = 0;
+
+    this._clickOnMoreButton();
     this._loadHistoryTimer = setInterval(
-      handleTick,
+      () => this._clickOnMoreButton(),
       this._loadHistoryInternvalInMs
     );
   }
 
   stopLoadHistory() {
     clearInterval(this._loadHistoryTimer);
+    this._loadHistoryTimer = undefined;
     this._utilsService.isLoadingHistory = false;
   }
 
-  toggleHideCleanMatches(event: Event) {
+  async toggleHideCleanMatches(event: Event) {
     if (event?.target) {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
       if (this._dataService.database) {
         this._dataService.database.hideHistoryTable = this.hideHistoryTable;
-        this._dataService.save();
+        await this._dataService.save();
         if (this.hideHistoryTable) {
           this._dataService.cleanParsedMatches();
         }
+      }
+    }
+  }
+
+  _clickOnMoreButton() {
+    if (this._loadMoreButton && this._loadMoreButton.offsetParent !== null) {
+      this._buttonClickAttempts = 0;
+      this._loadMoreButton.click();
+    } else {
+      this._buttonClickAttempts++;
+      if (this._buttonClickAttempts >= this._buttonClickMaxAttempts) {
+        this.stopLoadHistory();
       }
     }
   }

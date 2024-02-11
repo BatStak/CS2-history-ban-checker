@@ -11,6 +11,12 @@ export class UtilsService {
   matchesCssSelector = '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
   playersCssSelector = '.csgo_scoreboard_inner_right > tbody > tr';
 
+  async wait(timeInMs: number) {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), timeInMs);
+    });
+  }
+
   getMap(matchNode: HTMLElement) {
     return matchNode
       .querySelector<HTMLElement>(

@@ -4,7 +4,7 @@
   {{ matches.length || 0 }}. } @else { Players in database for this section :
   {{ players.length || 0 }}. }
 </p>
-@if (playersNotScannedYet && playersNotScannedYet.length) {
+@if (playersNotScannedYet.length) {
 <p class="warning">
   There are {{ playersNotScannedYet.length }} players that have not been scanned
   yet.
@@ -15,7 +15,7 @@
 <p>
   The oldest scan has been on {{ oldestScan.LastFetch | date : "dd/MM/y" }}.
 </p>
-} @if (playersNotScannedYet && playersNotScannedYet.length) {
+} @if (playersNotScannedYet.length) {
 <button (click)="startScan('new')" [disabled]="isLoadingHistory || isScanning">
   Scan new players
 </button>

@@ -46,16 +46,16 @@ export class ScannerComponent implements DoCheck {
   }
 
   showNewPlayersBannedWarning?: boolean;
-
   numberOfPages = 0;
   pageNumber = 0;
 
-  private _stopScan = false;
+  _delayBetweenSteamCall = 500;
+  _stopScan = false;
 
   constructor(
-    private _utilsService: UtilsService,
-    private _dataService: DataService,
-    private _steamService: SteamService
+    public _utilsService: UtilsService,
+    public _dataService: DataService,
+    public _steamService: SteamService
   ) {}
 
   ngDoCheck(): void {
@@ -71,9 +71,7 @@ export class ScannerComponent implements DoCheck {
         ? this.players.filter((p) => !p.banInfo?.LastFetch)
         : this.players;
 
-    this.numberOfPages =
-      Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
-
+    this._calcNumberOfPages(players);
     this._scanPlayers(players);
   }
 
@@ -81,7 +79,12 @@ export class ScannerComponent implements DoCheck {
     this._stopScan = true;
   }
 
-  private async _scanPlayers(players: PlayerInfo[]) {
+  _calcNumberOfPages(players: PlayerInfo[]) {
+    this.numberOfPages =
+      Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
+  }
+
+  async _scanPlayers(players: PlayerInfo[]) {
     this._utilsService.isScanning = true;
     const startIndex = this.pageNumber * 100;
     const scannedPlayers = players.slice(startIndex, startIndex + 100);
@@ -101,7 +104,10 @@ export class ScannerComponent implements DoCheck {
           if (this.pageNumber >= this.numberOfPages) {
             this._stopScanning();
           } else {
-            setTimeout(() => this._scanPlayers(players), 500);
+            setTimeout(
+              () => this._scanPlayers(players),
+              this._delayBetweenSteamCall
+            );
           }
         }
       } catch (e) {
@@ -114,7 +120,7 @@ export class ScannerComponent implements DoCheck {
     }
   }
 
-  private _stopScanning() {
+  _stopScanning() {
     this._utilsService.isScanning = this._stopScan = false;
     this.pageNumber = this.numberOfPages = 0;
     this._dataService.onSave.next();
@@ -125,7 +131,7 @@ export class ScannerComponent implements DoCheck {
    * @param steamApiResults the results from steam API
    * @param steamIdsScanned the steam IDs we send
    */
-  private _handleDeletedProfiles(
+  _handleDeletedProfiles(
     steamApiResults: BanInfo[],
     steamIdsScanned: string[]
   ) {

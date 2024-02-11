@@ -1,4 +1,4 @@
-npm run ng -- build;
+npm run build;
 cp ./assets/* ./dist/cs-history-ban-checker/browser/
 mkdir ./dist/cs-history-ban-checker/chrome/
 mkdir ./dist/cs-history-ban-checker/firefox/

@@ -4,9 +4,8 @@
   "scripts": {
     "ng": "node ./node_modules/@angular/cli/bin/ng",
     "start": "npm run ng -- serve",
-    "build": "npm run ng --  build",
-    "watch": "npm run ng --  build --watch --configuration development",
-    "test": "npm run ng --  test"
+    "build": "npm run ng -- test --no-watch --no-progress && npm run ng -- build",
+    "test": "npm run ng -- test"
   },
   "private": true,
   "dependencies": {

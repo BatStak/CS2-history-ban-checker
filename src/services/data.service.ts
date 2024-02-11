@@ -7,6 +7,7 @@ import {
   MatchInfo,
   PlayerInfo,
 } from '../models';
+import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
 @Injectable()
@@ -35,7 +36,10 @@ export class DataService {
 
   newPlayersBanned = false;
 
-  constructor(private _utilsService: UtilsService) {
+  constructor(
+    private _databaseService: DatabaseService,
+    private _utilsService: UtilsService
+  ) {
     this.onSave.pipe(debounceTime(250)).subscribe(() => {
       this.save();
     });
@@ -64,7 +68,7 @@ export class DataService {
     }
   }
 
-  reset() {
+  async reset() {
     // we remove storage but keep apiKey
     this.database = {
       apiKey: this.database.apiKey,
@@ -72,7 +76,7 @@ export class DataService {
       matches: [],
       players: [],
     };
-    chrome.storage.local.set(this.database);
+    await this._databaseService.setDatabase(this.database);
     document.location.reload();
   }
 
@@ -153,9 +157,9 @@ export class DataService {
     this.onSave.next();
   }
 
-  save() {
+  async save() {
     this._updateStatistics();
-    chrome.storage.local.set(this.database);
+    await this._databaseService.setDatabase(this.database);
   }
 
   private _parseMatch(match: HTMLElement, format: MatchFormat) {

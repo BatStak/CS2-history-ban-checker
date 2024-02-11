@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import Bowser from 'bowser';
 import { Subject, debounceTime } from 'rxjs';
 import { Database, MatchFormat } from '../models';
+import { DatabaseService } from '../services/database.service';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
@@ -48,6 +49,7 @@ export class AppComponent implements AfterViewInit {
   private _onDomUpdated = new Subject<void>();
 
   constructor(
+    private _databaseService: DatabaseService,
     private _utilsService: UtilsService,
     private _dataService: DataService,
     private _applicationRef: ApplicationRef
@@ -79,7 +81,7 @@ export class AppComponent implements AfterViewInit {
       });
     }
 
-    const database = await chrome.storage.local.get();
+    const database = await this._databaseService.getDatabase();
     this._dataService.init(database, section, format);
 
     this._update();

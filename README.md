@@ -1,13 +1,13 @@
 # CS2 history ban checker
 
-Load your premier, matchmaking, wingman or csgo history and find if players have been banned (VAC or Game ban) after playing with you by checking
-https://steamcommunity.com/my/gcpd/730
+Load your premier, matchmaking, wingman or csgo history and find if players have been banned (VAC or Game ban) after playing with you.  
+You can check on your friends, followed and blocked players too.
 
-You can check on your friends list too.
+Right click anywhere on any webpage and you will see the menu to access directly to your match history or friends list.
 
-You will see the list of banned players after playing with you and matches are populated with ban infos.
-
-We keep results in local database to avoid reloading the history every time. We don't send your data anywhere. Read the [privacy policy](./privacy-policy.md).
+You will see the list of banned players and matches are populated with ban infos.  
+We keep results in local database to avoid reloading the history every time.  
+Read the [privacy policy](./privacy-policy.md) for more information about it.
 
 > Even if it's still a fork, I rewrote everything in Angular from scratch at some point.
 

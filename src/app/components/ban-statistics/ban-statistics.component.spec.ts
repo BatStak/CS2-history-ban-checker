@@ -1,12 +1,23 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataService } from '../../../services/data.service';
 import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { BanStatisticsComponent } from './ban-statistics.component';
 
 describe('BanStatisticsComponent', () => {
-  const databaseService = new DatabaseService();
-  const utilsService = new UtilsService();
-  const dataService = new DataService(databaseService, utilsService);
+  let component: BanStatisticsComponent;
+  let dataService: DataService;
+  let fixture: ComponentFixture<BanStatisticsComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [BanStatisticsComponent],
+      providers: [DatabaseService, UtilsService, DataService],
+    });
+    fixture = TestBed.createComponent(BanStatisticsComponent);
+    component = fixture.componentInstance;
+    dataService = fixture.debugElement.injector.get(DataService);
+  });
 
   it('Test update', () => {
     const comp = new BanStatisticsComponent(dataService);

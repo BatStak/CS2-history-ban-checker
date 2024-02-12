@@ -9,6 +9,7 @@ describe('HistoryLoaderComponent', () => {
   let utilsService: UtilsService;
   let dataService: DataService;
   let fixture: ComponentFixture<HistoryLoaderComponent>;
+  let dom: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -19,6 +20,38 @@ describe('HistoryLoaderComponent', () => {
     component = fixture.componentInstance;
     utilsService = fixture.debugElement.injector.get(UtilsService);
     dataService = fixture.debugElement.injector.get(DataService);
+    dom = fixture.nativeElement;
+  });
+
+  it('Test template logic', () => {
+    utilsService.isLoadingHistory = true;
+    fixture.detectChanges();
+    expect(dom.textContent).toContain('Loading...');
+    expect(dom.textContent).toContain('No history loaded.');
+    expect(dom.textContent).not.toContain('History loaded from');
+
+    utilsService.isLoadingHistory = false;
+    fixture.detectChanges();
+    expect(dom.textContent).not.toContain('Loading...');
+    expect(dom.textContent).toContain('No history loaded.');
+    expect(dom.textContent).not.toContain('History loaded from');
+
+    utilsService.startDate = '2015-02-02';
+    fixture.detectChanges();
+    expect(dom.textContent).toContain('No history loaded.');
+    expect(dom.textContent).not.toContain('History loaded from');
+    utilsService.startDate = undefined;
+    utilsService.endDate = '2015-03-02';
+    fixture.detectChanges();
+    expect(dom.textContent).toContain('No history loaded.');
+    expect(dom.textContent).not.toContain('History loaded from');
+
+    utilsService.startDate = '2015-02-02';
+    fixture.detectChanges();
+    expect(dom.textContent).not.toContain('No history loaded.');
+    expect(dom.textContent).toContain(
+      'History loaded from 02/02/2015 to 02/03/2015'
+    );
   });
 
   it('Test timer behavior', async () => {

@@ -19,6 +19,7 @@ describe('BanStatisticsComponent', async () => {
     component = fixture.componentInstance;
     dataService = fixture.debugElement.injector.get(DataService);
     dom = fixture.nativeElement;
+    fixture.detectChanges();
   });
 
   it('Test template no banned player', async () => {

@@ -13,7 +13,7 @@ class MockDatabaseService extends DatabaseService {
     return {};
   }
 
-  override async setDatabase(database: Database): Promise<void> {
+  override async setDatabase(_database: Database): Promise<void> {
     return;
   }
 }
@@ -41,10 +41,10 @@ describe('AppComponent', async () => {
     utilsService = fixture.debugElement.injector.get(UtilsService);
     dataService = fixture.debugElement.injector.get(DataService);
     dom = fixture.nativeElement;
+    fixture.detectChanges();
   });
 
   it('Test template logic', async () => {
-    fixture.detectChanges();
     expect(dom.textContent).not.toContain('CS2 History Ban Checker');
     expect(dom.innerHTML).not.toContain('</cs2-history-ban-scanner>');
     expect(dom.innerHTML).not.toContain('</cs2-history-ban-statistics>');
@@ -111,5 +111,7 @@ describe('AppComponent', async () => {
     expect(component.isOnGCPDSection).toBeTrue();
     expect(component.addMarginClass).toBeFalse();
     expect(component._format).toEqual(MatchFormat.MR8);
+
+    window.history.replaceState(null, '', '');
   });
 });

@@ -23,6 +23,7 @@ describe('ScannerComponent', async () => {
     utilsService = fixture.debugElement.injector.get(UtilsService);
     dataService = fixture.debugElement.injector.get(DataService);
     dom = fixture.nativeElement;
+    fixture.detectChanges();
   });
 
   it('Test "matches in database" display', async () => {

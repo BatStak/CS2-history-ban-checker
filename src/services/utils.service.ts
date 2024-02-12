@@ -44,7 +44,10 @@ export class UtilsService {
   }
 
   getSteamID64FromMiniProfileId(miniprofileId: string) {
-    return '76' + (parseInt(miniprofileId, 10) + 561197960265728);
+    const number = parseInt(miniprofileId, 10);
+    return miniprofileId && !isNaN(number)
+      ? '76' + (number + 561197960265728)
+      : '';
   }
 
   getHistoryPeriod() {

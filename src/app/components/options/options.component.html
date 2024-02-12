@@ -3,7 +3,7 @@
   (click)="openOptions()"
   [disabled]="isLoadingHistory || isScanning"
 >
-  {{ apiKey ? "Change" : "Set" }} API Key
+  {{ apiKey ? "Change" : "Set" }} API key
 </button>
 
 @if (!apiKey) {
@@ -14,7 +14,7 @@
 <div id="overlay-options">
   <div>
     <div>
-      <label for="apikey"> Enter your Api KEY </label>
+      <label for="apikey"> Enter your API key </label>
       <input id="apikey" type="text" [(ngModel)]="apiKey" />
     </div>
     <div>

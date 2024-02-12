@@ -70,7 +70,7 @@ describe('AppComponent', async () => {
     expect(dom.innerHTML).toContain('</cs2-history-loader>');
   });
 
-  it('Test format variable', async () => {
+  it('Test typescript variables initialisation', async () => {
     component.ngAfterViewInit();
     component.ngDoCheck();
     expect(component.isOnGCPDSection).toBeFalse();

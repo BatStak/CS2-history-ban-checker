@@ -8,7 +8,7 @@
 - [x] Testing history-loader template
 - [ ] Testing options component -> useless
 - [x] Testing options template
-- [ ] Testing app component
+- [x] Testing app component
 - [x] Testing app template
 - [ ] Testing data service
 - [ ] Testing database service

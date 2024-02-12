@@ -13,13 +13,13 @@
 - [ ] Testing data service
 - [ ] Testing database service
 - [ ] Testing steam service
-- [ ] Testing utils service
+- [x] Testing utils service
 
 ```
 =============================== Coverage summary ===============================
-Statements : 44.83% ( 191/426 )
-Branches : 26.61% ( 37/139 )
-Functions : 46.84% ( 52/111 )
-Lines : 45.52% ( 188/413 )
+Statements   : 46.37% ( 198/427 )
+Branches     : 30.76% ( 44/143 )
+Functions    : 48.64% ( 54/111 )
+Lines        : 47.1% ( 195/414 )
 ================================================================================
 ```

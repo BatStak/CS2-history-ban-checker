@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 
@@ -10,7 +11,7 @@ import { DataService } from '../../../services/data.service';
   templateUrl: './ban-statistics.component.html',
   styleUrl: './ban-statistics.component.scss',
 })
-export class BanStatisticsComponent {
+export class BanStatisticsComponent implements OnDestroy {
   playersCount = 0;
   bannedCount = 0;
   bannedPourcentage = 0;
@@ -23,12 +24,19 @@ export class BanStatisticsComponent {
     return this._dataService.playersBannedAfter;
   }
 
+  _onStatisticsUpdatedSubscription?: Subscription;
+
   constructor(public _dataService: DataService) {
-    this._dataService.onStatisticsUpdated.subscribe(() => {
-      this._update();
-    });
+    this._onStatisticsUpdatedSubscription =
+      this._dataService.onStatisticsUpdated.subscribe(() => {
+        this._update();
+      });
 
     this._update();
+  }
+
+  ngOnDestroy(): void {
+    this._onStatisticsUpdatedSubscription?.unsubscribe();
   }
 
   _update() {

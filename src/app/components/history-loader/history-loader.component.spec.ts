@@ -4,7 +4,7 @@ import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { HistoryLoaderComponent } from './history-loader.component';
 
-describe('HistoryLoaderComponent', () => {
+describe('HistoryLoaderComponent', async () => {
   let component: HistoryLoaderComponent;
   let utilsService: UtilsService;
   let dataService: DataService;
@@ -23,7 +23,7 @@ describe('HistoryLoaderComponent', () => {
     dom = fixture.nativeElement;
   });
 
-  it('Test template logic', () => {
+  it('Test template logic', async () => {
     utilsService.isLoadingHistory = true;
     fixture.detectChanges();
     expect(dom.textContent).toContain('Loading...');

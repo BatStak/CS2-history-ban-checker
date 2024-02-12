@@ -4,7 +4,7 @@ import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { OptionsComponent } from './options.component';
 
-describe('OptionsComponent', () => {
+describe('OptionsComponent', async () => {
   let component: OptionsComponent;
   let utilsService: UtilsService;
   let dataService: DataService;
@@ -23,7 +23,7 @@ describe('OptionsComponent', () => {
     dom = fixture.nativeElement;
   });
 
-  it('Test template logic', () => {
+  it('Test template logic', async () => {
     fixture.detectChanges();
     expect(dom.textContent).toContain('Set API key');
     expect(dom.textContent).not.toContain('Change API key');

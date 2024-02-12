@@ -4,7 +4,7 @@ import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { BanStatisticsComponent } from './ban-statistics.component';
 
-describe('BanStatisticsComponent', () => {
+describe('BanStatisticsComponent', async () => {
   let component: BanStatisticsComponent;
   let dataService: DataService;
   let fixture: ComponentFixture<BanStatisticsComponent>;
@@ -21,7 +21,7 @@ describe('BanStatisticsComponent', () => {
     dom = fixture.nativeElement;
   });
 
-  it('Test template no banned player', () => {
+  it('Test template no banned player', async () => {
     dataService.playersBannedAfter = [];
 
     component._update();
@@ -40,7 +40,7 @@ describe('BanStatisticsComponent', () => {
     );
   });
 
-  it('Test update', () => {
+  it('Test update', async () => {
     // we add 100 players in database
     dataService.players = [];
     for (let i = 0; i < 100; i++) {

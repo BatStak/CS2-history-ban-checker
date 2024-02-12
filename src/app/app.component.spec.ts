@@ -1,12 +1,24 @@
-import { ApplicationRef } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Database, MatchFormat } from '../models';
 import { DataService } from '../services/data.service';
 import { DatabaseService } from '../services/database.service';
 import { SteamService } from '../services/steam.service';
 import { UtilsService } from '../services/utils.service';
 import { AppComponent } from './app.component';
 
-describe('AppComponent', () => {
+@Injectable()
+class MockDatabaseService extends DatabaseService {
+  override async getDatabase(): Promise<{ [key: string]: any }> {
+    return {};
+  }
+
+  override async setDatabase(database: Database): Promise<void> {
+    return;
+  }
+}
+
+describe('AppComponent', async () => {
   let component: AppComponent;
   let utilsService: UtilsService;
   let dataService: DataService;
@@ -17,7 +29,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [
-        DatabaseService,
+        { provide: DatabaseService, useClass: MockDatabaseService },
         UtilsService,
         DataService,
         SteamService,
@@ -31,7 +43,7 @@ describe('AppComponent', () => {
     dom = fixture.nativeElement;
   });
 
-  it('Test template logic', () => {
+  it('Test template logic', async () => {
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('CS2 History Ban Checker');
     expect(dom.innerHTML).not.toContain('</cs2-history-ban-scanner>');
@@ -56,5 +68,48 @@ describe('AppComponent', () => {
     expect(dom.innerHTML).toContain('</cs2-history-ban-scanner>');
     expect(dom.innerHTML).toContain('</cs2-history-ban-statistics>');
     expect(dom.innerHTML).toContain('</cs2-history-loader>');
+  });
+
+  it('Test format variable', async () => {
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeFalse();
+    expect(component.addMarginClass).toBeTrue();
+    expect(component._format).toBeUndefined();
+
+    window.history.replaceState(null, '', '?tab=toto');
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeFalse();
+    expect(component.addMarginClass).toBeTrue();
+    expect(component._format).toBeUndefined();
+
+    window.history.replaceState(null, '', '?tab=matchhistorypremier');
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeTrue();
+    expect(component.addMarginClass).toBeFalse();
+    expect(component._format).toEqual(MatchFormat.MR12);
+
+    window.history.replaceState(null, '', '?tab=matchhistorycompetitivepermap');
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeTrue();
+    expect(component.addMarginClass).toBeFalse();
+    expect(component._format).toEqual(MatchFormat.MR12);
+
+    window.history.replaceState(null, '', '?tab=matchhistorycompetitive');
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeTrue();
+    expect(component.addMarginClass).toBeFalse();
+    expect(component._format).toEqual(MatchFormat.MR15);
+
+    window.history.replaceState(null, '', '?tab=matchhistorywingman');
+    component.ngAfterViewInit();
+    component.ngDoCheck();
+    expect(component.isOnGCPDSection).toBeTrue();
+    expect(component.addMarginClass).toBeFalse();
+    expect(component._format).toEqual(MatchFormat.MR8);
   });
 });

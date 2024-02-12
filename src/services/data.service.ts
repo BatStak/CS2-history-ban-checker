@@ -36,13 +36,17 @@ export class DataService {
 
   newPlayersBanned = false;
 
+  onSaveDebounceTimeInMs = 250;
+
   constructor(
     private _databaseService: DatabaseService,
     private _utilsService: UtilsService
   ) {
-    this.onSave.pipe(debounceTime(250)).subscribe(() => {
-      this.save();
-    });
+    this.onSave
+      .pipe(debounceTime(this.onSaveDebounceTimeInMs))
+      .subscribe(() => {
+        this.save();
+      });
   }
 
   init(database?: any, section?: string, format?: MatchFormat) {

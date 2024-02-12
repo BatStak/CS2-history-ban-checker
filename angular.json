@@ -70,7 +70,8 @@
             "styles": ["src/styles.scss"],
             "scripts": [],
             "karmaConfig": "karma.conf.js",
-            "codeCoverage": true
+            "codeCoverage": true,
+            "codeCoverageExclude": ["**/database.service.ts"]
           }
         }
       }

@@ -6,10 +6,10 @@
 - [x] Testing ban-statistics template
 - [x] Testing history-loader component
 - [x] Testing history-loader template
-- [ ] Testing options component
-- [ ] Testing options template
+- [ ] Testing options component -> useless
+- [x] Testing options template
 - [ ] Testing app component
-- [ ] Testing app template
+- [x] Testing app template
 - [ ] Testing data service
 - [ ] Testing database service
 - [ ] Testing steam service

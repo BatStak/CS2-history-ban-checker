@@ -6,7 +6,7 @@
 - [x] Testing ban-statistics template
 - [x] Testing history-loader component
 - [x] Testing history-loader template
-- [ ] Testing options component
+- [x] Testing options component (nothing to test)
 - [x] Testing options template
 - [x] Testing app component
 - [x] Testing app template

@@ -1,22 +1,12 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Database, MatchFormat } from '../models';
+import { MatchFormat } from '../models';
 import { DataService } from '../services/data.service';
+import { MockDatabaseService } from '../services/data.service.spec';
 import { DatabaseService } from '../services/database.service';
 import { SteamService } from '../services/steam.service';
 import { UtilsService } from '../services/utils.service';
 import { AppComponent } from './app.component';
-
-@Injectable()
-class MockDatabaseService extends DatabaseService {
-  override async getDatabase(): Promise<{ [key: string]: any }> {
-    return {};
-  }
-
-  override async setDatabase(_database: Database): Promise<void> {
-    return;
-  }
-}
 
 describe('AppComponent', async () => {
   let component: AppComponent;

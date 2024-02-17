@@ -24,8 +24,8 @@ export class DataService {
   section?: string;
   format?: MatchFormat;
 
-  players: PlayerInfo[] = [];
-  matches: MatchInfo[] = [];
+  filteredPlayers: PlayerInfo[] = [];
+  filteredMatches: MatchInfo[] = [];
 
   playersNotScannedYet: PlayerInfo[] = [];
   oldestScan?: BanInfo;
@@ -94,7 +94,7 @@ export class DataService {
   }
 
   parseFriends() {
-    this.players = [];
+    this.filteredPlayers = [];
     const players = document.querySelectorAll<HTMLElement>(
       '.persona[data-steamid]'
     );
@@ -117,7 +117,7 @@ export class DataService {
         };
         this.database.players.push(playerInfo);
       }
-      this.players.push(playerInfo);
+      this.filteredPlayers.push(playerInfo);
     }
   }
 
@@ -287,25 +287,29 @@ export class DataService {
 
     if (this.section) {
       // filter matches from the section we are on
-      this.matches = this.database.matches.filter(
+      this.filteredMatches = this.database.matches.filter(
         (m) => m.section === this.section
       );
 
       // filter players from the section we are on
-      this.players = this.database.players.filter(
+      this.filteredPlayers = this.database.players.filter(
         (p) =>
           !p.deleted &&
-          this.matches.some((m) => m.playersSteamID64?.includes(p.steamID64))
+          this.filteredMatches.some((m) =>
+            m.playersSteamID64?.includes(p.steamID64)
+          )
       );
     } else {
       this.parseFriends();
     }
 
     // get players that has no ban information
-    this.playersNotScannedYet = this.players.filter(
+    this.playersNotScannedYet = this.filteredPlayers.filter(
       (p) => !p.banInfo?.LastFetch
     );
-    const playersScanned = this.players.filter((p) => p.banInfo?.LastFetch);
+    const playersScanned = this.filteredPlayers.filter(
+      (p) => p.banInfo?.LastFetch
+    );
     if (playersScanned.length) {
       this.oldestScan = playersScanned[0].banInfo;
     } else {
@@ -313,19 +317,19 @@ export class DataService {
     }
 
     // get oldest match of history
-    this.oldestMatch = this.matches[0];
+    this.oldestMatch = this.filteredMatches[0];
 
     // get player banned
-    const banInfosList = this.players
+    const banInfosList = this.filteredPlayers
       .filter(
         (p) =>
           p.banInfo &&
           p.lastPlayWith &&
-          (p.banInfo.NumberOfGameBans > 0 || p.banInfo.NumberOfVACBans > 0)
+          (p.banInfo.NumberOfGameBans || p.banInfo.NumberOfVACBans)
       )
       .map((p) => p.banInfo!);
 
-    this.playersBanned = this.players
+    this.playersBanned = this.filteredPlayers
       ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
       .sort((a, b) => this._sortBannedPlayers(a, b));
 
@@ -351,7 +355,7 @@ export class DataService {
   /**
    * we sort player : the ones we did not scan yet, then the older scanned first
    */
-  private _sortPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+  _sortPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
     let result = 0;
 
     if (playerA.banInfo?.LastFetch || playerB.banInfo?.LastFetch) {
@@ -372,7 +376,7 @@ export class DataService {
   /**
    * we sort matchs by date ascending
    */
-  private _sortMatches(matchA: MatchInfo, matchB: MatchInfo) {
+  _sortMatches(matchA: MatchInfo, matchB: MatchInfo) {
     return matchA.id! < matchB.id! ? -1 : 1;
   }
 
@@ -398,7 +402,7 @@ export class DataService {
       );
       if (playerInfo?.lastPlayWith && playerInfo?.banInfo) {
         const banInfo = playerInfo.banInfo;
-        if (banInfo.NumberOfVACBans > 0 || banInfo.NumberOfGameBans > 0) {
+        if (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans) {
           let text = '';
           if (banInfo.NumberOfVACBans) {
             text += `${banInfo.NumberOfVACBans} VAC ban`;

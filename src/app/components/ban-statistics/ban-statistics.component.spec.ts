@@ -43,9 +43,9 @@ describe('BanStatisticsComponent', async () => {
 
   it('Test update', async () => {
     // we add 100 players in database
-    dataService.players = [];
+    dataService.filteredPlayers = [];
     for (let i = 0; i < 100; i++) {
-      dataService.players.push({
+      dataService.filteredPlayers.push({
         matches: [],
         steamID64: `steamID${i}`,
       });
@@ -61,9 +61,9 @@ describe('BanStatisticsComponent', async () => {
     }
 
     // we add 100 matches in database
-    dataService.matches = [];
+    dataService.filteredMatches = [];
     for (let i = 0; i < 100; i++) {
-      dataService.matches.push({
+      dataService.filteredMatches.push({
         playersSteamID64: [],
       });
     }
@@ -78,7 +78,7 @@ describe('BanStatisticsComponent', async () => {
     expect(component.matchPourcentage).toEqual(0);
 
     // 1 match concerned (1%) of 100 matches
-    dataService.matches[0].playersSteamID64.push('steamID0');
+    dataService.filteredMatches[0].playersSteamID64.push('steamID0');
     component._update();
     expect(component.playersCount).toEqual(100);
     expect(component.matchesCount).toEqual(100);
@@ -87,9 +87,9 @@ describe('BanStatisticsComponent', async () => {
     expect(component.matchPourcentage).toEqual(1);
 
     // 3 match concerned (6%) of 50 matches
-    dataService.matches[1].playersSteamID64.push('steamID0');
-    dataService.matches[2].playersSteamID64.push('steamID0');
-    dataService.matches.splice(50, 50);
+    dataService.filteredMatches[1].playersSteamID64.push('steamID0');
+    dataService.filteredMatches[2].playersSteamID64.push('steamID0');
+    dataService.filteredMatches.splice(50, 50);
     component._update();
     expect(component.playersCount).toEqual(100);
     expect(component.matchesCount).toEqual(50);
@@ -98,7 +98,7 @@ describe('BanStatisticsComponent', async () => {
     expect(component.matchPourcentage).toEqual(6);
 
     // 10 players out of 50 (20%)
-    dataService.players.splice(50, 50);
+    dataService.filteredPlayers.splice(50, 50);
     component._update();
     expect(component.playersCount).toEqual(50);
     expect(component.matchesCount).toEqual(50);
@@ -107,7 +107,7 @@ describe('BanStatisticsComponent', async () => {
 
     // we now have 1050 players and 10 banned players (0.95%)
     for (let i = 0; i < 1000; i++) {
-      dataService.players.push({
+      dataService.filteredPlayers.push({
         matches: [],
         steamID64: `steamID-new-${i}`,
       });
@@ -120,7 +120,7 @@ describe('BanStatisticsComponent', async () => {
 
     // we now have 968 matches and 10 banned players (0.95%)
     for (let i = 0; i < 918; i++) {
-      dataService.matches.push({
+      dataService.filteredMatches.push({
         playersSteamID64: [],
       });
     }

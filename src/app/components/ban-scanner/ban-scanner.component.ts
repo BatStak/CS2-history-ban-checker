@@ -26,11 +26,11 @@ export class ScannerComponent implements DoCheck {
   }
 
   get matches(): MatchInfo[] {
-    return this._dataService.matches;
+    return this._dataService.filteredMatches;
   }
 
   get players(): PlayerInfo[] {
-    return this._dataService.players;
+    return this._dataService.filteredPlayers;
   }
 
   get playersNotScannedYet(): PlayerInfo[] {

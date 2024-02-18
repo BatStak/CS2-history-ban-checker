@@ -27,7 +27,8 @@ export class UtilsService {
       ?.textContent?.trim()
       ?.replace('Premier ', '')
       ?.replace('Wingman ', '')
-      ?.replace('Competitive ', '');
+      ?.replace('Competitive ', '')
+      ?.trim();
   }
 
   getReplayLink(matchNode: HTMLElement) {

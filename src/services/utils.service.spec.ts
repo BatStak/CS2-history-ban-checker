@@ -2431,4 +2431,38 @@ describe('UtilsService', () => {
     const result = service.getSteamID64FromMiniProfileId('lol');
     expect(result).toEqual('');
   });
+
+  it('getMap', async () => {
+    const elt = document.createElement('div');
+    let map: string | undefined;
+
+    elt.innerHTML = '<div id="test"> Premier   dust2 </div>';
+    service.mapCssSelector = '#test';
+    map = service.getMap(elt);
+    expect(map).toEqual('dust2');
+
+    elt.innerHTML = '<div id="test"> Wingman   dust2 </div>';
+    service.mapCssSelector = '#test';
+    map = service.getMap(elt);
+    expect(map).toEqual('dust2');
+
+    elt.innerHTML = '<div id="test"> Competitive   dust2  </div>';
+    service.mapCssSelector = '#test';
+    map = service.getMap(elt);
+    expect(map).toEqual('dust2');
+  });
+
+  it('getReplayLink', async () => {
+    const elt = document.createElement('div');
+    let replayLink: string | undefined;
+
+    elt.innerHTML =
+      '<a href="http://test.com/"><div class="csgo_scoreboard_btn_gotv"> Premier   dust2 </div></a>';
+    replayLink = service.getReplayLink(elt);
+    expect(replayLink).toEqual('http://test.com/');
+
+    elt.innerHTML = '';
+    replayLink = service.getReplayLink(elt);
+    expect(replayLink).toBeUndefined();
+  });
 });

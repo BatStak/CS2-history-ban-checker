@@ -1,3 +1,9 @@
+# v2.0.9
+
+Add wording when ticking off the checkbox.  
+Fix order of banned players being random when banned on the same day.  
+Fix potentiel future issue in map name.
+
 # v2.0.8
 
 Remove scrimmage supports.  

@@ -256,8 +256,22 @@ export class DataService {
               matches: [matchInfo!.id!],
             };
             this.database.players.push(playerInfo);
-          } else if (!playerInfo.matches.includes(matchInfo!.id!)) {
-            playerInfo.matches.push(matchInfo!.id!);
+          } else {
+            const matchId = matchInfo.id;
+            if (matchId) {
+              // we add the match to the list of the playerInfo matches
+              if (!playerInfo.matches.includes(matchId)) {
+                playerInfo.matches.push(matchId);
+              }
+
+              // if this match is more recent than the lastPlayWith field, we update the field
+              if (
+                !playerInfo.lastPlayWith ||
+                matchId > playerInfo.lastPlayWith
+              ) {
+                playerInfo.lastPlayWith = matchInfo.id;
+              }
+            }
           }
         }
       } else {

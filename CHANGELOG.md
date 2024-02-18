@@ -1,3 +1,7 @@
+# v2.0.10
+
+Fix a case where we don't update the ban status column for clean players.
+
 # v2.0.9
 
 Add wording when ticking off the checkbox.  

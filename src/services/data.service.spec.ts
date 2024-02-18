@@ -107,4 +107,62 @@ describe('DataService', () => {
     expect(matches[1].id).toEqual('2024-02-16 19:47:55 GMT');
     expect(matches[2].id).toEqual('2024-02-17 19:47:55 GMT');
   });
+
+  it('test sort banned players', async () => {
+    const players = dataService.playersBanned;
+
+    players.push(
+      {
+        matches: [],
+        steamID64: 'b',
+        banInfo: {
+          CommunityBanned: false,
+          DaysSinceLastBan: 12,
+          EconomyBan: '',
+          LastBanOn: '',
+          LastFetch: '',
+          NumberOfGameBans: 0,
+          NumberOfVACBans: 0,
+          SteamId: '',
+          VACBanned: false,
+        },
+      },
+      {
+        matches: [],
+        steamID64: 'a',
+        banInfo: {
+          CommunityBanned: false,
+          DaysSinceLastBan: 12,
+          EconomyBan: '',
+          LastBanOn: '',
+          LastFetch: '',
+          NumberOfGameBans: 0,
+          NumberOfVACBans: 0,
+          SteamId: '',
+          VACBanned: false,
+        },
+      },
+      {
+        matches: [],
+        steamID64: 'c',
+        banInfo: {
+          CommunityBanned: false,
+          DaysSinceLastBan: 1,
+          EconomyBan: '',
+          LastBanOn: '',
+          LastFetch: '',
+          NumberOfGameBans: 0,
+          NumberOfVACBans: 0,
+          SteamId: '',
+          VACBanned: false,
+        },
+      }
+    );
+
+    players.sort((a, b) => dataService._sortBannedPlayers(a, b));
+    expect(players.length).toEqual(3);
+    expect(players[0].steamID64).toEqual('c');
+    expect(players[1].steamID64).toEqual('a');
+    expect(players[2].steamID64).toEqual('b');
+  });
 });

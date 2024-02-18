@@ -391,8 +391,14 @@ export class DataService {
   /**
    * we sort by most recent bans first
    */
-  private _sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
-    return playerA.banInfo!.DaysSinceLastBan < playerB.banInfo!.DaysSinceLastBan
+  _sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+    const playerADaysSinceLastBan = playerA.banInfo!.DaysSinceLastBan;
+    const playerBDaysSinceLastBan = playerB.banInfo!.DaysSinceLastBan;
+    return playerADaysSinceLastBan === playerBDaysSinceLastBan
+      ? playerA.steamID64 < playerB.steamID64
+        ? -1
+        : 1
+      : playerADaysSinceLastBan < playerBDaysSinceLastBan
       ? -1
       : 1;
   }

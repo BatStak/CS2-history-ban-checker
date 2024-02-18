@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataService } from '../../../services/data.service';
+import { MockDatabaseService } from '../../../services/data.service.spec';
 import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { OptionsComponent } from './options.component';
@@ -14,7 +15,11 @@ describe('OptionsComponent', async () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [OptionsComponent],
-      providers: [DatabaseService, UtilsService, DataService],
+      providers: [
+        { provide: DatabaseService, useClass: MockDatabaseService },
+        UtilsService,
+        DataService,
+      ],
     });
     fixture = TestBed.createComponent(OptionsComponent);
     component = fixture.componentInstance;
@@ -41,8 +46,12 @@ describe('OptionsComponent', async () => {
       'First, you need to set an API key to be able to check BAN status of players'
     );
 
-    component.showOptions = true;
+    component.openOptions();
+    expect(component.showOptions).toBeTrue();
     fixture.detectChanges();
     expect(dom.textContent).toContain('Enter your API key');
+
+    component.closeOptions();
+    expect(component.showOptions).toBeFalse();
   });
 });

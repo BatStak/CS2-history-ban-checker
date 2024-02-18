@@ -174,7 +174,7 @@ export class DataService {
     return `.banstatus[data-steamid64="${steamid64}"]`;
   }
 
-  private _parseMatch(match: HTMLElement, format: MatchFormat) {
+  _parseMatch(match: HTMLElement, format: MatchFormat) {
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
     if (!matchInfo) {
@@ -289,7 +289,7 @@ export class DataService {
     this._updateMatchBanStatus(match);
   }
 
-  private _updateStatistics(updateFlags = true) {
+  _updateStatistics(updateFlags = true) {
     this.database.players.sort((a, b) => this._sortPlayers(a, b));
     this.database.matches.sort((a, b) => this._sortMatches(a, b));
 
@@ -403,7 +403,7 @@ export class DataService {
       : 1;
   }
 
-  private _updateMatchBanStatus(match: HTMLElement) {
+  _updateMatchBanStatus(match: HTMLElement) {
     const matchId = this._utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
 
@@ -414,40 +414,44 @@ export class DataService {
       const playerBannedColumn = document.querySelectorAll<HTMLElement>(
         this._getBanColumnForPlayer(steamID64)
       );
-      if (playerInfo?.lastPlayWith && playerInfo?.banInfo) {
-        const banInfo = playerInfo.banInfo;
-        if (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans) {
-          let text = '';
-          if (banInfo.NumberOfVACBans) {
-            text += `${banInfo.NumberOfVACBans} VAC ban`;
-          }
-          if (banInfo.NumberOfVACBans && banInfo.NumberOfGameBans) {
-            text += ' & ';
-          }
-          if (banInfo.NumberOfGameBans) {
-            text += `${banInfo.NumberOfGameBans} GAME ban`;
-          }
-          const text2 = `last is ${banInfo.DaysSinceLastBan} days ago`;
-          const div = document.createElement('div');
-          div.textContent = text2;
-          for (let elt of Array.from(playerBannedColumn)) {
-            elt.textContent = text;
-            elt.appendChild(div);
-            elt.classList.add('banned');
-            if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
-              elt.classList.add('after');
-            }
-          }
-
-          // we display red the match only if ban occured after the game
+      const banInfo = playerInfo?.banInfo;
+      if (
+        playerInfo?.lastPlayWith &&
+        banInfo &&
+        (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans)
+      ) {
+        let text = '';
+        if (banInfo.NumberOfVACBans) {
+          text += `${banInfo.NumberOfVACBans} VAC ban`;
+        }
+        if (banInfo.NumberOfVACBans && banInfo.NumberOfGameBans) {
+          text += ' & ';
+        }
+        if (banInfo.NumberOfGameBans) {
+          text += `${banInfo.NumberOfGameBans} GAME ban`;
+        }
+        const text2 = `last is ${banInfo.DaysSinceLastBan} days ago`;
+        const div = document.createElement('div');
+        div.textContent = text2;
+        for (let elt of Array.from(playerBannedColumn)) {
+          elt.textContent = text;
+          elt.appendChild(div);
+          elt.classList.add('banned');
+          elt.classList.remove('not-banned');
           if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
-            match.classList.add('banned');
+            elt.classList.add('after');
           }
-        } else {
-          for (let elt of Array.from(playerBannedColumn)) {
-            elt.textContent = 'clean';
-            elt.classList.add('not-banned');
-          }
+        }
+
+        // we display red the match only if ban occured after the game
+        if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
+          match.classList.add('banned');
+        }
+      } else {
+        for (let elt of Array.from(playerBannedColumn)) {
+          elt.textContent = 'clean';
+          elt.classList.remove('banned');
+          elt.classList.add('not-banned');
         }
       }
     }
@@ -467,11 +471,7 @@ export class DataService {
     return isOvertime;
   }
 
-  private _isFinished(
-    scoreA: number,
-    scoreB: number,
-    format: MatchFormat
-  ): boolean {
+  _isFinished(scoreA: number, scoreB: number, format: MatchFormat): boolean {
     let drawScore: number;
     let winScore: number;
     switch (format) {

@@ -135,7 +135,6 @@ describe('ScannerComponent', async () => {
   it('Test doCheck', async () => {
     component.isOnGCPDSection = true;
     dataService.newPlayersBanned = false;
-    dataService.database.hideHistoryTable = false;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeFalse();
@@ -143,23 +142,13 @@ describe('ScannerComponent', async () => {
 
     component.isOnGCPDSection = true;
     dataService.newPlayersBanned = true;
-    dataService.database.hideHistoryTable = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeTrue();
     expect(dom.textContent).toContain('There are new players banned');
 
-    component.isOnGCPDSection = true;
-    dataService.newPlayersBanned = true;
-    dataService.database.hideHistoryTable = undefined;
-    component.ngDoCheck();
-    fixture.detectChanges();
-    expect(component.showNewPlayersBannedWarning).toBeFalse();
-    expect(dom.textContent).not.toContain('There are new players banned');
-
     component.isOnGCPDSection = false;
     dataService.newPlayersBanned = true;
-    dataService.database.hideHistoryTable = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeFalse();
@@ -167,7 +156,6 @@ describe('ScannerComponent', async () => {
 
     component.isOnGCPDSection = false;
     dataService.newPlayersBanned = false;
-    dataService.database.hideHistoryTable = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeFalse();

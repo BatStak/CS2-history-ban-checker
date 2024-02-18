@@ -60,9 +60,7 @@ export class ScannerComponent implements DoCheck {
 
   ngDoCheck(): void {
     this.showNewPlayersBannedWarning =
-      this.isOnGCPDSection &&
-      this._dataService.newPlayersBanned &&
-      !!this._dataService.database.hideHistoryTable;
+      this.isOnGCPDSection && this._dataService.newPlayersBanned;
   }
 
   startScan(type: 'new' | 'all') {

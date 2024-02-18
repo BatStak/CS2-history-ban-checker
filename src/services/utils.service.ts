@@ -9,7 +9,11 @@ export class UtilsService {
   endDate?: string;
 
   matchesCssSelector = '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
+  matchesNotParsedCssSelector = `${this.matchesCssSelector}:not(.parsed)`;
+  matchesParsedNoBanCssSelector = `${this.matchesCssSelector}.parsed:not(.banned)`;
   playersCssSelector = '.csgo_scoreboard_inner_right > tbody > tr';
+  mapCssSelector = '.csgo_scoreboard_inner_left > tbody > tr:nth-child(1)';
+  friendsListCssSelector = '.persona[data-steamid]';
 
   async wait(timeInMs: number) {
     return new Promise<void>((resolve) => {
@@ -19,9 +23,7 @@ export class UtilsService {
 
   getMap(matchNode: HTMLElement) {
     return matchNode
-      .querySelector<HTMLElement>(
-        '.csgo_scoreboard_inner_left > tbody > tr:nth-child(1)'
-      )
+      .querySelector<HTMLElement>(this.mapCssSelector)
       ?.textContent?.trim()
       ?.replace('Premier ', '')
       ?.replace('Wingman ', '')

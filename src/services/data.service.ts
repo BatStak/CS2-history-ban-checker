@@ -38,6 +38,9 @@ export class DataService {
 
   onSaveDebounceTimeInMs = 250;
 
+  _friendsListCssSelector = '.friend_block_content';
+  _avatarCssSelector = '.player_avatar img';
+
   constructor(
     private _databaseService: DatabaseService,
     private _utilsService: UtilsService
@@ -86,7 +89,7 @@ export class DataService {
 
   parseMatches() {
     const matches = document.querySelectorAll<HTMLElement>(
-      `${this._utilsService.matchesCssSelector}:not(.parsed)`
+      this._utilsService.matchesNotParsedCssSelector
     );
     for (let match of Array.from(matches)) {
       this._parseMatch(match, this.format!);
@@ -96,7 +99,7 @@ export class DataService {
   parseFriends() {
     this.filteredPlayers = [];
     const players = document.querySelectorAll<HTMLElement>(
-      '.persona[data-steamid]'
+      this._utilsService.friendsListCssSelector
     );
     for (let player of Array.from(players)) {
       const steamID64 = player.dataset['steamid']!;
@@ -108,11 +111,12 @@ export class DataService {
         playerInfo = {
           steamID64: steamID64,
           name: player
-            .querySelector<HTMLElement>('.friend_block_content')
+            .querySelector<HTMLElement>(this._friendsListCssSelector)
             ?.childNodes[0]?.textContent?.trim(),
           profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
-          avatarLink:
-            player.querySelector<HTMLImageElement>('.player_avatar img')?.src,
+          avatarLink: player.querySelector<HTMLImageElement>(
+            this._avatarCssSelector
+          )?.src,
           matches: [],
         };
         this.database.players.push(playerInfo);
@@ -123,7 +127,7 @@ export class DataService {
 
   cleanParsedMatches() {
     const matches = document.querySelectorAll<HTMLElement>(
-      `${this._utilsService.matchesCssSelector}.parsed:not(.banned)`
+      this._utilsService.matchesParsedNoBanCssSelector
     );
     for (let match of Array.from(matches)) {
       match.remove();
@@ -144,7 +148,7 @@ export class DataService {
 
         // for each column of the player ban status, we get the match row and update ban status on the table row of the match
         const playerBanStatusList = document.querySelectorAll<HTMLElement>(
-          `.banstatus[data-steamid64="${playerInfo.steamID64}"]`
+          this._getBanColumnForPlayer(playerInfo.steamID64)
         );
         if (playerBanStatusList?.length) {
           for (let playerBanStatus of Array.from(playerBanStatusList)) {
@@ -164,6 +168,10 @@ export class DataService {
   async save() {
     this._updateStatistics();
     await this._databaseService.setDatabase(this.database);
+  }
+
+  _getBanColumnForPlayer(steamid64: string) {
+    return `.banstatus[data-steamid64="${steamid64}"]`;
   }
 
   private _parseMatch(match: HTMLElement, format: MatchFormat) {
@@ -398,7 +406,7 @@ export class DataService {
         (p) => p.steamID64 === steamID64
       );
       const playerBannedColumn = document.querySelectorAll<HTMLElement>(
-        `.banstatus[data-steamid64="${steamID64}"]`
+        this._getBanColumnForPlayer(steamID64)
       );
       if (playerInfo?.lastPlayWith && playerInfo?.banInfo) {
         const banInfo = playerInfo.banInfo;

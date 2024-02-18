@@ -13,6 +13,7 @@ import { UtilsService } from '../../../services/utils.service';
 })
 export class HistoryLoaderComponent {
   hideHistoryTable?: boolean;
+  displayReloadWarning = false;
 
   get startDate(): string | undefined {
     return this._utilsService.startDate;
@@ -36,13 +37,16 @@ export class HistoryLoaderComponent {
   _buttonClickMaxAttempts = 5;
   _loadMoreButton?: HTMLButtonElement | null;
 
+  _loadMoreButtonCssSelector = '#load_more_button';
+
   constructor(
     public _utilsService: UtilsService,
     public _dataService: DataService
   ) {
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
-    this._loadMoreButton =
-      document.querySelector<HTMLButtonElement>('#load_more_button');
+    this._loadMoreButton = document.querySelector<HTMLButtonElement>(
+      this._loadMoreButtonCssSelector
+    );
   }
 
   startLoadHistory() {
@@ -65,12 +69,11 @@ export class HistoryLoaderComponent {
   async toggleHideCleanMatches(event: Event) {
     if (event?.target) {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
-      if (this._dataService.database) {
-        this._dataService.database.hideHistoryTable = this.hideHistoryTable;
-        await this._dataService.save();
-        if (this.hideHistoryTable) {
-          this._dataService.cleanParsedMatches();
-        }
+      this._dataService.database.hideHistoryTable = this.hideHistoryTable;
+      await this._dataService.save();
+      this.displayReloadWarning = !this.hideHistoryTable;
+      if (this.hideHistoryTable) {
+        this._dataService.cleanParsedMatches();
       }
     }
   }

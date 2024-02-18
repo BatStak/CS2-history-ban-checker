@@ -1,8 +1,14 @@
+import { Injectable } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataService } from '../../../services/data.service';
 import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { HistoryLoaderComponent } from './history-loader.component';
+
+@Injectable()
+class MockDataService extends DataService {
+  override async save(): Promise<void> {}
+}
 
 describe('HistoryLoaderComponent', async () => {
   let component: HistoryLoaderComponent;
@@ -14,7 +20,11 @@ describe('HistoryLoaderComponent', async () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HistoryLoaderComponent],
-      providers: [DatabaseService, UtilsService, DataService],
+      providers: [
+        DatabaseService,
+        UtilsService,
+        { provide: DataService, useClass: MockDataService },
+      ],
     });
     fixture = TestBed.createComponent(HistoryLoaderComponent);
     component = fixture.componentInstance;
@@ -76,5 +86,34 @@ describe('HistoryLoaderComponent', async () => {
     expect(utilsService.isLoadingHistory).toBeFalse();
     expect(component._loadHistoryTimer).toBeUndefined();
     expect(component._buttonClickAttempts).toEqual(1);
+  });
+
+  it('Test checkbox behavior', async () => {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = 'hide-history-table';
+    const event: any = {
+      target: checkbox,
+    };
+
+    checkbox.checked = false;
+    await component.toggleHideCleanMatches(event);
+    fixture.detectChanges();
+    expect(component.hideHistoryTable).toBeFalse();
+    expect(dataService.database.hideHistoryTable).toBeFalse();
+    expect(component.displayReloadWarning).toBeTrue();
+    expect(dom.textContent).toContain(
+      'You may need to reload the page to display games previously removed from the page'
+    );
+
+    checkbox.checked = true;
+    await component.toggleHideCleanMatches(event);
+    fixture.detectChanges();
+    expect(component.hideHistoryTable).toBeTrue();
+    expect(dataService.database.hideHistoryTable).toBeTrue();
+    expect(component.displayReloadWarning).toBeFalse();
+    expect(dom.textContent).not.toContain(
+      'You may need to reload the page to display games previously removed from the page'
+    );
   });
 });

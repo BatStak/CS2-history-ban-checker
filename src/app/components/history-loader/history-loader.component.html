@@ -22,7 +22,12 @@
   </label>
 </div>
 
-@if (isLoadingHistory) {
+@if (displayReloadWarning) {
+<p class="warning">
+  You may need to reload the page to display games previously removed from the
+  page.
+</p>
+} @if (isLoadingHistory) {
 <p>Loading...</p>
 } @if (!startDate || !endDate) {
 <p>No history loaded.</p>

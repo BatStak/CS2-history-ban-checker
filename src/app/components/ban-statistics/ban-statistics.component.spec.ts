@@ -17,6 +17,7 @@ describe('BanStatisticsComponent', async () => {
     });
     fixture = TestBed.createComponent(BanStatisticsComponent);
     component = fixture.componentInstance;
+    component.displayListOfBannedPlayers = true;
     dataService = fixture.debugElement.injector.get(DataService);
     dom = fixture.nativeElement;
     fixture.detectChanges();

@@ -12,6 +12,8 @@ import { DataService } from '../../../services/data.service';
   styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
+  displayListOfBannedPlayers = false;
+
   playersCount = 0;
   bannedCount = 0;
   bannedPourcentage = 0;

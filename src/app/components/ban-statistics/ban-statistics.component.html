@@ -8,6 +8,15 @@
   players banned after the game (<strong>{{ matchPourcentage }}%</strong>)*
 </p>
 
+<a
+  class="action-link"
+  (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers"
+>
+  {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
+</a>
+
+@if (displayListOfBannedPlayers) {
+
 <em>
   *bans can occur on other games. We only know that the bans occurred after you
   played with them.
@@ -44,6 +53,6 @@
   </tr>
   }
 </table>
-} @else {
+} } @else {
 <p>No banned player</p>
 }

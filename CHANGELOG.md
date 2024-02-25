@@ -1,3 +1,8 @@
+# v2.0.11
+
+small UI update.  
+add button to hide/show list of players banned.
+
 # v2.0.10
 
 Fix a case where we don't update the ban status column for clean players.

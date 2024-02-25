@@ -32,3 +32,20 @@
     }
   }
 }
+
+.container-block {
+  display: block;
+  padding: 15px;
+  box-shadow: 0px 0 4px 0px rgb(0, 0, 0);
+  background: #1b2838;
+}
+
+:host ::ng-deep {
+  p:first-child {
+    margin-top: 0;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}

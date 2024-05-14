@@ -13,6 +13,7 @@ import { DataService } from '../../../services/data.service';
 })
 export class BanStatisticsComponent implements OnDestroy {
   displayListOfBannedPlayers = false;
+  displayOnlyListOfPlayers = false;
 
   playersCount = 0;
   bannedCount = 0;
@@ -44,8 +45,9 @@ export class BanStatisticsComponent implements OnDestroy {
   _update() {
     this.playersCount = this._dataService.filteredPlayers.length;
     this.bannedCount = this.playersBannedAfter.length;
-    this.bannedPourcentage =
-      Math.round((this.bannedCount / this.playersCount) * 10000) / 100;
+    this.bannedPourcentage = this.playersCount
+      ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100
+      : 0;
 
     this.matchesCount = this._dataService.filteredMatches.length;
     const filteredMatches = this._dataService.filteredMatches.filter((m) =>
@@ -54,7 +56,13 @@ export class BanStatisticsComponent implements OnDestroy {
       )
     );
     this.matchesConcerned = filteredMatches.length || 0;
-    this.matchPourcentage =
-      Math.round((this.matchesConcerned / this.matchesCount) * 10000) / 100;
+    this.matchPourcentage = this.matchesCount
+      ? Math.round((this.matchesConcerned / this.matchesCount) * 10000) / 100
+      : 0;
+
+    this.displayOnlyListOfPlayers = !this._dataService.section;
+    if (this.displayOnlyListOfPlayers) {
+      this.displayListOfBannedPlayers = true;
+    }
   }
 }

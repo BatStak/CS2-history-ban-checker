@@ -1,4 +1,4 @@
-@if(playersBannedAfter.length) {
+@if(playersBannedAfter.length) { @if(!displayOnlyListOfPlayers) {
 <p>
   Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been
   banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>)*
@@ -14,19 +14,20 @@
 >
   {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
 </a>
-
-@if (displayListOfBannedPlayers) {
-
+} @if (displayListOfBannedPlayers) { @if(!displayOnlyListOfPlayers) {
 <em>
   *bans can occur on other games. We only know that the bans occurred after you
   played with them.
 </em>
+}
 
 <table class="results">
   <tr>
     <th>Avatar</th>
     <th>Name</th>
+    @if(!displayOnlyListOfPlayers) {
     <th>Last played with on</th>
+    }
     <th>Banned since</th>
   </tr>
   @for (playerBanned of playersBannedAfter; track $index) {
@@ -41,9 +42,11 @@
         playerBanned.name
       }}</a>
     </td>
+    @if(!displayOnlyListOfPlayers) {
     <td>
       {{ playerBanned.lastPlayWith | date : "dd/MM/y" }}
     </td>
+    }
     <td>
       ~{{ playerBanned.banInfo?.LastBanOn | date : "dd/MM/y" }} ({{
         playerBanned.banInfo?.DaysSinceLastBan

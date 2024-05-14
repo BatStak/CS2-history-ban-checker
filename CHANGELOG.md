@@ -1,3 +1,8 @@
+# v2.0.12
+
+improve results on friends list.  
+add red background on a friend banned.
+
 # v2.0.11
 
 small UI update.  

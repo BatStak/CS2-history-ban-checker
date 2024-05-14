@@ -12,6 +12,10 @@ table.results {
   th:first-child {
     width: 50px;
     text-align: center;
+
+    img {
+      max-height: 32px;
+    }
   }
 
   th:nth-child(3),

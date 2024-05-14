@@ -25,6 +25,7 @@ describe('BanStatisticsComponent', async () => {
 
   it('Test template no banned player', async () => {
     dataService.playersBannedAfter = [];
+    dataService.section = 'test';
 
     component._update();
     fixture.detectChanges();

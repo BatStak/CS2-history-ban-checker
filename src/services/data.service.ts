@@ -122,6 +122,12 @@ export class DataService {
         this.database.players.push(playerInfo);
       }
       this.filteredPlayers.push(playerInfo);
+      if (
+        playerInfo.banInfo?.NumberOfGameBans ||
+        playerInfo.banInfo?.NumberOfVACBans
+      ) {
+        player.classList.add('banned');
+      }
     }
   }
 
@@ -307,6 +313,9 @@ export class DataService {
     this.database.players.sort((a, b) => this._sortPlayers(a, b));
     this.database.matches.sort((a, b) => this._sortMatches(a, b));
 
+    // flag to know if we need to filter players banned after playing with them
+    const filterBannedAfter = !!this.section;
+
     if (this.section) {
       // filter matches from the section we are on
       this.filteredMatches = this.database.matches.filter(
@@ -343,12 +352,7 @@ export class DataService {
 
     // get player banned
     const banInfosList = this.filteredPlayers
-      .filter(
-        (p) =>
-          p.banInfo &&
-          p.lastPlayWith &&
-          (p.banInfo.NumberOfGameBans || p.banInfo.NumberOfVACBans)
-      )
+      .filter((p) => p.banInfo?.NumberOfGameBans || p.banInfo?.NumberOfVACBans)
       .map((p) => p.banInfo!);
 
     this.playersBanned = this.filteredPlayers
@@ -356,11 +360,13 @@ export class DataService {
       .sort((a, b) => this._sortBannedPlayers(a, b));
 
     // get players banned after playing with them
-    const playersBannedAfter = this.playersBanned.filter(
-      (p) =>
-        // we take only people banned after playing with them
-        p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
-    );
+    const playersBannedAfter = filterBannedAfter
+      ? this.playersBanned.filter(
+          (p) =>
+            // we take only people banned after playing with them
+            p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
+        )
+      : this.playersBanned;
 
     // update flag to know that there are new people banned
     if (

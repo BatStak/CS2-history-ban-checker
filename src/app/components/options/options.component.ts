@@ -15,6 +15,8 @@ export class OptionsComponent {
   apiKey?: string;
 
   showOptions = false;
+  displayDisclaimer = false;
+  displayMoreOptions = false;
 
   get isLoadingHistory(): boolean {
     return this._utilsService.isLoadingHistory;
@@ -24,10 +26,7 @@ export class OptionsComponent {
     return this._utilsService.isScanning;
   }
 
-  constructor(
-    private _utilsService: UtilsService,
-    private _dataService: DataService
-  ) {
+  constructor(private _utilsService: UtilsService, private _dataService: DataService) {
     this.apiKey = this._dataService.database.apiKey;
   }
 
@@ -36,12 +35,18 @@ export class OptionsComponent {
   }
 
   closeOptions() {
-    this.showOptions = false;
+    this.showOptions = this.displayDisclaimer = this.displayMoreOptions = false;
     this._dataService.database.apiKey = this.apiKey;
     this._dataService.save();
   }
 
+  toggleDisclaimer() {
+    this.displayDisclaimer = !this.displayDisclaimer;
+  }
+
   resetDatabase() {
-    this._dataService.reset();
+    if (window.confirm('Do you really want to reset the database ?')) {
+      this._dataService.reset();
+    }
   }
 }

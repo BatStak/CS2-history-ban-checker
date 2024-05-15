@@ -222,17 +222,13 @@ describe('DataService', () => {
     expect(playersSteamIds.some((steamId) => steamId === player8)).toBeTrue();
     expect(playersSteamIds.some((steamId) => steamId === player9)).toBeTrue();
     expect(playersSteamIds.some((steamId) => steamId === player10)).toBeTrue();
-    const playerInfo = players.find(
-      (playerInfo: PlayerInfo) => playerInfo.steamID64 === player1
-    );
+    const playerInfo = players.find((playerInfo: PlayerInfo) => playerInfo.steamID64 === player1);
     expect(playerInfo).toBeDefined();
     expect(playerInfo?.avatarLink).toEqual(
       'https://avatars.akamai.steamstatic.com/b4f86a7202ee507b749724f6fe58ea6c40844465.jpg'
     );
     expect(playerInfo?.name).toEqual('PISSMYKISS');
-    expect(playerInfo?.profileLink).toEqual(
-      'https://steamcommunity.com/id/PISSMYKISS666'
-    );
+    expect(playerInfo?.profileLink).toEqual('https://steamcommunity.com/id/PISSMYKISS666');
     expect(playerInfo?.matches?.length).toEqual(1);
     expect(playerInfo?.matches?.[0]).toEqual(matchInfo.id);
   });
@@ -279,15 +275,11 @@ describe('DataService', () => {
 
     expect(matchRowInDom.classList.contains('banned')).toBeTrue();
 
-    const banColumn1 = document.querySelector(
-      dataService._getBanColumnForPlayer(steamId1)
-    );
+    const banColumn1 = document.querySelector(dataService._getBanColumnForPlayer(steamId1));
     expect(banColumn1?.textContent).toContain('1 VAC ban & 1 GAME ban');
     expect(banColumn1?.textContent).toContain('last is 15 days ago');
 
-    const banColumn2 = document.querySelector(
-      dataService._getBanColumnForPlayer(steamId2)
-    );
+    const banColumn2 = document.querySelector(dataService._getBanColumnForPlayer(steamId2));
     expect(banColumn2?.textContent).toContain('clean');
   });
 

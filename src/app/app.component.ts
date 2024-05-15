@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  ApplicationRef,
-  Component,
-  DoCheck,
-  HostBinding,
-  OnDestroy,
-} from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, DoCheck, HostBinding, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { UtilsService } from '../services/utils.service';
@@ -69,17 +62,13 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
     public _applicationRef: ApplicationRef
   ) {
     // for some reason, change detection does not work in firefox extension
-    if (
-      Bowser.getParser(window.navigator.userAgent).getBrowserName() ===
-      'Firefox'
-    ) {
+    if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
       setInterval(() => this._applicationRef.tick(), 100);
     }
   }
 
   async ngAfterViewInit() {
-    const section =
-      new URLSearchParams(document.location.search).get('tab') || undefined;
+    const section = new URLSearchParams(document.location.search).get('tab') || undefined;
 
     this.isOnGCPDSection = !!section && this._validTabs.includes(section);
     if (this.isOnGCPDSection) {
@@ -120,9 +109,7 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
 
   _observeDomChanges() {
     const results = document.querySelector<HTMLElement>(
-      this.isOnGCPDSection
-        ? this._gcpdCSSRootSelector
-        : this._friendsCSSRootSelector
+      this.isOnGCPDSection ? this._gcpdCSSRootSelector : this._friendsCSSRootSelector
     );
     if (results) {
       const observer = new MutationObserver(() => {

@@ -32,25 +32,19 @@ export class UtilsService {
   }
 
   getReplayLink(matchNode: HTMLElement) {
-    const link = matchNode.querySelector<HTMLElement>(
-      '.csgo_scoreboard_btn_gotv'
-    )?.parentElement as HTMLLinkElement;
+    const link = matchNode.querySelector<HTMLElement>('.csgo_scoreboard_btn_gotv')?.parentElement as HTMLLinkElement;
     return link?.href;
   }
 
   getDateOfMatch(matchNode: HTMLElement) {
     return matchNode
-      .querySelector<HTMLElement>(
-        '.csgo_scoreboard_inner_left > tbody > tr:nth-child(2)'
-      )
+      .querySelector<HTMLElement>('.csgo_scoreboard_inner_left > tbody > tr:nth-child(2)')
       ?.textContent?.trim();
   }
 
   getSteamID64FromMiniProfileId(miniprofileId: string) {
     const number = parseInt(miniprofileId, 10);
-    return miniprofileId && !isNaN(number)
-      ? '76' + (number + 561197960265728)
-      : '';
+    return miniprofileId && !isNaN(number) ? '76' + (number + 561197960265728) : '';
   }
 
   getHistoryPeriod() {
@@ -64,9 +58,7 @@ export class UtilsService {
       }
     }
     if (!this.endDate) {
-      const endMatch = document.querySelector<HTMLElement>(
-        '.csgo_scoreboard_root > tbody > tr:nth-child(2)'
-      );
+      const endMatch = document.querySelector<HTMLElement>('.csgo_scoreboard_root > tbody > tr:nth-child(2)');
       if (endMatch) {
         this.endDate = this.getDateOfMatch(endMatch);
       }

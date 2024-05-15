@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
-import {
-  BanInfo,
-  Database,
-  MatchFormat,
-  MatchInfo,
-  PlayerInfo,
-} from '../models';
+import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo } from '../models';
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
@@ -41,15 +35,10 @@ export class DataService {
   _friendsListCssSelector = '.friend_block_content';
   _avatarCssSelector = '.player_avatar img';
 
-  constructor(
-    private _databaseService: DatabaseService,
-    private _utilsService: UtilsService
-  ) {
-    this.onSave
-      .pipe(debounceTime(this.onSaveDebounceTimeInMs))
-      .subscribe(() => {
-        this.save();
-      });
+  constructor(private _databaseService: DatabaseService, private _utilsService: UtilsService) {
+    this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
+      this.save();
+    });
   }
 
   init(database?: any, section?: string, format?: MatchFormat) {
@@ -88,9 +77,7 @@ export class DataService {
   }
 
   parseMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      this._utilsService.matchesNotParsedCssSelector
-    );
+    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesNotParsedCssSelector);
     for (let match of Array.from(matches)) {
       this._parseMatch(match, this.format!);
     }
@@ -98,43 +85,30 @@ export class DataService {
 
   parseFriends() {
     this.filteredPlayers = [];
-    const players = document.querySelectorAll<HTMLElement>(
-      this._utilsService.friendsListCssSelector
-    );
+    const players = document.querySelectorAll<HTMLElement>(this._utilsService.friendsListCssSelector);
     for (let player of Array.from(players)) {
       const steamID64 = player.dataset['steamid']!;
       // add playerInfo to global list
-      let playerInfo = this.database.players.find(
-        (p) => p.steamID64 === steamID64
-      );
+      let playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
       if (!playerInfo) {
         playerInfo = {
           steamID64: steamID64,
-          name: player
-            .querySelector<HTMLElement>(this._friendsListCssSelector)
-            ?.childNodes[0]?.textContent?.trim(),
+          name: player.querySelector<HTMLElement>(this._friendsListCssSelector)?.childNodes[0]?.textContent?.trim(),
           profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
-          avatarLink: player.querySelector<HTMLImageElement>(
-            this._avatarCssSelector
-          )?.src,
+          avatarLink: player.querySelector<HTMLImageElement>(this._avatarCssSelector)?.src,
           matches: [],
         };
         this.database.players.push(playerInfo);
       }
       this.filteredPlayers.push(playerInfo);
-      if (
-        playerInfo.banInfo?.NumberOfGameBans ||
-        playerInfo.banInfo?.NumberOfVACBans
-      ) {
+      if (playerInfo.banInfo?.NumberOfGameBans || playerInfo.banInfo?.NumberOfVACBans) {
         player.classList.add('banned');
       }
     }
   }
 
   cleanParsedMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(
-      this._utilsService.matchesParsedNoBanCssSelector
-    );
+    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesParsedNoBanCssSelector);
     for (let match of Array.from(matches)) {
       match.remove();
     }
@@ -142,14 +116,10 @@ export class DataService {
 
   parseSteamResults(results: BanInfo[]) {
     for (let banInfo of results) {
-      const playerInfo = this.database.players.find(
-        (p) => p.steamID64 === banInfo.SteamId
-      );
+      const playerInfo = this.database.players.find((p) => p.steamID64 === banInfo.SteamId);
       if (playerInfo) {
         banInfo.LastFetch = new Date().toISOString();
-        banInfo.LastBanOn = new Date(
-          new Date().setDate(new Date().getDate() - banInfo.DaysSinceLastBan)
-        ).toISOString();
+        banInfo.LastBanOn = new Date(new Date().setDate(new Date().getDate() - banInfo.DaysSinceLastBan)).toISOString();
         playerInfo.banInfo = banInfo;
 
         // for each column of the player ban status, we get the match row and update ban status on the table row of the match
@@ -158,8 +128,7 @@ export class DataService {
         );
         if (playerBanStatusList?.length) {
           for (let playerBanStatus of Array.from(playerBanStatusList)) {
-            const matchTableRow =
-              playerBanStatus.closest<HTMLElement>('tr.parsed');
+            const matchTableRow = playerBanStatus.closest<HTMLElement>('tr.parsed');
             if (matchTableRow) {
               this._updateMatchBanStatus(matchTableRow);
             }
@@ -206,9 +175,7 @@ export class DataService {
     matchInfo.teamB ??= { playersSteamID64: [] };
     matchInfo.playersSteamID64 ??= [];
 
-    const players = match.querySelectorAll<HTMLTableRowElement>(
-      this._utilsService.playersCssSelector
-    );
+    const players = match.querySelectorAll<HTMLTableRowElement>(this._utilsService.playersCssSelector);
 
     let isTeamA = true;
     for (let index = 0; index < players.length; index++) {
@@ -216,19 +183,14 @@ export class DataService {
       if (playerRow.children.length > 1) {
         const lastColumn = playerRow.children[playerRow.children.length - 1];
         lastColumn.after(lastColumn.cloneNode(true));
-        const banStatus = playerRow.children[
-          playerRow.children.length - 1
-        ] as HTMLElement;
+        const banStatus = playerRow.children[playerRow.children.length - 1] as HTMLElement;
         if (index === 0) {
           banStatus.textContent = 'Ban status';
         } else {
           banStatus.textContent = '-';
           // get html attributes
-          const profileLink =
-            playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
-          const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(
-            profileLink.dataset['miniprofile']!
-          );
+          const profileLink = playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
+          const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(profileLink.dataset['miniprofile']!);
 
           // set html attributes
           banStatus.dataset['steamid64'] = steamID64;
@@ -247,17 +209,13 @@ export class DataService {
           }
 
           // add playerInfo to global list
-          let playerInfo = this.database.players.find(
-            (p) => p.steamID64 === steamID64
-          );
+          let playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
           if (!playerInfo) {
             playerInfo = {
               steamID64: steamID64,
               name: profileLink.textContent?.trim(),
               profileLink: profileLink.href,
-              avatarLink:
-                playerRow.querySelector<HTMLImageElement>('.playerAvatar img')
-                  ?.src,
+              avatarLink: playerRow.querySelector<HTMLImageElement>('.playerAvatar img')?.src,
               lastPlayWith: matchInfo!.id,
               matches: [matchInfo!.id!],
             };
@@ -271,10 +229,7 @@ export class DataService {
               }
 
               // if this match is more recent than the lastPlayWith field, we update the field
-              if (
-                !playerInfo.lastPlayWith ||
-                matchId > playerInfo.lastPlayWith
-              ) {
+              if (!playerInfo.lastPlayWith || matchId > playerInfo.lastPlayWith) {
                 playerInfo.lastPlayWith = matchInfo.id;
               }
             }
@@ -284,10 +239,7 @@ export class DataService {
         isTeamA = false;
         const colspan = playerRow.children[0].getAttribute('colspan');
         if (colspan) {
-          playerRow.children[0].setAttribute(
-            'colspan',
-            `${parseInt(colspan, 10) + 1}`
-          );
+          playerRow.children[0].setAttribute('colspan', `${parseInt(colspan, 10) + 1}`);
         }
         const scores = playerRow.textContent?.trim().match(/(\d+) : (\d+)/);
         if (scores?.length && scores?.length > 2) {
@@ -318,29 +270,19 @@ export class DataService {
 
     if (this.section) {
       // filter matches from the section we are on
-      this.filteredMatches = this.database.matches.filter(
-        (m) => m.section === this.section
-      );
+      this.filteredMatches = this.database.matches.filter((m) => m.section === this.section);
 
       // filter players from the section we are on
       this.filteredPlayers = this.database.players.filter(
-        (p) =>
-          !p.deleted &&
-          this.filteredMatches.some((m) =>
-            m.playersSteamID64?.includes(p.steamID64)
-          )
+        (p) => !p.deleted && this.filteredMatches.some((m) => m.playersSteamID64?.includes(p.steamID64))
       );
     } else {
       this.parseFriends();
     }
 
     // get players that has no ban information
-    this.playersNotScannedYet = this.filteredPlayers.filter(
-      (p) => !p.banInfo?.LastFetch
-    );
-    const playersScanned = this.filteredPlayers.filter(
-      (p) => p.banInfo?.LastFetch
-    );
+    this.playersNotScannedYet = this.filteredPlayers.filter((p) => !p.banInfo?.LastFetch);
+    const playersScanned = this.filteredPlayers.filter((p) => p.banInfo?.LastFetch);
     if (playersScanned.length) {
       this.oldestScan = playersScanned[0].banInfo;
     } else {
@@ -369,10 +311,7 @@ export class DataService {
       : this.playersBanned;
 
     // update flag to know that there are new people banned
-    if (
-      updateFlags &&
-      playersBannedAfter.length !== this.playersBannedAfter.length
-    ) {
+    if (updateFlags && playersBannedAfter.length !== this.playersBannedAfter.length) {
       this.newPlayersBanned = true;
     }
     this.playersBannedAfter = playersBannedAfter;
@@ -428,18 +367,10 @@ export class DataService {
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
 
     for (let steamID64 of matchInfo!.playersSteamID64) {
-      const playerInfo = this.database.players.find(
-        (p) => p.steamID64 === steamID64
-      );
-      const playerBannedColumn = document.querySelectorAll<HTMLElement>(
-        this._getBanColumnForPlayer(steamID64)
-      );
+      const playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
+      const playerBannedColumn = document.querySelectorAll<HTMLElement>(this._getBanColumnForPlayer(steamID64));
       const banInfo = playerInfo?.banInfo;
-      if (
-        playerInfo?.lastPlayWith &&
-        banInfo &&
-        (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans)
-      ) {
+      if (playerInfo?.lastPlayWith && banInfo && (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans)) {
         let text = '';
         if (banInfo.NumberOfVACBans) {
           text += `${banInfo.NumberOfVACBans} VAC ban`;
@@ -477,11 +408,7 @@ export class DataService {
     }
   }
 
-  private _isOvertime(
-    scoreA: number,
-    scoreB: number,
-    format: MatchFormat
-  ): boolean {
+  private _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {
     let isOvertime = false;
     switch (format) {
       case MatchFormat.MR12:
@@ -515,10 +442,6 @@ export class DataService {
   }
 
   private _getWin(teamScore: number, oppositeTeamScore: number) {
-    return teamScore > oppositeTeamScore
-      ? 1
-      : teamScore < oppositeTeamScore
-      ? -1
-      : 0;
+    return teamScore > oppositeTeamScore ? 1 : teamScore < oppositeTeamScore ? -1 : 0;
   }
 }

@@ -33,17 +33,13 @@ describe('ScannerComponent', async () => {
 
     component.isOnGCPDSection = false;
     fixture.detectChanges();
-    expect(dom.textContent).not.toContain(
-      'matches in database for this section'
-    );
+    expect(dom.textContent).not.toContain('matches in database for this section');
   });
 
   it('Test "not been scanned yet" display', async () => {
     dataService.playersNotScannedYet = [];
     fixture.detectChanges();
-    expect(dom.textContent).not.toContain(
-      'players that have not been scanned yet'
-    );
+    expect(dom.textContent).not.toContain('players that have not been scanned yet');
     expect(dom.textContent).not.toContain('Scan new players');
 
     dataService.playersNotScannedYet = [{ matches: [], steamID64: 'test' }];

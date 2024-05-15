@@ -59,15 +59,11 @@ export class ScannerComponent implements DoCheck {
   ) {}
 
   ngDoCheck(): void {
-    this.showNewPlayersBannedWarning =
-      this.isOnGCPDSection && this._dataService.newPlayersBanned;
+    this.showNewPlayersBannedWarning = this.isOnGCPDSection && this._dataService.newPlayersBanned;
   }
 
   startScan(type: 'new' | 'all') {
-    const players =
-      type === 'new'
-        ? this.players.filter((p) => !p.banInfo?.LastFetch)
-        : this.players;
+    const players = type === 'new' ? this.players.filter((p) => !p.banInfo?.LastFetch) : this.players;
 
     this._calcNumberOfPages(players);
     this._scanPlayers(players);
@@ -78,8 +74,7 @@ export class ScannerComponent implements DoCheck {
   }
 
   _calcNumberOfPages(players: PlayerInfo[]) {
-    this.numberOfPages =
-      Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
+    this.numberOfPages = Math.floor(players.length / 100) + (players.length % 100 !== 0 ? 1 : 0);
   }
 
   async _scanPlayers(players: PlayerInfo[]) {
@@ -102,10 +97,7 @@ export class ScannerComponent implements DoCheck {
           if (this.pageNumber >= this.numberOfPages) {
             this._stopScanning();
           } else {
-            setTimeout(
-              () => this._scanPlayers(players),
-              this._delayBetweenSteamCall
-            );
+            setTimeout(() => this._scanPlayers(players), this._delayBetweenSteamCall);
           }
         }
       } catch (e) {
@@ -129,20 +121,13 @@ export class ScannerComponent implements DoCheck {
    * @param steamApiResults the results from steam API
    * @param steamIdsScanned the steam IDs we send
    */
-  _handleDeletedProfiles(
-    steamApiResults: BanInfo[],
-    steamIdsScanned: string[]
-  ) {
+  _handleDeletedProfiles(steamApiResults: BanInfo[], steamIdsScanned: string[]) {
     let allPlayers = this._dataService.database.players;
     const deletedPlayers = allPlayers.filter(
-      (p) =>
-        steamIdsScanned.includes(p.steamID64) &&
-        !steamApiResults.some((r) => r.SteamId === p.steamID64)
+      (p) => steamIdsScanned.includes(p.steamID64) && !steamApiResults.some((r) => r.SteamId === p.steamID64)
     );
     for (const deleted of deletedPlayers) {
-      const playerInfo = allPlayers.find(
-        (p) => p.steamID64 === deleted.steamID64
-      );
+      const playerInfo = allPlayers.find((p) => p.steamID64 === deleted.steamID64);
       if (playerInfo) {
         playerInfo.deleted = true;
       }

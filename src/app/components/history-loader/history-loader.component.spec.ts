@@ -20,11 +20,7 @@ describe('HistoryLoaderComponent', async () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HistoryLoaderComponent],
-      providers: [
-        DatabaseService,
-        UtilsService,
-        { provide: DataService, useClass: MockDataService },
-      ],
+      providers: [DatabaseService, UtilsService, { provide: DataService, useClass: MockDataService }],
     });
     fixture = TestBed.createComponent(HistoryLoaderComponent);
     component = fixture.componentInstance;
@@ -60,9 +56,7 @@ describe('HistoryLoaderComponent', async () => {
     utilsService.startDate = '2015-02-02';
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('No history loaded.');
-    expect(dom.textContent).toContain(
-      'History loaded from 02/02/2015 to 02/03/2015'
-    );
+    expect(dom.textContent).toContain('History loaded from 02/02/2015 to 02/03/2015');
   });
 
   it('Test timer behavior', async () => {

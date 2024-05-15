@@ -15,11 +15,7 @@ describe('OptionsComponent', async () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [OptionsComponent],
-      providers: [
-        { provide: DatabaseService, useClass: MockDatabaseService },
-        UtilsService,
-        DataService,
-      ],
+      providers: [{ provide: DatabaseService, useClass: MockDatabaseService }, UtilsService, DataService],
     });
     fixture = TestBed.createComponent(OptionsComponent);
     component = fixture.componentInstance;
@@ -30,21 +26,17 @@ describe('OptionsComponent', async () => {
 
   it('Test template logic', async () => {
     fixture.detectChanges();
-    expect(dom.textContent).toContain('Set API key');
-    expect(dom.textContent).not.toContain('Change API key');
+    expect(dom.textContent).toContain('Set Steam Web API key');
+    expect(dom.textContent).not.toContain('Change Steam Web API key');
     expect(dom.textContent).not.toContain('Enter your API key');
-    expect(dom.textContent).toContain(
-      'First, you need to set an API key to be able to check BAN status of players'
-    );
+    expect(dom.textContent).toContain('First, you need to enter your Steam Web API key');
 
     component.apiKey = 'test';
     fixture.detectChanges();
-    expect(dom.textContent).not.toContain('Set API key');
-    expect(dom.textContent).toContain('Change API key');
+    expect(dom.textContent).not.toContain('Set Steam Web API key');
+    expect(dom.textContent).toContain('Change Steam Web API key');
     expect(dom.textContent).not.toContain('Enter your API key');
-    expect(dom.textContent).not.toContain(
-      'First, you need to set an API key to be able to check BAN status of players'
-    );
+    expect(dom.textContent).not.toContain('First, you need to enter your Steam Web API key');
 
     component.openOptions();
     expect(component.showOptions).toBeTrue();

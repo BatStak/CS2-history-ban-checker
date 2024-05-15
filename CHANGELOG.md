@@ -1,3 +1,9 @@
+# v2.0.13
+
+Add disclaimer about Steam Web API Key.  
+Add confirmation dialog when reseting database.  
+Better UX for popin options.
+
 # v2.0.12
 
 improve results on friends list.  

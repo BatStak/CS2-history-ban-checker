@@ -1,32 +1,17 @@
 <div class="container-flex vcenter">
-  <button
-    (click)="startLoadHistory()"
-    [disabled]="isLoadingHistory || isScanning"
-  >
-    Load history
-  </button>
-  <button
-    (click)="stopLoadHistory()"
-    [disabled]="!isLoadingHistory || isScanning"
-  >
-    Stop
-  </button>
+  <button (click)="startLoadHistory()" [disabled]="isLoadingHistory || isScanning">Load history</button>
+  <button (click)="stopLoadHistory()" [disabled]="!isLoadingHistory || isScanning">Stop</button>
   <input
     id="hide-history-table"
     type="checkbox"
     [checked]="hideHistoryTable"
     (change)="toggleHideCleanMatches($event)"
   />
-  <label for="hide-history-table">
-    Display only games with bans for better performance. Remove others.
-  </label>
+  <label for="hide-history-table"> Display only games with bans for better performance. Remove others. </label>
 </div>
 
 @if (displayReloadWarning) {
-<p class="warning">
-  You may need to reload the page to display games previously removed from the
-  page.
-</p>
+<p class="warning">You may need to reload the page to display games previously removed from the page.</p>
 } @if (isLoadingHistory) {
 <p>Loading...</p>
 } @if (!startDate || !endDate) {

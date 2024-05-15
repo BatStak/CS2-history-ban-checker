@@ -1,3 +1,8 @@
+a.link {
+  color: blue !important;
+  text-decoration: underline !important;
+}
+
 #overlay-options {
   z-index: 500;
   position: fixed;
@@ -10,10 +15,9 @@
   & > div {
     display: block;
     position: absolute;
-    top: calc(50% - 120px);
-    left: calc(50% - 160px);
+    top: 100px;
+    left: calc(50% - 150px);
     width: 300px;
-    height: 200px;
     background: #fff;
     color: #000 !important;
     padding: 20px;
@@ -22,14 +26,23 @@
   input {
     color: #000;
   }
-
-  a {
-    color: blue !important;
-  }
 }
 
 #open-options {
   position: absolute;
   top: 20px;
   right: 20px;
+}
+
+.disclaimer {
+  margin: 20px 0;
+  padding: 10px;
+  background: #1b2838;
+  border: 1px solid #000;
+  color: #fff;
+
+  a {
+    color: white !important;
+    text-decoration: underline !important;
+  }
 }

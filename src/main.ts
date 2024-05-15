@@ -5,6 +5,4 @@ import { appConfig } from './app/app.config';
 
 enableProdMode();
 
-bootstrapApplication(AppComponent, appConfig).catch((err) =>
-  console.error(err)
-);
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));

@@ -1,14 +1,23 @@
-<button
-  id="open-options"
-  (click)="openOptions()"
-  [disabled]="isLoadingHistory || isScanning"
->
-  {{ apiKey ? "Change" : "Set" }} API key
+<ng-template #disclaimer>
+  <div class="disclaimer">
+    <a (click)="displayDisclaimer = !displayDisclaimer">About your Steam Web API key</a>
+    <div *ngIf="displayDisclaimer">
+      We won't send it anywhere on the internet. It's your own Steam Web API key. We store it in your browser locally.
+      No one will have access to it. Your Steam Web API key does not give permission to trade or anything fishy. It's
+      only used to read public information of Steam accounts. We are only using it to check if Steam profiles are
+      banned. <a target="_blank" href="https://steamcommunity.com/dev">Click here to know more.</a>
+    </div>
+  </div>
+</ng-template>
+
+<button id="open-options" (click)="openOptions()" [disabled]="isLoadingHistory || isScanning">
+  {{ apiKey ? "Change" : "Set" }} Steam Web API key
 </button>
 
 @if (!apiKey) {
 <div>
-  First, you need to set an API key to be able to check BAN status of players :
+  First, you need to enter your Steam Web API key. Click on the button on the right.
+  <div *ngTemplateOutlet="disclaimer"></div>
 </div>
 } @if (showOptions) {
 <div id="overlay-options">
@@ -18,15 +27,18 @@
       <input id="apikey" type="text" [(ngModel)]="apiKey" />
     </div>
     <div>
-      <a href="https://steamcommunity.com/dev/apikey" target="_blank">
-        Retrieve your API KEY here
+      <a class="link" href="https://steamcommunity.com/dev/apikey" target="_blank">
+        Retrieve your Steam Web API Key here
       </a>
+      <br />
+      <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
+      <div *ngIf="displayMoreOptions">
+        <button (click)="resetDatabase()">Reset Database</button>
+      </div>
     </div>
-    <div>
-      <button (click)="closeOptions()">Close</button>
-    </div>
+    <div *ngTemplateOutlet="disclaimer"></div>
     <div [style.text-align]="'right'">
-      <button (click)="resetDatabase()">Reset Database</button>
+      <button (click)="closeOptions()">Close</button>
     </div>
   </div>
 </div>

@@ -30,10 +30,9 @@ export class BanStatisticsComponent implements OnDestroy {
   _onStatisticsUpdatedSubscription?: Subscription;
 
   constructor(public _dataService: DataService) {
-    this._onStatisticsUpdatedSubscription =
-      this._dataService.onStatisticsUpdated.subscribe(() => {
-        this._update();
-      });
+    this._onStatisticsUpdatedSubscription = this._dataService.onStatisticsUpdated.subscribe(() => {
+      this._update();
+    });
 
     this._update();
   }
@@ -45,15 +44,11 @@ export class BanStatisticsComponent implements OnDestroy {
   _update() {
     this.playersCount = this._dataService.filteredPlayers.length;
     this.bannedCount = this.playersBannedAfter.length;
-    this.bannedPourcentage = this.playersCount
-      ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100
-      : 0;
+    this.bannedPourcentage = this.playersCount ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100 : 0;
 
     this.matchesCount = this._dataService.filteredMatches.length;
     const filteredMatches = this._dataService.filteredMatches.filter((m) =>
-      this._dataService.playersBannedAfter.some((p) =>
-        m.playersSteamID64.includes(p.steamID64)
-      )
+      this._dataService.playersBannedAfter.some((p) => m.playersSteamID64.includes(p.steamID64))
     );
     this.matchesConcerned = filteredMatches.length || 0;
     this.matchPourcentage = this.matchesCount

@@ -39,14 +39,9 @@ export class HistoryLoaderComponent {
 
   _loadMoreButtonCssSelector = '#load_more_button';
 
-  constructor(
-    public _utilsService: UtilsService,
-    public _dataService: DataService
-  ) {
+  constructor(public _utilsService: UtilsService, public _dataService: DataService) {
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
-    this._loadMoreButton = document.querySelector<HTMLButtonElement>(
-      this._loadMoreButtonCssSelector
-    );
+    this._loadMoreButton = document.querySelector<HTMLButtonElement>(this._loadMoreButtonCssSelector);
   }
 
   startLoadHistory() {
@@ -54,10 +49,7 @@ export class HistoryLoaderComponent {
     this._buttonClickAttempts = 0;
 
     this._clickOnMoreButton();
-    this._loadHistoryTimer = setInterval(
-      () => this._clickOnMoreButton(),
-      this._loadHistoryInternvalInMs
-    );
+    this._loadHistoryTimer = setInterval(() => this._clickOnMoreButton(), this._loadHistoryInternvalInMs);
   }
 
   stopLoadHistory() {

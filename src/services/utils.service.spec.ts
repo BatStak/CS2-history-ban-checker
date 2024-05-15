@@ -74,8 +74,7 @@ describe('UtilsService', () => {
     const elt = document.createElement('div');
     let replayLink: string | undefined;
 
-    elt.innerHTML =
-      '<a href="http://test.com/"><div class="csgo_scoreboard_btn_gotv"> Premier   dust2 </div></a>';
+    elt.innerHTML = '<a href="http://test.com/"><div class="csgo_scoreboard_btn_gotv"> Premier   dust2 </div></a>';
     replayLink = service.getReplayLink(elt);
     expect(replayLink).toEqual('http://test.com/');
 

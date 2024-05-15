@@ -1,24 +1,20 @@
 @if(playersBannedAfter.length) { @if(!displayOnlyListOfPlayers) {
 <p>
-  Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been
-  banned after playing with you (<strong>{{ bannedPourcentage }}%</strong>)*
+  Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been banned after playing with you (<strong
+    >{{ bannedPourcentage }}%</strong
+  >)*
 </p>
 <p>
-  Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with
-  players banned after the game (<strong>{{ matchPourcentage }}%</strong>)*
+  Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with players banned after the game (<strong
+    >{{ matchPourcentage }}%</strong
+  >)*
 </p>
 
-<a
-  class="action-link"
-  (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers"
->
+<a class="action-link" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
   {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
 </a>
 } @if (displayListOfBannedPlayers) { @if(!displayOnlyListOfPlayers) {
-<em>
-  *bans can occur on other games. We only know that the bans occurred after you
-  played with them.
-</em>
+<em> *bans can occur on other games. We only know that the bans occurred after you played with them. </em>
 }
 
 <table class="results">
@@ -33,14 +29,10 @@
   @for (playerBanned of playersBannedAfter; track $index) {
   <tr>
     <td>
-      <a [href]="playerBanned.profileLink" target="_blank"
-        ><img [src]="playerBanned.avatarLink"
-      /></a>
+      <a [href]="playerBanned.profileLink" target="_blank"><img [src]="playerBanned.avatarLink" /></a>
     </td>
     <td>
-      <a [href]="playerBanned.profileLink" target="_blank">{{
-        playerBanned.name
-      }}</a>
+      <a [href]="playerBanned.profileLink" target="_blank">{{ playerBanned.name }}</a>
     </td>
     @if(!displayOnlyListOfPlayers) {
     <td>
@@ -48,9 +40,7 @@
     </td>
     }
     <td>
-      ~{{ playerBanned.banInfo?.LastBanOn | date : "dd/MM/y" }} ({{
-        playerBanned.banInfo?.DaysSinceLastBan
-      }}
+      ~{{ playerBanned.banInfo?.LastBanOn | date : "dd/MM/y" }} ({{ playerBanned.banInfo?.DaysSinceLastBan }}
       days)
     </td>
   </tr>

@@ -38,9 +38,7 @@ describe('BanStatisticsComponent', async () => {
     component._update();
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('No banned player');
-    expect(dom.textContent).toContain(
-      '1 have been banned after playing with you'
-    );
+    expect(dom.textContent).toContain('1 have been banned after playing with you');
   });
 
   it('Test update', async () => {

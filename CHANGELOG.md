@@ -1,3 +1,7 @@
+# v2.0.14
+
+Refresh avatar and name from the list of players banned if they change.
+
 # v2.0.13
 
 Add disclaimer about Steam Web API Key.  

@@ -189,8 +189,8 @@ export class DataService {
         } else {
           banStatus.textContent = '-';
           // get html attributes
-          const profileLink = playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
-          const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(profileLink.dataset['miniprofile']!);
+          const linkTitle = playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
+          const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(linkTitle.dataset['miniprofile']!);
 
           // set html attributes
           banStatus.dataset['steamid64'] = steamID64;
@@ -210,17 +210,25 @@ export class DataService {
 
           // add playerInfo to global list
           let playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
+          const profileName = linkTitle.textContent?.trim();
+          const profileLink = linkTitle.href;
+          const profileAvatarLink = playerRow.querySelector<HTMLImageElement>('.playerAvatar img')?.src;
           if (!playerInfo) {
             playerInfo = {
               steamID64: steamID64,
-              name: profileLink.textContent?.trim(),
-              profileLink: profileLink.href,
-              avatarLink: playerRow.querySelector<HTMLImageElement>('.playerAvatar img')?.src,
+              name: profileName,
+              profileLink: profileLink,
+              avatarLink: profileAvatarLink,
               lastPlayWith: matchInfo!.id,
               matches: [matchInfo!.id!],
             };
             this.database.players.push(playerInfo);
           } else {
+            // we update infos from player
+            playerInfo.name = profileName;
+            playerInfo.profileLink = profileLink;
+            playerInfo.avatarLink = profileAvatarLink;
+
             const matchId = matchInfo.id;
             if (matchId) {
               // we add the match to the list of the playerInfo matches

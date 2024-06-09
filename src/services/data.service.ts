@@ -26,7 +26,7 @@ export class DataService {
   oldestMatch?: MatchInfo;
 
   playersBanned: PlayerInfo[] = [];
-  playersBannedAfter: PlayerInfo[] = [];
+  playersBannedFiltered: PlayerInfo[] = [];
 
   newPlayersBanned = false;
 
@@ -310,7 +310,7 @@ export class DataService {
       .sort((a, b) => this._sortBannedPlayers(a, b));
 
     // get players banned after playing with them
-    const playersBannedAfter = filterBannedAfter
+    const playersBannedFiltered = filterBannedAfter
       ? this.playersBanned.filter(
           (p) =>
             // we take only people banned after playing with them
@@ -319,10 +319,10 @@ export class DataService {
       : this.playersBanned;
 
     // update flag to know that there are new people banned
-    if (updateFlags && playersBannedAfter.length !== this.playersBannedAfter.length) {
+    if (updateFlags && playersBannedFiltered.length !== this.playersBannedFiltered.length) {
       this.newPlayersBanned = true;
     }
-    this.playersBannedAfter = playersBannedAfter;
+    this.playersBannedFiltered = playersBannedFiltered;
 
     this.onStatisticsUpdated.next();
   }

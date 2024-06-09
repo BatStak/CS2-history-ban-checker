@@ -1,3 +1,7 @@
+# v2.0.15
+
+Add ratio players on people pages `X / Y players have been banned in this section.`
+
 # v2.0.14
 
 Refresh avatar and name from the list of players banned if they change.

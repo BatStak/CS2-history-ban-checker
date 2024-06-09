@@ -23,8 +23,12 @@ export class BanStatisticsComponent implements OnDestroy {
   matchesConcerned = 0;
   matchPourcentage = 0;
 
-  get playersBannedAfter(): PlayerInfo[] {
-    return this._dataService.playersBannedAfter;
+  get playersBanned(): PlayerInfo[] {
+    return this._dataService.playersBannedFiltered;
+  }
+
+  get players(): PlayerInfo[] {
+    return this._dataService.filteredPlayers;
   }
 
   _onStatisticsUpdatedSubscription?: Subscription;
@@ -43,12 +47,12 @@ export class BanStatisticsComponent implements OnDestroy {
 
   _update() {
     this.playersCount = this._dataService.filteredPlayers.length;
-    this.bannedCount = this.playersBannedAfter.length;
+    this.bannedCount = this.playersBanned.length;
     this.bannedPourcentage = this.playersCount ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100 : 0;
 
     this.matchesCount = this._dataService.filteredMatches.length;
     const filteredMatches = this._dataService.filteredMatches.filter((m) =>
-      this._dataService.playersBannedAfter.some((p) => m.playersSteamID64.includes(p.steamID64))
+      this.playersBanned.some((p) => m.playersSteamID64.includes(p.steamID64))
     );
     this.matchesConcerned = filteredMatches.length || 0;
     this.matchPourcentage = this.matchesCount

@@ -24,14 +24,14 @@ describe('BanStatisticsComponent', async () => {
   });
 
   it('Test template no banned player', async () => {
-    dataService.playersBannedAfter = [];
+    dataService.playersBannedFiltered = [];
     dataService.section = 'test';
 
     component._update();
     fixture.detectChanges();
     expect(dom.textContent).toContain('No banned player');
 
-    dataService.playersBannedAfter.push({
+    dataService.playersBannedFiltered.push({
       matches: [],
       steamID64: 'test',
     });
@@ -52,9 +52,9 @@ describe('BanStatisticsComponent', async () => {
     }
 
     // we add 10 banned players in database
-    dataService.playersBannedAfter = [];
+    dataService.playersBannedFiltered = [];
     for (let i = 0; i < 10; i++) {
-      dataService.playersBannedAfter.push({
+      dataService.playersBannedFiltered.push({
         matches: [],
         steamID64: `steamID${i}`,
       });

@@ -9,8 +9,19 @@ export interface PlayerInfo {
   deleted?: boolean;
 }
 
+export interface PlayerScore {
+  steamID64: string;
+  ping: string | null;
+  k: string | null;
+  a: string | null;
+  d: string | null;
+  mvp: string | null;
+  hsp: string | null;
+  score: string | null;
+}
+
 export interface TeamInfo {
-  playersSteamID64: string[];
+  scores: PlayerScore[];
   score?: number;
   win?: number;
 }

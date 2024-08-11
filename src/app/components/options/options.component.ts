@@ -26,7 +26,10 @@ export class OptionsComponent {
     return this._utilsService.isScanning;
   }
 
-  constructor(private _utilsService: UtilsService, private _dataService: DataService) {
+  constructor(
+    private _utilsService: UtilsService,
+    private _dataService: DataService,
+  ) {
     this.apiKey = this._dataService.database.apiKey;
   }
 

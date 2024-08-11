@@ -39,7 +39,10 @@ export class HistoryLoaderComponent {
 
   _loadMoreButtonCssSelector = '#load_more_button';
 
-  constructor(public _utilsService: UtilsService, public _dataService: DataService) {
+  constructor(
+    public _utilsService: UtilsService,
+    public _dataService: DataService,
+  ) {
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
     this._loadMoreButton = document.querySelector<HTMLButtonElement>(this._loadMoreButtonCssSelector);
   }

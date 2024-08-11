@@ -15,31 +15,32 @@
 </button>
 
 @if (!apiKey) {
-<div>
-  First, you need to enter your Steam Web API key. Click on the button on the right.
-  <div *ngTemplateOutlet="disclaimer"></div>
-</div>
-} @if (showOptions) {
-<div id="overlay-options">
   <div>
+    First, you need to enter your Steam Web API key. Click on the button on the right.
+    <div *ngTemplateOutlet="disclaimer"></div>
+  </div>
+}
+@if (showOptions) {
+  <div id="overlay-options">
     <div>
-      <label for="apikey"> Enter your API key </label>
-      <input id="apikey" type="text" [(ngModel)]="apiKey" />
-    </div>
-    <div>
-      <a class="link" href="https://steamcommunity.com/dev/apikey" target="_blank">
-        Retrieve your Steam Web API Key here
-      </a>
-      <br />
-      <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
-      <div *ngIf="displayMoreOptions">
-        <button (click)="resetDatabase()">Reset Database</button>
+      <div>
+        <label for="apikey"> Enter your API key </label>
+        <input id="apikey" type="text" [(ngModel)]="apiKey" />
+      </div>
+      <div>
+        <a class="link" href="https://steamcommunity.com/dev/apikey" target="_blank">
+          Retrieve your Steam Web API Key here
+        </a>
+        <br />
+        <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
+        <div *ngIf="displayMoreOptions">
+          <button (click)="resetDatabase()">Reset Database</button>
+        </div>
+      </div>
+      <div *ngTemplateOutlet="disclaimer"></div>
+      <div [style.text-align]="'right'">
+        <button (click)="closeOptions()">Close</button>
       </div>
     </div>
-    <div *ngTemplateOutlet="disclaimer"></div>
-    <div [style.text-align]="'right'">
-      <button (click)="closeOptions()">Close</button>
-    </div>
   </div>
-</div>
 }

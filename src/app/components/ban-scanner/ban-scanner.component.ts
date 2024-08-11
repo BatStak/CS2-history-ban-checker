@@ -55,7 +55,7 @@ export class ScannerComponent implements DoCheck {
   constructor(
     public _utilsService: UtilsService,
     public _dataService: DataService,
-    public _steamService: SteamService
+    public _steamService: SteamService,
   ) {}
 
   ngDoCheck(): void {
@@ -124,7 +124,7 @@ export class ScannerComponent implements DoCheck {
   _handleDeletedProfiles(steamApiResults: BanInfo[], steamIdsScanned: string[]) {
     let allPlayers = this._dataService.database.players;
     const deletedPlayers = allPlayers.filter(
-      (p) => steamIdsScanned.includes(p.steamID64) && !steamApiResults.some((r) => r.SteamId === p.steamID64)
+      (p) => steamIdsScanned.includes(p.steamID64) && !steamApiResults.some((r) => r.SteamId === p.steamID64),
     );
     for (const deleted of deletedPlayers) {
       const playerInfo = allPlayers.find((p) => p.steamID64 === deleted.steamID64);

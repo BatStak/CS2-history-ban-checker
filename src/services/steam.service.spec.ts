@@ -49,8 +49,8 @@ describe('SteamService', () => {
         {
           status: 200,
           statusText: 'OK',
-        }
-      )
+        },
+      ),
     );
     const data = await steamService.scanPlayers(steamIds);
     expect(data).toBeDefined();
@@ -62,7 +62,7 @@ describe('SteamService', () => {
       new Response(JSON.stringify({}), {
         status: 500,
         statusText: 'Error message',
-      })
+      }),
     );
     let banInfos: BanInfo[] = [];
     try {

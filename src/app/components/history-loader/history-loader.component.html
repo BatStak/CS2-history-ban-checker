@@ -7,18 +7,23 @@
     [checked]="hideHistoryTable"
     (change)="toggleHideCleanMatches($event)"
   />
-  <label for="hide-history-table"> Display only games with bans for better performance. Remove others. </label>
+  <label for="hide-history-table">
+    Remove history while loading for better performance (tab can crash if you go deep).
+  </label>
 </div>
 
 @if (displayReloadWarning) {
-<p class="warning">You may need to reload the page to display games previously removed from the page.</p>
-} @if (isLoadingHistory) {
-<p>Loading...</p>
-} @if (!startDate || !endDate) {
-<p>No history loaded.</p>
-} @if (startDate && endDate) {
-<p>
-  History loaded from
-  {{ startDate | date : "dd/MM/y" }} to {{ endDate | date : "dd/MM/y" }}.
-</p>
+  <p class="warning">You may need to reload the page to display games previously removed from the page.</p>
+}
+@if (isLoadingHistory) {
+  <p>Loading...</p>
+}
+@if (!startDate || !endDate) {
+  <p>No history loaded.</p>
+}
+@if (startDate && endDate) {
+  <p>
+    History loaded from
+    {{ startDate | date: "dd/MM/y" }} to {{ endDate | date: "dd/MM/y" }}.
+  </p>
 }

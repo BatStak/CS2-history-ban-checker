@@ -1,53 +1,153 @@
-@if(playersBanned.length) { @if(!displayOnlyListOfPlayers) {
-<p>
-  Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been banned after playing with you (<strong
-    >{{ bannedPourcentage }}%</strong
-  >)*
-</p>
-<p>
-  Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with players banned after the game (<strong
-    >{{ matchPourcentage }}%</strong
-  >)*
-</p>
+@if (playersBanned.length) {
+  @if (!displayOnlyListOfPlayers) {
+    <p>
+      Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been banned after playing with you
+      (<strong>{{ bannedPourcentage }}%</strong>)*
+    </p>
+    <p>
+      Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with players banned after the game
+      (<strong>{{ matchPourcentage }}%</strong>)*
+    </p>
 
-<a class="action-link" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
-  {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
-</a>
-} @if (displayListOfBannedPlayers) { @if(!displayOnlyListOfPlayers) {
-<em> *bans can occur on other games. We only know that the bans occurred after you played with them. </em>
-} @if (displayOnlyListOfPlayers && playersBanned.length > 0) {
-<p>{{ playersBanned.length }} / {{ players.length }} players have been banned in this section.</p>
-}
-
-<table class="results">
-  <tr>
-    <th>Avatar</th>
-    <th>Name</th>
-    @if(!displayOnlyListOfPlayers) {
-    <th>Last played with on</th>
-    }
-    <th>Last ban on</th>
-  </tr>
-  @for (playerBanned of playersBanned; track $index) {
-  <tr>
-    <td>
-      <a [href]="playerBanned.profileLink" target="_blank"><img [src]="playerBanned.avatarLink" /></a>
-    </td>
-    <td>
-      <a [href]="playerBanned.profileLink" target="_blank">{{ playerBanned.name }}</a>
-    </td>
-    @if(!displayOnlyListOfPlayers) {
-    <td>
-      {{ playerBanned.lastPlayWith | date : "dd/MM/y" }}
-    </td>
-    }
-    <td>
-      ~{{ playerBanned.banInfo?.LastBanOn | date : "dd/MM/y" }} ({{ playerBanned.banInfo?.DaysSinceLastBan }}
-      days)
-    </td>
-  </tr>
+    <a class="action-link" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
+      {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
+    </a>
   }
-</table>
-} } @else {
-<p>No banned player</p>
+  @if (displayListOfBannedPlayers) {
+    @if (!displayOnlyListOfPlayers) {
+      <em> *bans can occur on other games. We only know that the bans occurred after you played with them. </em>
+    }
+    @if (displayOnlyListOfPlayers && playersBanned.length > 0) {
+      <p>{{ playersBanned.length }} / {{ players.length }} players have been banned in this section.</p>
+    }
+
+    <table class="results">
+      <tr>
+        <th>Avatar</th>
+        <th>Name</th>
+        @if (!displayOnlyListOfPlayers) {
+          <th>See match</th>
+          <th>Last played with on</th>
+        }
+        <th>Last ban on</th>
+      </tr>
+      @for (playerBanned of playersBanned; track $index) {
+        <tr>
+          <td>
+            <a [href]="playerBanned.profileLink" target="_blank"><img [src]="playerBanned.avatarLink" /></a>
+          </td>
+          <td>
+            <a [href]="playerBanned.profileLink" target="_blank">{{ playerBanned.name }}</a>
+          </td>
+          @if (!displayOnlyListOfPlayers) {
+            <td><button (click)="_showMatch(playerBanned.lastPlayWith)">Show match below</button></td>
+            <td>
+              {{ playerBanned.lastPlayWith | date: "dd/MM/y" }}
+            </td>
+          }
+          <td>
+            ~{{ playerBanned.banInfo?.LastBanOn | date: "dd/MM/y" }} ({{ playerBanned.banInfo?.DaysSinceLastBan }}
+            days)
+          </td>
+        </tr>
+      }
+    </table>
+
+    @if (matchInfo) {
+      <br /><br />
+      <div style="text-align: right">
+        <button (click)="_closeMatchInfo()">Close</button>
+      </div>
+      <table class="generic_kv_table csgo_scoreboard_root">
+        <tr style="display: table-row" class="parsed">
+          <td class="val_left">
+            @if (_getMapImage(matchInfo.map)) {
+              <img [src]="_getMapImage(matchInfo.map)" width="200" height="112" border="0" />
+            }
+            <table class="csgo_scoreboard_inner_left">
+              <tbody>
+                <tr>
+                  <td>{{ matchInfo.map }}</td>
+                </tr>
+                <tr>
+                  <td>{{ matchInfo.id }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br /><br />
+          </td>
+          <td class="no-padding">
+            <table class="csgo_scoreboard_inner_right">
+              <tbody>
+                <tr>
+                  <th class="inner_name">Player Name</th>
+                  <th>Ping</th>
+                  <th>K</th>
+                  <th>A</th>
+                  <th>D</th>
+                  <th>★</th>
+                  <th>HSP</th>
+                  <th>Score</th>
+                </tr>
+                @for (playerScore of matchInfo.teamA?.scores; track $index) {
+                  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
+                    <td class="inner_name">
+                      <div class="playerAvatar offline">
+                        <a target="_blank" [href]="_getPlayerLink(playerScore.steamID64)">
+                          <img [src]="_getPlayerAvatar(playerScore.steamID64)" />
+                        </a>
+                      </div>
+                      <div class="playerNickname ellipsis">
+                        <a target="_blank" class="linkTitle" [href]="_getPlayerLink(playerScore.steamID64)">{{
+                          _getPlayerName(playerScore.steamID64)
+                        }}</a>
+                      </div>
+                    </td>
+                    <td>{{ playerScore.ping }}</td>
+                    <td>{{ playerScore.k }}</td>
+                    <td>{{ playerScore.a }}</td>
+                    <td>{{ playerScore.d }}</td>
+                    <td>{{ playerScore.mvp }}</td>
+                    <td>{{ playerScore.hsp }}</td>
+                    <td>{{ playerScore.score }}</td>
+                  </tr>
+                }
+                <tr>
+                  <td colspan="9" class="csgo_scoreboard_score">
+                    {{ matchInfo.teamA?.score }} : {{ matchInfo.teamB?.score }}
+                  </td>
+                </tr>
+                @for (playerScore of matchInfo.teamB?.scores; track $index) {
+                  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
+                    <td class="inner_name">
+                      <div class="playerAvatar offline">
+                        <a target="_blank" [href]="_getPlayerLink(playerScore.steamID64)">
+                          <img [src]="_getPlayerAvatar(playerScore.steamID64)" />
+                        </a>
+                      </div>
+                      <div class="playerNickname ellipsis">
+                        <a target="_blank" class="linkTitle" [href]="_getPlayerLink(playerScore.steamID64)">{{
+                          _getPlayerName(playerScore.steamID64)
+                        }}</a>
+                      </div>
+                    </td>
+                    <td>{{ playerScore.ping }}</td>
+                    <td>{{ playerScore.k }}</td>
+                    <td>{{ playerScore.a }}</td>
+                    <td>{{ playerScore.d }}</td>
+                    <td>{{ playerScore.mvp }}</td>
+                    <td>{{ playerScore.hsp }}</td>
+                    <td>{{ playerScore.score }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br /><br />
+          </td>
+        </tr>
+      </table>
+    }
+  }
+} @else {
+  <p>No banned player</p>
 }

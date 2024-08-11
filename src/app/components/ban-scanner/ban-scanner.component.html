@@ -1,31 +1,41 @@
 <p>
-  @if(isOnGCPDSection) { Players in database for this section :
-  {{ players.length || 0 }}, matches in database for this section : {{ matches.length || 0 }}. } @else { Players in
-  database for this section : {{ players.length || 0 }}. }
+  @if (isOnGCPDSection) {
+    Players in database for this section : {{ players.length || 0 }}, matches in database for this section :
+    {{ matches.length || 0 }}.
+  } @else {
+    Players in database for this section : {{ players.length || 0 }}.
+  }
 </p>
 @if (playersNotScannedYet.length) {
-<p class="warning">There are {{ playersNotScannedYet.length }} players that have not been scanned yet.</p>
-} @if (oldestMatch || oldestScan) {
-<p>
-  @if (oldestMatch) { The oldest match is from
-  {{ oldestMatch.id | date : "dd/MM/y" }}. } @if (oldestScan ) { The oldest scan has been on
-  {{ oldestScan.LastFetch | date : "dd/MM/y" }}. }
-</p>
-} @if (playersNotScannedYet.length) {
-<button (click)="startScan('new')" [disabled]="isLoadingHistory || isScanning">Scan new players</button>
+  <p class="warning">There are {{ playersNotScannedYet.length }} players that have not been scanned yet.</p>
+}
+@if (oldestMatch || oldestScan) {
+  <p>
+    @if (oldestMatch) {
+      The oldest match is from {{ oldestMatch.id | date: "dd/MM/y" }}.
+    }
+    @if (oldestScan) {
+      The oldest scan has been on {{ oldestScan.LastFetch | date: "dd/MM/y" }}.
+    }
+  </p>
+}
+@if (playersNotScannedYet.length) {
+  <button (click)="startScan('new')" [disabled]="isLoadingHistory || isScanning">Scan new players</button>
 }
 <button (click)="startScan('all')" [disabled]="isLoadingHistory || isScanning">Scan all</button>
 <button (click)="stopScan()" [disabled]="isLoadingHistory || !isScanning">Stop</button>
 
 @if (isScanning) {
-<p>We can scan 100 players at a time. Scanning ({{ pageNumber + 1 }}/{{ numberOfPages }})...</p>
-} @if (error) {
-<p class="error">
-  {{ error }}
-</p>
-} @if (showNewPlayersBannedWarning) {
-<p class="warning">
-  There are new players banned.<br />
-  You may need to reload the page and reload the history to display the matches concerned in the list below.
-</p>
+  <p>We can scan 100 players at a time. Scanning ({{ pageNumber + 1 }}/{{ numberOfPages }})...</p>
+}
+@if (error) {
+  <p class="error">
+    {{ error }}
+  </p>
+}
+@if (showNewPlayersBannedWarning) {
+  <p class="warning">
+    There are new players banned.<br />
+    You may need to reload the page and reload the history to display the matches concerned in the list below.
+  </p>
 }

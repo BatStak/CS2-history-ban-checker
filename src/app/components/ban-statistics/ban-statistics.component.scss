@@ -18,8 +18,15 @@ table.results {
     }
   }
 
-  th:nth-child(3),
+  th:nth-child(3) {
+    width: 150px;
+  }
+
   th:nth-child(4) {
+    width: 150px;
+  }
+
+  th:nth-child(5) {
     width: 200px;
   }
 }
@@ -36,4 +43,21 @@ em {
 a.action-link {
   cursor: pointer;
   text-decoration: underline;
+}
+
+.val_left {
+  padding: 0;
+  width: 230px;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+.csgo_scoreboard_inner_right .banned {
+  background-color: #f00;
+
+  * {
+    color: #fff !important;
+  }
 }

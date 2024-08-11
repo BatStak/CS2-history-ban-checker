@@ -1,3 +1,7 @@
+# v2.1.0
+
+Add the possibility to see the last match with a cheater without loading history.
+
 # v2.0.15
 
 Add ratio players on people pages `X / Y players have been banned in this section.`

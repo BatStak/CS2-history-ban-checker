@@ -59,7 +59,7 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
     public _databaseService: DatabaseService,
     public _utilsService: UtilsService,
     public _dataService: DataService,
-    public _applicationRef: ApplicationRef
+    public _applicationRef: ApplicationRef,
   ) {
     // for some reason, change detection does not work in firefox extension
     if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
@@ -109,7 +109,7 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
 
   _observeDomChanges() {
     const results = document.querySelector<HTMLElement>(
-      this.isOnGCPDSection ? this._gcpdCSSRootSelector : this._friendsCSSRootSelector
+      this.isOnGCPDSection ? this._gcpdCSSRootSelector : this._friendsCSSRootSelector,
     );
     if (results) {
       const observer = new MutationObserver(() => {

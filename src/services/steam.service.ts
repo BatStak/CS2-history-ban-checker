@@ -11,7 +11,7 @@ export class SteamService {
       fetch(
         `https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=${
           this._dataService.database.apiKey
-        }&steamids=${steamIds.join(',')}`
+        }&steamids=${steamIds.join(',')}`,
       )
         .then((res) => {
           if (res.ok) {

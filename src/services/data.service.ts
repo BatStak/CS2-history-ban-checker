@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
-import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo } from '../models';
+import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore } from '../models';
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
@@ -35,7 +35,10 @@ export class DataService {
   _friendsListCssSelector = '.friend_block_content';
   _avatarCssSelector = '.player_avatar img';
 
-  constructor(private _databaseService: DatabaseService, private _utilsService: UtilsService) {
+  constructor(
+    private _databaseService: DatabaseService,
+    private _utilsService: UtilsService,
+  ) {
     this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
       this.save();
     });
@@ -108,7 +111,7 @@ export class DataService {
   }
 
   cleanParsedMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesParsedNoBanCssSelector);
+    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesParsedCssSelector);
     for (let match of Array.from(matches)) {
       match.remove();
     }
@@ -124,7 +127,7 @@ export class DataService {
 
         // for each column of the player ban status, we get the match row and update ban status on the table row of the match
         const playerBanStatusList = document.querySelectorAll<HTMLElement>(
-          this._getBanColumnForPlayer(playerInfo.steamID64)
+          this._getBanColumnForPlayer(playerInfo.steamID64),
         );
         if (playerBanStatusList?.length) {
           for (let playerBanStatus of Array.from(playerBanStatusList)) {
@@ -161,8 +164,8 @@ export class DataService {
         format: format,
         overtime: false,
         replayLink: this._utilsService.getReplayLink(match),
-        teamA: { playersSteamID64: [] },
-        teamB: { playersSteamID64: [] },
+        teamA: { scores: [] },
+        teamB: { scores: [] },
         playersSteamID64: [],
       };
       this.database.matches.push(matchInfo);
@@ -171,9 +174,13 @@ export class DataService {
     matchInfo.finished ??= true;
     matchInfo.format ??= format;
     matchInfo.overtime ??= false;
-    matchInfo.teamA ??= { playersSteamID64: [] };
-    matchInfo.teamB ??= { playersSteamID64: [] };
     matchInfo.playersSteamID64 ??= [];
+    matchInfo.teamA ??= { scores: [] };
+    matchInfo.teamB ??= { scores: [] };
+
+    // reset scores
+    matchInfo.teamA.scores = [];
+    matchInfo.teamB.scores = [];
 
     const players = match.querySelectorAll<HTMLTableRowElement>(this._utilsService.playersCssSelector);
 
@@ -184,6 +191,7 @@ export class DataService {
         const lastColumn = playerRow.children[playerRow.children.length - 1];
         lastColumn.after(lastColumn.cloneNode(true));
         const banStatus = playerRow.children[playerRow.children.length - 1] as HTMLElement;
+
         if (index === 0) {
           banStatus.textContent = 'Ban status';
         } else {
@@ -201,11 +209,15 @@ export class DataService {
             matchInfo!.playersSteamID64.push(steamID64);
           }
 
+          // delete unused data which were leaking btw
+          delete (matchInfo.teamA as any).playersSteamID64;
+          delete (matchInfo.teamB as any).playersSteamID64;
+
           // add steamId to team X players list
           if (isTeamA) {
-            matchInfo!.teamA!.playersSteamID64.push(steamID64);
+            matchInfo.teamA.scores.push(this._addPlayerScore(steamID64, playerRow));
           } else {
-            matchInfo!.teamB!.playersSteamID64.push(steamID64);
+            matchInfo.teamB.scores.push(this._addPlayerScore(steamID64, playerRow));
           }
 
           // add playerInfo to global list
@@ -269,6 +281,19 @@ export class DataService {
     this._updateMatchBanStatus(match);
   }
 
+  private _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
+    return {
+      steamID64: steamID64,
+      ping: playerRow.children[1].textContent,
+      k: playerRow.children[2].textContent,
+      a: playerRow.children[3].textContent,
+      d: playerRow.children[4].textContent,
+      mvp: playerRow.children[5].textContent,
+      hsp: playerRow.children[6].textContent,
+      score: playerRow.children[7].textContent,
+    };
+  }
+
   _updateStatistics(updateFlags = true) {
     this.database.players.sort((a, b) => this._sortPlayers(a, b));
     this.database.matches.sort((a, b) => this._sortMatches(a, b));
@@ -282,7 +307,7 @@ export class DataService {
 
       // filter players from the section we are on
       this.filteredPlayers = this.database.players.filter(
-        (p) => !p.deleted && this.filteredMatches.some((m) => m.playersSteamID64?.includes(p.steamID64))
+        (p) => !p.deleted && this.filteredMatches.some((m) => m.playersSteamID64?.includes(p.steamID64)),
       );
     } else {
       this.parseFriends();
@@ -314,7 +339,7 @@ export class DataService {
       ? this.playersBanned.filter(
           (p) =>
             // we take only people banned after playing with them
-            p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith
+            p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith,
         )
       : this.playersBanned;
 
@@ -366,8 +391,8 @@ export class DataService {
         ? -1
         : 1
       : playerADaysSinceLastBan < playerBDaysSinceLastBan
-      ? -1
-      : 1;
+        ? -1
+        : 1;
   }
 
   _updateMatchBanStatus(match: HTMLElement) {

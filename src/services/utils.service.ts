@@ -10,7 +10,7 @@ export class UtilsService {
 
   matchesCssSelector = '.csgo_scoreboard_root > tbody > tr:not(:first-child)';
   matchesNotParsedCssSelector = `${this.matchesCssSelector}:not(.parsed)`;
-  matchesParsedNoBanCssSelector = `${this.matchesCssSelector}.parsed:not(.banned)`;
+  matchesParsedCssSelector = `${this.matchesCssSelector}.parsed`;
   playersCssSelector = '.csgo_scoreboard_inner_right > tbody > tr';
   mapCssSelector = '.csgo_scoreboard_inner_left > tbody > tr:nth-child(1)';
   friendsListCssSelector = '.persona[data-steamid]';
@@ -49,7 +49,7 @@ export class UtilsService {
 
   getHistoryPeriod() {
     const startMatch = document.querySelector<HTMLElement>(
-      '.csgo_scoreboard_root > tbody > tr:not(:first-child):last-child'
+      '.csgo_scoreboard_root > tbody > tr:not(:first-child):last-child',
     );
     if (startMatch) {
       const startDate = this.getDateOfMatch(startMatch);

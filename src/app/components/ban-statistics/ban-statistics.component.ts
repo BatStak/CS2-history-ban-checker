@@ -101,11 +101,6 @@ export class BanStatisticsComponent implements OnDestroy {
   _showMatch(matchId?: string) {
     if (matchId) {
       this.matchInfo = this._dataService.filteredMatches.find((match) => match.id === matchId);
-      if (!this.matchInfo) {
-        alert(
-          `We don't have the information of the match, please reload your history so we can retrive the infos (this is a new feature).`,
-        );
-      }
     }
   }
 

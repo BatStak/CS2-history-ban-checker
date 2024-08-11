@@ -55,6 +55,10 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
   _gcpdCSSRootSelector = '.csgo_scoreboard_root > tbody';
   _friendsCSSRootSelector = '.friends_content';
 
+  get hideHistoryTable() {
+    return this._dataService.database?.hideHistoryTable;
+  }
+
   constructor(
     public _databaseService: DatabaseService,
     public _utilsService: UtilsService,

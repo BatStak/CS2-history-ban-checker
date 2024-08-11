@@ -1,3 +1,7 @@
+# v2.1.1
+
+Add warnings for better understanding.
+
 # v2.1.0
 
 Add the possibility to see the last match with a cheater without loading history.

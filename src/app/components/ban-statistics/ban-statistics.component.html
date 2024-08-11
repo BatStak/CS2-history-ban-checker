@@ -54,7 +54,14 @@
     </table>
 
     @if (matchInfo) {
-      <br /><br />
+      <br />
+      @if (!matchInfo.teamA?.scores?.length) {
+        <div class="warning-panel">
+          Due to this feature being a new one, you need to reload your history to the date of the match so we can
+          retrieve the scoreboard informations.
+        </div>
+      }
+      <br />
       <div style="text-align: right">
         <button (click)="_closeMatchInfo()">Close</button>
       </div>

@@ -1,3 +1,7 @@
+# v2.1.4
+
+Fix minimum height of map info when no image for the map.
+
 # v2.1.3
 
 See match info just below the cheater

@@ -33,6 +33,7 @@ export class BanStatisticsComponent implements OnDestroy {
   matchesConcerned = 0;
   matchPourcentage = 0;
 
+  matchInfoIndex?: number;
   matchInfo?: MatchInfo;
 
   get playersBanned(): PlayerInfo[] {
@@ -98,8 +99,9 @@ export class BanStatisticsComponent implements OnDestroy {
     );
   }
 
-  _showMatch(matchId?: string) {
+  _showMatch(matchId?: string, index?: number) {
     if (matchId) {
+      this.matchInfoIndex = index;
       this.matchInfo = this._dataService.filteredMatches.find((match) => match.id === matchId);
     }
   }

@@ -1,3 +1,29 @@
+<ng-template #playerInfoTemplate let-playerScore="playerScore">
+  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
+    <td>
+      <div class="player-avatar-name">
+        <div class="playerAvatar offline">
+          <a target="_blank" [href]="_getPlayerLink(playerScore.steamID64)">
+            <img [src]="_getPlayerAvatar(playerScore.steamID64)" />
+          </a>
+        </div>
+        <div class="playerNickname ellipsis">
+          <a target="_blank" class="linkTitle" [href]="_getPlayerLink(playerScore.steamID64)">{{
+            _getPlayerName(playerScore.steamID64)
+          }}</a>
+        </div>
+      </div>
+    </td>
+    <td>{{ playerScore.ping }}</td>
+    <td>{{ playerScore.k }}</td>
+    <td>{{ playerScore.a }}</td>
+    <td>{{ playerScore.d }}</td>
+    <td>{{ playerScore.mvp }}</td>
+    <td>{{ playerScore.hsp }}</td>
+    <td>{{ playerScore.score }}</td>
+  </tr>
+</ng-template>
+
 @if (playersBanned.length) {
   @if (!displayOnlyListOfPlayers) {
     <p>
@@ -40,7 +66,7 @@
             <a [href]="playerBanned.profileLink" target="_blank">{{ playerBanned.name }}</a>
           </td>
           @if (!displayOnlyListOfPlayers) {
-            <td><button (click)="_showMatch(playerBanned.lastPlayWith)">Show match below</button></td>
+            <td><button (click)="_showMatch(playerBanned.lastPlayWith, $index)">Show match below</button></td>
             <td>
               {{ playerBanned.lastPlayWith | date: "dd/MM/y" }}
             </td>
@@ -50,110 +76,66 @@
             days)
           </td>
         </tr>
-      }
-    </table>
 
-    @if (matchInfo) {
-      <br />
-      @if (!matchInfo.teamA?.scores?.length) {
-        <div class="warning-panel">
-          Due to this feature being a new one, you need to reload your history to the date of the match so we can
-          retrieve the scoreboard informations.
-        </div>
-      }
-      <br />
-      <div style="text-align: right">
-        <button (click)="_closeMatchInfo()">Close</button>
-      </div>
-      <table class="generic_kv_table csgo_scoreboard_root">
-        <tr style="display: table-row" class="parsed">
-          <td class="val_left">
-            @if (_getMapImage(matchInfo.map)) {
-              <img [src]="_getMapImage(matchInfo.map)" width="200" height="112" border="0" />
-            }
-            <table class="csgo_scoreboard_inner_left">
-              <tbody>
+        @if (matchInfo && matchInfoIndex === $index) {
+          <tr>
+            <td colspan="5">
+              @if (!matchInfo.teamA?.scores?.length) {
+                <div class="warning-panel">
+                  Due to this feature being a new one, you need to reload your history to the date of the match so we
+                  can retrieve the scoreboard informations.
+                </div>
+              }
+              <div class="right">
+                <button (click)="_closeMatchInfo()">Close</button>
+              </div>
+              <table class="match-info-table">
                 <tr>
-                  <td>{{ matchInfo.map }}</td>
-                </tr>
-                <tr>
-                  <td>{{ matchInfo.id }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <br /><br />
-          </td>
-          <td class="no-padding">
-            <table class="csgo_scoreboard_inner_right">
-              <tbody>
-                <tr>
-                  <th class="inner_name">Player Name</th>
-                  <th>Ping</th>
-                  <th>K</th>
-                  <th>A</th>
-                  <th>D</th>
-                  <th>★</th>
-                  <th>HSP</th>
-                  <th>Score</th>
-                </tr>
-                @for (playerScore of matchInfo.teamA?.scores; track $index) {
-                  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
-                    <td class="inner_name">
-                      <div class="playerAvatar offline">
-                        <a target="_blank" [href]="_getPlayerLink(playerScore.steamID64)">
-                          <img [src]="_getPlayerAvatar(playerScore.steamID64)" />
-                        </a>
-                      </div>
-                      <div class="playerNickname ellipsis">
-                        <a target="_blank" class="linkTitle" [href]="_getPlayerLink(playerScore.steamID64)">{{
-                          _getPlayerName(playerScore.steamID64)
-                        }}</a>
-                      </div>
-                    </td>
-                    <td>{{ playerScore.ping }}</td>
-                    <td>{{ playerScore.k }}</td>
-                    <td>{{ playerScore.a }}</td>
-                    <td>{{ playerScore.d }}</td>
-                    <td>{{ playerScore.mvp }}</td>
-                    <td>{{ playerScore.hsp }}</td>
-                    <td>{{ playerScore.score }}</td>
-                  </tr>
-                }
-                <tr>
-                  <td colspan="9" class="csgo_scoreboard_score">
-                    {{ matchInfo.teamA?.score }} : {{ matchInfo.teamB?.score }}
+                  <td class="map-info">
+                    @if (_getMapImage(matchInfo.map)) {
+                      <img [src]="_getMapImage(matchInfo.map)" width="200" height="112" border="0" />
+                    }
+                    <p>{{ matchInfo.map }}</p>
+                    <p>{{ matchInfo.id }}</p>
+                  </td>
+                  <td>
+                    <table>
+                      <tr>
+                        <th class="left">Player Name</th>
+                        <th class="n-info">Ping</th>
+                        <th class="n-info">K</th>
+                        <th class="n-info">A</th>
+                        <th class="n-info">D</th>
+                        <th class="n-info">★</th>
+                        <th class="n-info">HSP</th>
+                        <th class="n-info">Score</th>
+                      </tr>
+                      @for (playerScore of matchInfo.teamA?.scores; track $index) {
+                        <ng-container
+                          [ngTemplateOutlet]="playerInfoTemplate"
+                          [ngTemplateOutletContext]="{ playerScore: playerScore }"
+                        ></ng-container>
+                      }
+                      <tr>
+                        <td colspan="9" class="map-score">
+                          {{ matchInfo.teamA?.score }} : {{ matchInfo.teamB?.score }}
+                        </td>
+                      </tr>
+                      @for (playerScore of matchInfo.teamB?.scores; track $index) {
+                        <ng-container
+                          [ngTemplateOutlet]="playerInfoTemplate"
+                          [ngTemplateOutletContext]="{ playerScore: playerScore }"
+                        ></ng-container>
+                      }
+                    </table>
                   </td>
                 </tr>
-                @for (playerScore of matchInfo.teamB?.scores; track $index) {
-                  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
-                    <td class="inner_name">
-                      <div class="playerAvatar offline">
-                        <a target="_blank" [href]="_getPlayerLink(playerScore.steamID64)">
-                          <img [src]="_getPlayerAvatar(playerScore.steamID64)" />
-                        </a>
-                      </div>
-                      <div class="playerNickname ellipsis">
-                        <a target="_blank" class="linkTitle" [href]="_getPlayerLink(playerScore.steamID64)">{{
-                          _getPlayerName(playerScore.steamID64)
-                        }}</a>
-                      </div>
-                    </td>
-                    <td>{{ playerScore.ping }}</td>
-                    <td>{{ playerScore.k }}</td>
-                    <td>{{ playerScore.a }}</td>
-                    <td>{{ playerScore.d }}</td>
-                    <td>{{ playerScore.mvp }}</td>
-                    <td>{{ playerScore.hsp }}</td>
-                    <td>{{ playerScore.score }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-            <br /><br />
-          </td>
-        </tr>
-      </table>
-    }
+              </table>
+            </td>
+          </tr>
+        }
+      }
+    </table>
   }
 } @else {
   <p>No banned player</p>

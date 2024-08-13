@@ -1,3 +1,11 @@
+# v2.1.3
+
+See match info just below the cheater
+
+# v2.1.2
+
+Fix display of a warning message which has no CSS rules
+
 # v2.1.1
 
 Add warnings for better understanding.

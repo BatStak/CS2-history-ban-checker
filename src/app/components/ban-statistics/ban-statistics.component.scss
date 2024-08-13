@@ -45,19 +45,60 @@ a.action-link {
   text-decoration: underline;
 }
 
-.val_left {
-  padding: 0;
-  width: 230px;
+.left {
+  text-align: left !important;
 }
 
-.no-padding {
-  padding: 0;
+.right {
+  text-align: right !important;
 }
 
-.csgo_scoreboard_inner_right .banned {
-  background-color: #f00;
+.match-info-table {
+  border-collapse: collapse;
+  width: 100%;
 
-  * {
-    color: #fff !important;
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 0 !important;
+    padding: 5px !important;
+  }
+
+  .n-info {
+    width: 40px !important;
+  }
+
+  img {
+    max-height: none !important;
+  }
+
+  .player-avatar-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 200px;
+  }
+
+  .map-info {
+    text-align: left !important;
+    vertical-align: top;
+    width: 200px;
+  }
+
+  .map-score {
+    font-weight: bold;
+    font-size: 1.5em;
+  }
+
+  .banned {
+    background-color: #f00;
+
+    * {
+      color: #fff !important;
+    }
   }
 }

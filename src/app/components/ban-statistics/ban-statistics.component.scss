@@ -8,8 +8,7 @@ table.results {
     border: 1px solid gray;
   }
 
-  td:first-child,
-  th:first-child {
+  .col-avatar {
     width: 50px;
     text-align: center;
 
@@ -18,16 +17,17 @@ table.results {
     }
   }
 
-  th:nth-child(3) {
+  .col-showmatch {
     width: 150px;
   }
 
-  th:nth-child(4) {
+  .col-lastplay {
     width: 150px;
   }
 
-  th:nth-child(5) {
+  .col-lastban {
     width: 200px;
+    cursor: help;
   }
 }
 
@@ -92,6 +92,8 @@ a.action-link {
   .map-score {
     font-weight: bold;
     font-size: 1.5em;
+    background-color: #111923;
+    text-align: center;
   }
 
   .banned {

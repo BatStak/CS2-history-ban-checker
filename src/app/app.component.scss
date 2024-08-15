@@ -30,6 +30,14 @@
     button ~ button {
       margin-left: 10px;
     }
+
+    button {
+      border: 1px solid #424242;
+      background: #080c11;
+      color: #fff;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
   }
 }
 

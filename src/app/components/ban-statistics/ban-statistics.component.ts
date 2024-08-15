@@ -6,8 +6,10 @@ import { DataService } from '../../../services/data.service';
 import {
   ancientBase64,
   anubisBase64,
+  assemblyBase64,
   dust2Base64,
   infernoBase64,
+  mementoBase64,
   millsBase64,
   mirageBase64,
   nukeBase64,
@@ -97,6 +99,10 @@ export class BanStatisticsComponent implements OnDestroy {
         return theraBase64;
       case 'de_mills':
         return millsBase64;
+      case 'de_memento':
+        return mementoBase64;
+      case 'de_assembly':
+        return assemblyBase64;
     }
 
     return '';

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { BanInfo, MatchInfo, PlayerInfo } from '../../../models';
+import { MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import {
   ancientBase64,
@@ -43,6 +43,8 @@ export class BanStatisticsComponent implements OnDestroy {
   get players(): PlayerInfo[] {
     return this._dataService.filteredPlayers;
   }
+
+  private _banTitles: Record<string, string> = {};
 
   _onStatisticsUpdatedSubscription?: Subscription;
 
@@ -110,18 +112,25 @@ export class BanStatisticsComponent implements OnDestroy {
     this.matchInfo = undefined;
   }
 
-  _getBanInfos(banInfo?: BanInfo) {
-    let infos = '';
-    if (banInfo?.NumberOfVACBans) {
-      infos += `${banInfo?.NumberOfVACBans} VAC ban${banInfo?.NumberOfVACBans > 1 ? 's' : ''}`;
+  _getBanTitle(playerInfo: PlayerInfo) {
+    if (playerInfo.banInfo) {
+      const banInfo = playerInfo.banInfo;
+      if (!this._banTitles[playerInfo.steamID64]) {
+        let infos = '';
+        if (banInfo.NumberOfVACBans) {
+          infos += `${banInfo.NumberOfVACBans} VAC ban${banInfo.NumberOfVACBans > 1 ? 's' : ''}`;
+        }
+        if (banInfo.NumberOfGameBans) {
+          infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
+        }
+        if (banInfo.DaysSinceLastBan !== undefined) {
+          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)} ago`;
+        }
+        this._banTitles[playerInfo.steamID64] = infos;
+      }
     }
-    if (banInfo?.NumberOfGameBans) {
-      infos += `${infos ? ', ' : ''}${banInfo?.NumberOfGameBans} Game ban${banInfo?.NumberOfGameBans > 1 ? 's' : ''}`;
-    }
-    if (banInfo?.DaysSinceLastBan !== undefined) {
-      infos += `, last ban was ${this._getFormatedStringFromDays(banInfo?.DaysSinceLastBan)} ago`;
-    }
-    return infos;
+
+    return this._banTitles[playerInfo.steamID64];
   }
 
   _update() {

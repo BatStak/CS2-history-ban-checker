@@ -73,7 +73,7 @@
               {{ playerBanned.lastPlayWith | date: "dd/MM/y" }}
             </td>
           }
-          <td class="col-lastban" [attr.title]="_getBanInfos(playerBanned.banInfo)">
+          <td class="col-lastban" [attr.title]="_getBanTitle(playerBanned)">
             ~{{ playerBanned.banInfo?.LastBanOn | date: "dd/MM/y" }} ({{ playerBanned.banInfo?.DaysSinceLastBan }}
             days)
           </td>

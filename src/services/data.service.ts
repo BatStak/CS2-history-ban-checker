@@ -124,19 +124,6 @@ export class DataService {
         banInfo.LastFetch = new Date().toISOString();
         banInfo.LastBanOn = new Date(new Date().setDate(new Date().getDate() - banInfo.DaysSinceLastBan)).toISOString();
         playerInfo.banInfo = banInfo;
-
-        // for each column of the player ban status, we get the match row and update ban status on the table row of the match
-        const playerBanStatusList = document.querySelectorAll<HTMLElement>(
-          this._getBanColumnForPlayer(playerInfo.steamID64),
-        );
-        if (playerBanStatusList?.length) {
-          for (let playerBanStatus of Array.from(playerBanStatusList)) {
-            const matchTableRow = playerBanStatus.closest<HTMLElement>('tr.parsed');
-            if (matchTableRow) {
-              this._updateMatchBanStatus(matchTableRow);
-            }
-          }
-        }
       }
     }
 
@@ -188,21 +175,10 @@ export class DataService {
     for (let index = 0; index < players.length; index++) {
       const playerRow = players[index];
       if (playerRow.children.length > 1) {
-        const lastColumn = playerRow.children[playerRow.children.length - 1];
-        lastColumn.after(lastColumn.cloneNode(true));
-        const banStatus = playerRow.children[playerRow.children.length - 1] as HTMLElement;
-
-        if (index === 0) {
-          banStatus.textContent = 'Ban status';
-        } else {
-          banStatus.textContent = '-';
+        if (index) {
           // get html attributes
           const linkTitle = playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
           const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(linkTitle.dataset['miniprofile']!);
-
-          // set html attributes
-          banStatus.dataset['steamid64'] = steamID64;
-          banStatus.classList.add('banstatus');
 
           // add steamId to matchInfo players list
           if (!matchInfo!.playersSteamID64.includes(steamID64)) {
@@ -278,7 +254,6 @@ export class DataService {
     }
 
     match.classList.add('parsed');
-    this._updateMatchBanStatus(match);
   }
 
   private _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
@@ -393,52 +368,6 @@ export class DataService {
       : playerADaysSinceLastBan < playerBDaysSinceLastBan
         ? -1
         : 1;
-  }
-
-  _updateMatchBanStatus(match: HTMLElement) {
-    const matchId = this._utilsService.getDateOfMatch(match);
-    let matchInfo = this.database.matches.find((m) => m.id === matchId);
-
-    for (let steamID64 of matchInfo!.playersSteamID64) {
-      const playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
-      const playerBannedColumn = document.querySelectorAll<HTMLElement>(this._getBanColumnForPlayer(steamID64));
-      const banInfo = playerInfo?.banInfo;
-      if (playerInfo?.lastPlayWith && banInfo && (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans)) {
-        let text = '';
-        if (banInfo.NumberOfVACBans) {
-          text += `${banInfo.NumberOfVACBans} VAC ban`;
-        }
-        if (banInfo.NumberOfVACBans && banInfo.NumberOfGameBans) {
-          text += ' & ';
-        }
-        if (banInfo.NumberOfGameBans) {
-          text += `${banInfo.NumberOfGameBans} GAME ban`;
-        }
-        const text2 = `last is ${banInfo.DaysSinceLastBan} days ago`;
-        const div = document.createElement('div');
-        div.textContent = text2;
-        for (let elt of Array.from(playerBannedColumn)) {
-          elt.textContent = text;
-          elt.appendChild(div);
-          elt.classList.add('banned');
-          elt.classList.remove('not-banned');
-          if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
-            elt.classList.add('after');
-          }
-        }
-
-        // we display red the match only if ban occured after the game
-        if (banInfo.LastBanOn > playerInfo.lastPlayWith) {
-          match.classList.add('banned');
-        }
-      } else {
-        for (let elt of Array.from(playerBannedColumn)) {
-          elt.textContent = 'clean';
-          elt.classList.remove('banned');
-          elt.classList.add('not-banned');
-        }
-      }
-    }
   }
 
   private _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {

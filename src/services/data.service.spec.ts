@@ -96,7 +96,7 @@ describe('DataService', () => {
       {
         steamID64: 'noBanInfoB',
         matches: [],
-      }
+      },
     );
 
     players.sort((a, b) => dataService._sortPlayers(a, b));
@@ -117,7 +117,7 @@ describe('DataService', () => {
     matches.push(
       { id: '2024-02-16 19:47:55 GMT', playersSteamID64: [] },
       { id: '2024-02-15 19:47:55 GMT', playersSteamID64: [] },
-      { id: '2024-02-17 19:47:55 GMT', playersSteamID64: [] }
+      { id: '2024-02-17 19:47:55 GMT', playersSteamID64: [] },
     );
 
     matches.sort((a, b) => dataService._sortMatches(a, b));
@@ -175,7 +175,7 @@ describe('DataService', () => {
           SteamId: '',
           VACBanned: false,
         },
-      }
+      },
     );
 
     players.sort((a, b) => dataService._sortBannedPlayers(a, b));
@@ -225,62 +225,12 @@ describe('DataService', () => {
     const playerInfo = players.find((playerInfo: PlayerInfo) => playerInfo.steamID64 === player1);
     expect(playerInfo).toBeDefined();
     expect(playerInfo?.avatarLink).toEqual(
-      'https://avatars.akamai.steamstatic.com/b4f86a7202ee507b749724f6fe58ea6c40844465.jpg'
+      'https://avatars.akamai.steamstatic.com/b4f86a7202ee507b749724f6fe58ea6c40844465.jpg',
     );
     expect(playerInfo?.name).toEqual('PISSMYKISS');
     expect(playerInfo?.profileLink).toEqual('https://steamcommunity.com/id/PISSMYKISS666');
     expect(playerInfo?.matches?.length).toEqual(1);
     expect(playerInfo?.matches?.[0]).toEqual(matchInfo.id);
-  });
-
-  it('test updateMatchBanStatus', async () => {
-    const matchRowInDom = document.createElement('div');
-    matchRowInDom.innerHTML = matchTable;
-    document.body.appendChild(matchRowInDom);
-
-    const steamId1 = utilsService.getSteamID64FromMiniProfileId('259535419');
-    const steamId2 = utilsService.getSteamID64FromMiniProfileId('1131008354');
-
-    const players = dataService.database.players;
-    players.push(
-      {
-        matches: [matchId],
-        steamID64: steamId1,
-        lastPlayWith: matchId,
-        banInfo: {
-          CommunityBanned: false,
-          DaysSinceLastBan: 15,
-          EconomyBan: '',
-          LastBanOn: '2024-02-20',
-          LastFetch: '',
-          NumberOfGameBans: 1,
-          NumberOfVACBans: 1,
-          SteamId: steamId1,
-          VACBanned: true,
-        },
-      },
-      {
-        matches: [matchId],
-        steamID64: steamId2,
-        lastPlayWith: matchId,
-      }
-    );
-
-    const matches = dataService.database.matches;
-    matches.push({
-      playersSteamID64: [steamId1, steamId2],
-      id: matchId,
-    });
-    dataService._updateMatchBanStatus(matchRowInDom);
-
-    expect(matchRowInDom.classList.contains('banned')).toBeTrue();
-
-    const banColumn1 = document.querySelector(dataService._getBanColumnForPlayer(steamId1));
-    expect(banColumn1?.textContent).toContain('1 VAC ban & 1 GAME ban');
-    expect(banColumn1?.textContent).toContain('last is 15 days ago');
-
-    const banColumn2 = document.querySelector(dataService._getBanColumnForPlayer(steamId2));
-    expect(banColumn2?.textContent).toContain('clean');
   });
 
   it('test _isFinished', async () => {

@@ -13,7 +13,6 @@ import { UtilsService } from '../../../services/utils.service';
 })
 export class HistoryLoaderComponent {
   hideHistoryTable?: boolean;
-  displayReloadWarning = false;
 
   get startDate(): string | undefined {
     return this._utilsService.startDate;
@@ -66,7 +65,6 @@ export class HistoryLoaderComponent {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
       this._dataService.database.hideHistoryTable = this.hideHistoryTable;
       await this._dataService.save();
-      this.displayReloadWarning = !this.hideHistoryTable;
       if (this.hideHistoryTable) {
         this._dataService.cleanParsedMatches();
       }

@@ -95,19 +95,11 @@ describe('HistoryLoaderComponent', async () => {
     fixture.detectChanges();
     expect(component.hideHistoryTable).toBeFalse();
     expect(dataService.database.hideHistoryTable).toBeFalse();
-    expect(component.displayReloadWarning).toBeTrue();
-    expect(dom.textContent).toContain(
-      'You may need to reload the page to display games previously removed from the page',
-    );
 
     checkbox.checked = true;
     await component.toggleHideCleanMatches(event);
     fixture.detectChanges();
     expect(component.hideHistoryTable).toBeTrue();
     expect(dataService.database.hideHistoryTable).toBeTrue();
-    expect(component.displayReloadWarning).toBeFalse();
-    expect(dom.textContent).not.toContain(
-      'You may need to reload the page to display games previously removed from the page',
-    );
   });
 });

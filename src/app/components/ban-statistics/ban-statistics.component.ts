@@ -104,6 +104,10 @@ export class BanStatisticsComponent implements OnDestroy {
     return '';
   }
 
+  _playerInfo(steamID64: string) {
+    return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)!;
+  }
+
   _playerIsBanned(steamID64: string) {
     return this._dataService.playersBanned.some(
       (p) => p.steamID64 === steamID64 && p.banInfo!.LastBanOn > p.lastPlayWith!,

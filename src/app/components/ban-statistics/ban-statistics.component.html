@@ -1,5 +1,8 @@
 <ng-template #playerInfoTemplate let-playerScore="playerScore">
-  <tr [class.banned]="_playerIsBanned(playerScore.steamID64)">
+  <tr
+    [class.banned]="_playerIsBanned(playerScore.steamID64)"
+    [attr.title]="_getBanTitle(_playerInfo(playerScore.steamID64))"
+  >
     <td>
       <div class="player-avatar-name">
         <div class="playerAvatar offline">

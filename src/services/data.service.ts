@@ -35,6 +35,8 @@ export class DataService {
   _friendsListCssSelector = '.friend_block_content';
   _avatarCssSelector = '.player_avatar img';
 
+  _banTitles: Record<string, string> = {};
+
   constructor(
     private _databaseService: DatabaseService,
     private _utilsService: UtilsService,
@@ -106,6 +108,7 @@ export class DataService {
       this.filteredPlayers.push(playerInfo);
       if (playerInfo.banInfo?.NumberOfGameBans || playerInfo.banInfo?.NumberOfVACBans) {
         player.classList.add('banned');
+        player.setAttribute('title', this.getBanTitle(playerInfo));
       }
     }
   }
@@ -133,10 +136,6 @@ export class DataService {
   async save() {
     this._updateStatistics();
     await this._databaseService.setDatabase(this.database);
-  }
-
-  _getBanColumnForPlayer(steamid64: string) {
-    return `.banstatus[data-steamid64="${steamid64}"]`;
   }
 
   _parseMatch(match: HTMLElement, format: MatchFormat) {
@@ -256,7 +255,43 @@ export class DataService {
     match.classList.add('parsed');
   }
 
-  private _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
+  getBanTitle(playerInfo: PlayerInfo) {
+    if (playerInfo.banInfo) {
+      const banInfo = playerInfo.banInfo;
+      if (!this._banTitles[playerInfo.steamID64]) {
+        let infos = '';
+        if (banInfo.NumberOfVACBans) {
+          infos += `${banInfo.NumberOfVACBans} VAC ban${banInfo.NumberOfVACBans > 1 ? 's' : ''}`;
+        }
+        if (banInfo.NumberOfGameBans) {
+          infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
+        }
+        if (banInfo.DaysSinceLastBan !== undefined) {
+          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)}`;
+        }
+        this._banTitles[playerInfo.steamID64] = infos;
+      }
+    }
+
+    return this._banTitles[playerInfo.steamID64];
+  }
+
+  _getFormatedStringFromDays(numberOfDays: number) {
+    if (numberOfDays === 0) {
+      return 'today';
+    }
+
+    var years = Math.floor(numberOfDays / 365);
+    var months = Math.floor((numberOfDays % 365) / 30);
+    var days = Math.floor((numberOfDays % 365) % 30);
+
+    var yearsDisplay = years > 0 ? years + (years == 1 ? ' year, ' : ' years, ') : '';
+    var monthsDisplay = months > 0 ? months + (months == 1 ? ' month, ' : ' months, ') : '';
+    var daysDisplay = days > 0 ? days + (days == 1 ? ' day' : ' days') : '';
+    return yearsDisplay + monthsDisplay + daysDisplay + ' ago';
+  }
+
+  _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
     return {
       steamID64: steamID64,
       ping: playerRow.children[1].textContent,
@@ -370,7 +405,7 @@ export class DataService {
         : 1;
   }
 
-  private _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {
+  _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {
     let isOvertime = false;
     switch (format) {
       case MatchFormat.MR12:
@@ -403,7 +438,7 @@ export class DataService {
     return scoreA !== scoreB && (scoreA === winScore || scoreB === winScore);
   }
 
-  private _getWin(teamScore: number, oppositeTeamScore: number) {
+  _getWin(teamScore: number, oppositeTeamScore: number) {
     return teamScore > oppositeTeamScore ? 1 : teamScore < oppositeTeamScore ? -1 : 0;
   }
 }

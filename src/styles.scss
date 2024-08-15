@@ -24,22 +24,6 @@ tr.banned {
   }
 }
 
-td.banstatus {
-  min-width: 65px !important;
-  font-weight: 600;
-  font-size: 0.8em;
-  white-space: nowrap;
-
-  &.banned.after,
-  &.banned.after * {
-    color: yellow !important;
-  }
-
-  &.not-banned {
-    color: #19ff00 !important;
-  }
-}
-
 .persona.banned {
   background: #f00 !important;
   color: #fff !important;

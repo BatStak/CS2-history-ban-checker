@@ -88,12 +88,6 @@ export const threeMatches = `
               <td>★4</td>
               <td>63%</td>
               <td>41</td>
-              <td
-                data-steamid64="76561198032060459"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
             <tr>
               <td class="inner_name">
@@ -122,12 +116,6 @@ export const threeMatches = `
               <td>★3</td>
               <td>56%</td>
               <td>38</td>
-              <td
-                data-steamid64="76561198145844250"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
             <tr>
               <td class="inner_name">
@@ -156,12 +144,6 @@ export const threeMatches = `
               <td>★4</td>
               <td>21%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561198041886680"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
             <tr>
               <td class="inner_name">
@@ -189,12 +171,6 @@ export const threeMatches = `
               <td>★2</td>
               <td>33%</td>
               <td>30</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
             <tr>
               <td class="inner_name">
@@ -222,12 +198,7 @@ export const threeMatches = `
               <td>&nbsp;</td>
               <td>42%</td>
               <td>20</td>
-              <td
-                data-steamid64="76561197985267551"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">13 : 4</td>
@@ -259,12 +230,6 @@ export const threeMatches = `
               <td>★</td>
               <td>40%</td>
               <td>24</td>
-              <td
-                data-steamid64="76561198271309750"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
             <tr>
               <td class="inner_name">
@@ -293,12 +258,7 @@ export const threeMatches = `
               <td>&nbsp;</td>
               <td>66%</td>
               <td>22</td>
-              <td
-                data-steamid64="76561198038197916"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -326,12 +286,7 @@ export const threeMatches = `
               <td>★</td>
               <td>85%</td>
               <td>20</td>
-              <td
-                data-steamid64="76561197960942721"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -360,12 +315,7 @@ export const threeMatches = `
               <td>★</td>
               <td>37%</td>
               <td>19</td>
-              <td
-                data-steamid64="76561197968956924"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -393,12 +343,7 @@ export const threeMatches = `
               <td>★</td>
               <td>87%</td>
               <td>18</td>
-              <td
-                data-steamid64="76561198130792271"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
           </tbody>
         </table>
@@ -475,12 +420,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>30%</td>
               <td>58</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -509,12 +449,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>30%</td>
               <td>46</td>
-              <td
-                data-steamid64="76561198982648815"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -543,12 +478,7 @@ export const threeMatches = `
               <td>★2</td>
               <td>29%</td>
               <td>45</td>
-              <td
-                data-steamid64="76561198135483009"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -577,12 +507,7 @@ export const threeMatches = `
               <td>★</td>
               <td>46%</td>
               <td>37</td>
-              <td
-                data-steamid64="76561198084071767"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -611,12 +536,7 @@ export const threeMatches = `
               <td>★</td>
               <td>66%</td>
               <td>25</td>
-              <td
-                data-steamid64="76561198213074969"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">10 : 13</td>
@@ -648,12 +568,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>15%</td>
               <td>55</td>
-              <td
-                data-steamid64="76561198237798164"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -682,12 +597,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>38%</td>
               <td>52</td>
-              <td
-                data-steamid64="76561198363022316"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -716,12 +626,7 @@ export const threeMatches = `
               <td>★2</td>
               <td>53%</td>
               <td>46</td>
-              <td
-                data-steamid64="76561198037365307"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -749,12 +654,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>29%</td>
               <td>39</td>
-              <td
-                data-steamid64="76561199525817971"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -783,12 +683,7 @@ export const threeMatches = `
               <td>★2</td>
               <td>30%</td>
               <td>37</td>
-              <td
-                data-steamid64="76561198114928149"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
           </tbody>
         </table>
@@ -865,12 +760,7 @@ export const threeMatches = `
               <td>★5</td>
               <td>50%</td>
               <td>60</td>
-              <td
-                data-steamid64="76561198847282908"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -898,12 +788,7 @@ export const threeMatches = `
               <td>★3</td>
               <td>46%</td>
               <td>44</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -932,12 +817,7 @@ export const threeMatches = `
               <td>&nbsp;</td>
               <td>37%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561199038809279"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -965,12 +845,7 @@ export const threeMatches = `
               <td>★</td>
               <td>70%</td>
               <td>31</td>
-              <td
-                data-steamid64="76561199469089801"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -999,12 +874,7 @@ export const threeMatches = `
               <td>&nbsp;</td>
               <td>50%</td>
               <td>30</td>
-              <td
-                data-steamid64="76561198260870706"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">9 : 13</td>
@@ -1036,12 +906,7 @@ export const threeMatches = `
               <td>★5</td>
               <td>60%</td>
               <td>63</td>
-              <td
-                data-steamid64="76561198182507830"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1069,12 +934,7 @@ export const threeMatches = `
               <td>★5</td>
               <td>33%</td>
               <td>57</td>
-              <td
-                data-steamid64="76561198267732452"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1103,12 +963,7 @@ export const threeMatches = `
               <td>★2</td>
               <td>40%</td>
               <td>52</td>
-              <td
-                data-steamid64="76561198876861073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1136,12 +991,7 @@ export const threeMatches = `
               <td>★</td>
               <td>42%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561198929455401"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1170,12 +1020,6 @@ export const threeMatches = `
               <td>&nbsp;</td>
               <td>60%</td>
               <td>13</td>
-              <td
-                data-steamid64="76561199106360073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
           </tbody>
         </table>
@@ -1275,12 +1119,7 @@ export const twoMatches = `
               <td>★4</td>
               <td>63%</td>
               <td>41</td>
-              <td
-                data-steamid64="76561198032060459"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1309,12 +1148,7 @@ export const twoMatches = `
               <td>★3</td>
               <td>56%</td>
               <td>38</td>
-              <td
-                data-steamid64="76561198145844250"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1343,12 +1177,7 @@ export const twoMatches = `
               <td>★4</td>
               <td>21%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561198041886680"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1376,12 +1205,7 @@ export const twoMatches = `
               <td>★2</td>
               <td>33%</td>
               <td>30</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1409,12 +1233,7 @@ export const twoMatches = `
               <td>&nbsp;</td>
               <td>42%</td>
               <td>20</td>
-              <td
-                data-steamid64="76561197985267551"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">13 : 4</td>
@@ -1446,12 +1265,7 @@ export const twoMatches = `
               <td>★</td>
               <td>40%</td>
               <td>24</td>
-              <td
-                data-steamid64="76561198271309750"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1480,12 +1294,7 @@ export const twoMatches = `
               <td>&nbsp;</td>
               <td>66%</td>
               <td>22</td>
-              <td
-                data-steamid64="76561198038197916"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1513,12 +1322,7 @@ export const twoMatches = `
               <td>★</td>
               <td>85%</td>
               <td>20</td>
-              <td
-                data-steamid64="76561197960942721"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1547,12 +1351,7 @@ export const twoMatches = `
               <td>★</td>
               <td>37%</td>
               <td>19</td>
-              <td
-                data-steamid64="76561197968956924"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1580,12 +1379,7 @@ export const twoMatches = `
               <td>★</td>
               <td>87%</td>
               <td>18</td>
-              <td
-                data-steamid64="76561198130792271"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
           </tbody>
         </table>
@@ -1663,12 +1457,7 @@ export const twoMatches = `
               <td>★5</td>
               <td>50%</td>
               <td>60</td>
-              <td
-                data-steamid64="76561198847282908"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1696,12 +1485,7 @@ export const twoMatches = `
               <td>★3</td>
               <td>46%</td>
               <td>44</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1730,12 +1514,7 @@ export const twoMatches = `
               <td>&nbsp;</td>
               <td>37%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561199038809279"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1763,12 +1542,7 @@ export const twoMatches = `
               <td>★</td>
               <td>70%</td>
               <td>31</td>
-              <td
-                data-steamid64="76561199469089801"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1797,12 +1571,7 @@ export const twoMatches = `
               <td>&nbsp;</td>
               <td>50%</td>
               <td>30</td>
-              <td
-                data-steamid64="76561198260870706"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">9 : 13</td>
@@ -1834,12 +1603,7 @@ export const twoMatches = `
               <td>★5</td>
               <td>60%</td>
               <td>63</td>
-              <td
-                data-steamid64="76561198182507830"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1867,12 +1631,7 @@ export const twoMatches = `
               <td>★5</td>
               <td>33%</td>
               <td>57</td>
-              <td
-                data-steamid64="76561198267732452"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1901,12 +1660,7 @@ export const twoMatches = `
               <td>★2</td>
               <td>40%</td>
               <td>52</td>
-              <td
-                data-steamid64="76561198876861073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1934,12 +1688,7 @@ export const twoMatches = `
               <td>★</td>
               <td>42%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561198929455401"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -1968,12 +1717,6 @@ export const twoMatches = `
               <td>&nbsp;</td>
               <td>60%</td>
               <td>13</td>
-              <td
-                data-steamid64="76561199106360073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
           </tbody>
         </table>
@@ -2061,12 +1804,7 @@ export const oneMatch = `
               <td>★5</td>
               <td>50%</td>
               <td>60</td>
-              <td
-                data-steamid64="76561198847282908"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2094,12 +1832,7 @@ export const oneMatch = `
               <td>★3</td>
               <td>46%</td>
               <td>44</td>
-              <td
-                data-steamid64="76561197962198400"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2128,12 +1861,7 @@ export const oneMatch = `
               <td>&nbsp;</td>
               <td>37%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561199038809279"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2161,12 +1889,7 @@ export const oneMatch = `
               <td>★</td>
               <td>70%</td>
               <td>31</td>
-              <td
-                data-steamid64="76561199469089801"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2195,12 +1918,7 @@ export const oneMatch = `
               <td>&nbsp;</td>
               <td>50%</td>
               <td>30</td>
-              <td
-                data-steamid64="76561198260870706"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td colspan="9" class="csgo_scoreboard_score">9 : 13</td>
@@ -2232,12 +1950,7 @@ export const oneMatch = `
               <td>★5</td>
               <td>60%</td>
               <td>63</td>
-              <td
-                data-steamid64="76561198182507830"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2265,12 +1978,7 @@ export const oneMatch = `
               <td>★5</td>
               <td>33%</td>
               <td>57</td>
-              <td
-                data-steamid64="76561198267732452"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2299,12 +2007,7 @@ export const oneMatch = `
               <td>★2</td>
               <td>40%</td>
               <td>52</td>
-              <td
-                data-steamid64="76561198876861073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2332,12 +2035,7 @@ export const oneMatch = `
               <td>★</td>
               <td>42%</td>
               <td>34</td>
-              <td
-                data-steamid64="76561198929455401"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
+              
             </tr>
             <tr>
               <td class="inner_name">
@@ -2366,12 +2064,6 @@ export const oneMatch = `
               <td>&nbsp;</td>
               <td>60%</td>
               <td>13</td>
-              <td
-                data-steamid64="76561199106360073"
-                class="banstatus not-banned"
-              >
-                clean
-              </td>
             </tr>
           </tbody>
         </table>
@@ -2464,9 +2156,6 @@ export const matchTable = `<tr class="parsed">
         <td>★5</td>
         <td>45%</td>
         <td>48</td>
-        <td data-steamid64="76561198219801147" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2494,9 +2183,6 @@ export const matchTable = `<tr class="parsed">
         <td>★</td>
         <td>50%</td>
         <td>38</td>
-        <td data-steamid64="76561199091274082" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2524,9 +2210,6 @@ export const matchTable = `<tr class="parsed">
         <td>★4</td>
         <td>46%</td>
         <td>37</td>
-        <td data-steamid64="76561199091003031" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2554,9 +2237,6 @@ export const matchTable = `<tr class="parsed">
         <td>★</td>
         <td>53%</td>
         <td>32</td>
-        <td data-steamid64="76561197962198400" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2584,9 +2264,6 @@ export const matchTable = `<tr class="parsed">
         <td>★2</td>
         <td>33%</td>
         <td>26</td>
-        <td data-steamid64="76561197985267551" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td colspan="9" class="csgo_scoreboard_score">13 : 5</td>
@@ -2617,9 +2294,6 @@ export const matchTable = `<tr class="parsed">
         <td>★3</td>
         <td>75%</td>
         <td>44</td>
-        <td data-steamid64="76561199153496008" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2647,9 +2321,6 @@ export const matchTable = `<tr class="parsed">
         <td>★2</td>
         <td>55%</td>
         <td>42</td>
-        <td data-steamid64="76561198089252378" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2677,9 +2348,6 @@ export const matchTable = `<tr class="parsed">
         <td>&nbsp;</td>
         <td>33%</td>
         <td>14</td>
-        <td data-steamid64="76561198157495008" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2707,9 +2375,6 @@ export const matchTable = `<tr class="parsed">
         <td>&nbsp;</td>
         <td>75%</td>
         <td>11</td>
-        <td data-steamid64="76561198121635338" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
       <tr>
         <td class="inner_name">
@@ -2737,9 +2402,6 @@ export const matchTable = `<tr class="parsed">
         <td>&nbsp;</td>
         <td>50%</td>
         <td>6</td>
-        <td data-steamid64="76561198041942705" class="banstatus not-banned">
-          clean
-        </td>
       </tr>
     </tbody>
   </table>

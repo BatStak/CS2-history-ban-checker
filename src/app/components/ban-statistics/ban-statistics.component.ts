@@ -47,8 +47,6 @@ export class BanStatisticsComponent implements OnDestroy {
     return this._dataService.filteredPlayers;
   }
 
-  private _banTitles: Record<string, string> = {};
-
   _onStatisticsUpdatedSubscription?: Subscription;
 
   constructor(public _dataService: DataService) {
@@ -126,24 +124,7 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   _getBanTitle(playerInfo: PlayerInfo) {
-    if (playerInfo.banInfo) {
-      const banInfo = playerInfo.banInfo;
-      if (!this._banTitles[playerInfo.steamID64]) {
-        let infos = '';
-        if (banInfo.NumberOfVACBans) {
-          infos += `${banInfo.NumberOfVACBans} VAC ban${banInfo.NumberOfVACBans > 1 ? 's' : ''}`;
-        }
-        if (banInfo.NumberOfGameBans) {
-          infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
-        }
-        if (banInfo.DaysSinceLastBan !== undefined) {
-          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)}`;
-        }
-        this._banTitles[playerInfo.steamID64] = infos;
-      }
-    }
-
-    return this._banTitles[playerInfo.steamID64];
+    return this._dataService.getBanTitle(playerInfo);
   }
 
   _update() {
@@ -164,20 +145,5 @@ export class BanStatisticsComponent implements OnDestroy {
     if (this.displayOnlyListOfPlayers) {
       this.displayListOfBannedPlayers = true;
     }
-  }
-
-  private _getFormatedStringFromDays(numberOfDays: number) {
-    if (numberOfDays === 0) {
-      return 'today';
-    }
-
-    var years = Math.floor(numberOfDays / 365);
-    var months = Math.floor((numberOfDays % 365) / 30);
-    var days = Math.floor((numberOfDays % 365) % 30);
-
-    var yearsDisplay = years > 0 ? years + (years == 1 ? ' year, ' : ' years, ') : '';
-    var monthsDisplay = months > 0 ? months + (months == 1 ? ' month, ' : ' months, ') : '';
-    var daysDisplay = days > 0 ? days + (days == 1 ? ' day' : ' days') : '';
-    return yearsDisplay + monthsDisplay + daysDisplay + ' ago';
   }
 }

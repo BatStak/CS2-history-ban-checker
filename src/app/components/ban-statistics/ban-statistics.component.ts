@@ -8,9 +8,12 @@ import {
   anubisBase64,
   dust2Base64,
   infernoBase64,
+  millsBase64,
   mirageBase64,
   nukeBase64,
+  officeBase64,
   overpassBase64,
+  theraBase64,
   vertigoBase64,
 } from './maps.base64';
 
@@ -90,6 +93,12 @@ export class BanStatisticsComponent implements OnDestroy {
         return overpassBase64;
       case 'Vertigo':
         return vertigoBase64;
+      case 'Office':
+        return officeBase64;
+      case 'de_thera':
+        return theraBase64;
+      case 'de_mills':
+        return millsBase64;
     }
 
     return '';
@@ -124,7 +133,7 @@ export class BanStatisticsComponent implements OnDestroy {
           infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
         }
         if (banInfo.DaysSinceLastBan !== undefined) {
-          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)} ago`;
+          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)}`;
         }
         this._banTitles[playerInfo.steamID64] = infos;
       }
@@ -154,6 +163,10 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   private _getFormatedStringFromDays(numberOfDays: number) {
+    if (numberOfDays === 0) {
+      return 'today';
+    }
+
     var years = Math.floor(numberOfDays / 365);
     var months = Math.floor((numberOfDays % 365) / 30);
     var days = Math.floor((numberOfDays % 365) % 30);
@@ -161,6 +174,6 @@ export class BanStatisticsComponent implements OnDestroy {
     var yearsDisplay = years > 0 ? years + (years == 1 ? ' year, ' : ' years, ') : '';
     var monthsDisplay = months > 0 ? months + (months == 1 ? ' month, ' : ' months, ') : '';
     var daysDisplay = days > 0 ? days + (days == 1 ? ' day' : ' days') : '';
-    return yearsDisplay + monthsDisplay + daysDisplay;
+    return yearsDisplay + monthsDisplay + daysDisplay + ' ago';
   }
 }

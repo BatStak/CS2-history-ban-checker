@@ -45,9 +45,10 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
 
   _validTabs = [
     'matchhistorypremier', // premier
-    'matchhistorycompetitivepermap', // per map matchmaking (cs2)
-    'matchhistorycompetitive', // csgo
+    'matchhistorycompetitivepermap', // competitive
     'matchhistorywingman', // wingman
+    'matchhistoryscrimmage', // scrimmage
+    'matchhistorycompetitive', // csgo
   ];
   _format?: MatchFormat;
   _domCheckDebounceTimeInMs = 250;

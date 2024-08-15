@@ -5,6 +5,8 @@
 - Add ban infos on mouse over for red players in all sections
 - Add ban infos on mouse over on last column of results + legend text
 - Add images maps for Thera, Mills, Memento, Office and Assembly
+- Add Scrimmage matches
+- Rename menu "Access to Matchmaking history" to "Access to Competitive history"
 
 # v2.1.4
 

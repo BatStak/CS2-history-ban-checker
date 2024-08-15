@@ -5,7 +5,7 @@ function genericOnClick(info) {
         url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorypremier",
       });
       break;
-    case "mm-history":
+    case "competitive-history":
       chrome.tabs.create({
         url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorycompetitivepermap",
       });
@@ -13,6 +13,11 @@ function genericOnClick(info) {
     case "wingman-history":
       chrome.tabs.create({
         url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistorywingman",
+      });
+      break;
+    case "scrimmage-history":
+      chrome.tabs.create({
+        url: "https://steamcommunity.com/my/gcpd/730?tab=matchhistoryscrimmage",
       });
       break;
     case "csgo-history":
@@ -40,13 +45,18 @@ chrome.contextMenus.create({
   contexts: ["all"],
 });
 chrome.contextMenus.create({
-  id: "mm-history",
-  title: "Access to Matchmaking history",
+  id: "competitive-history",
+  title: "Access to Competitive history",
   contexts: ["all"],
 });
 chrome.contextMenus.create({
   id: "wingman-history",
   title: "Access to Wingman history",
+  contexts: ["all"],
+});
+chrome.contextMenus.create({
+  id: "scrimmage-history",
+  title: "Access to Scrimmage history",
   contexts: ["all"],
 });
 chrome.contextMenus.create({

@@ -38,9 +38,9 @@
       (<strong>{{ matchPourcentage }}%</strong>)*
     </p>
 
-    <a class="action-link" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
-      {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players
-    </a>
+    <button type="button" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
+      {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players banned
+    </button>
   }
   @if (displayListOfBannedPlayers) {
     @if (!displayOnlyListOfPlayers) {
@@ -70,7 +70,15 @@
           </td>
           @if (!displayOnlyListOfPlayers) {
             <td class="col-showmatch">
-              <button (click)="_showMatch(playerBanned.lastPlayWith, $index)">Show match below</button>
+              <button
+                (click)="
+                  matchInfo && matchInfoIndex === $index
+                    ? _closeMatchInfo()
+                    : _showMatch(playerBanned.lastPlayWith, $index)
+                "
+              >
+                {{ matchInfo && matchInfoIndex === $index ? "Hide" : "Show" }} match below
+              </button>
             </td>
             <td class="col-lastplay">
               {{ playerBanned.lastPlayWith | date: "dd/MM/y" }}
@@ -91,9 +99,6 @@
                   can retrieve the scoreboard informations.
                 </div>
               }
-              <div class="right">
-                <button (click)="_closeMatchInfo()">Close</button>
-              </div>
               <table class="match-info-table">
                 <tr>
                   <td class="map-info">

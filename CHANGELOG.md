@@ -1,3 +1,11 @@
+# v2.2.1
+
+- add winrates data on history pages
+- remove "close" button on "match below", use the same button to toggle
+- replace link with button on "show list of players"
+- reword "show list of players" with "show list of players banned"
+- show list of players banned directly on load
+
 # v2.2.0
 
 > Important : remove red formatting and ban column of Steam matchs list. We have the scoreboard now directly below each player banned. No need to reload the page anymore. I remove the warnings about it.

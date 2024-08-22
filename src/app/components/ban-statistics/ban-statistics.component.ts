@@ -27,7 +27,7 @@ import {
   styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
-  displayListOfBannedPlayers = false;
+  displayListOfBannedPlayers = true;
   displayOnlyListOfPlayers = false;
 
   playersCount = 0;

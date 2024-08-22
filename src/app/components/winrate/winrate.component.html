@@ -1,0 +1,22 @@
+@if (mySteamId) {
+  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} winrates</button>
+
+  @if (display) {
+    <table>
+      <tr>
+        <th>Map</th>
+        <th class="sample">Sample size</th>
+        <th class="winrate">Winrate</th>
+      </tr>
+      @for (winrate of winrateDatas; track $index) {
+        <tr>
+          <td>{{ winrate.map }}</td>
+          <td class="sample">{{ winrate.sampleSize }}</td>
+          <td class="winrate">
+            ({{ winrate.wins }}) / <strong>{{ (winrate.wins / winrate.sampleSize) * 100 | number: "0.0-2" }}%</strong>
+          </td>
+        </tr>
+      }
+    </table>
+  }
+}

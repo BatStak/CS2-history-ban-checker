@@ -4,6 +4,12 @@ import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore } fr
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
+export interface WinrateData {
+  map: string;
+  wins: number;
+  sampleSize: number;
+}
+
 @Injectable()
 export class DataService {
   onSave = new Subject<void>();
@@ -14,6 +20,8 @@ export class DataService {
     matches: [],
     players: [],
   };
+
+  mySteamId?: string;
 
   section?: string;
   format?: MatchFormat;
@@ -60,6 +68,12 @@ export class DataService {
     this.database ??= { matches: [], players: [] };
     this.database.matches ??= [];
     this.database.players ??= [];
+
+    // get my steamID
+    const profileLink = document.querySelector<HTMLLinkElement>('.profile_small_header_texture > a')?.href;
+    if (profileLink) {
+      this.mySteamId = this.database.players.find((p) => p.profileLink === profileLink)?.steamID64;
+    }
 
     // to avoid having empty results on next version because we add "section" attributes between 2 versions
     if (this.database.matches.some((m) => !m.section)) {
@@ -118,6 +132,46 @@ export class DataService {
     for (let match of Array.from(matches)) {
       match.remove();
     }
+  }
+
+  getWinrates() {
+    const results: WinrateData[] = [];
+    let wins = 0;
+    this.filteredMatches.forEach((matchInfo: MatchInfo) => {
+      let winrate = results.find((winrate) => winrate.map === matchInfo.map);
+      if (!winrate) {
+        winrate = {
+          map: matchInfo.map!,
+          sampleSize: 0,
+          wins: 0,
+        };
+        results.push(winrate);
+      }
+      winrate.sampleSize++;
+      if (
+        (matchInfo.teamA?.scores &&
+          matchInfo.teamA.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) &&
+          matchInfo.teamA.win === 1) ||
+        (matchInfo.teamB?.scores &&
+          matchInfo.teamB.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) &&
+          matchInfo.teamB.win === 1)
+      ) {
+        winrate.wins++;
+        wins++;
+      }
+    });
+
+    results.push({
+      map: 'All maps',
+      wins: wins,
+      sampleSize: this.filteredMatches.length,
+    });
+
+    results.sort((a, b) => {
+      return a.map < b.map || a.map === 'All maps' ? -1 : 1;
+    });
+
+    return results;
   }
 
   parseSteamResults(results: BanInfo[]) {

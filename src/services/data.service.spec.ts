@@ -255,4 +255,73 @@ describe('DataService', () => {
     finished = dataService._isFinished(9, 7, MatchFormat.MR8);
     expect(finished).toBeTrue();
   });
+
+  it('test getWinrates', async () => {
+    dataService.mySteamId = 'playerId';
+    dataService.filteredMatches = [
+      {
+        map: 'dust2',
+        teamA: {
+          win: 1,
+          scores: [
+            { steamID64: 'playerId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        teamB: {
+          win: -1,
+          scores: [
+            { steamID64: 'otherId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        playersSteamID64: ['playerId'],
+      },
+      {
+        map: 'mirage',
+        teamA: {
+          win: -1,
+          scores: [
+            { steamID64: 'otherId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        teamB: {
+          win: 1,
+          scores: [
+            { steamID64: 'playerId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        playersSteamID64: ['playerId'],
+      },
+      {
+        map: 'mirage',
+        teamA: {
+          win: 0,
+          scores: [
+            { steamID64: 'otherId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        teamB: {
+          win: 0,
+          scores: [
+            { steamID64: 'playerId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+          ],
+        },
+        playersSteamID64: ['playerId'],
+      },
+    ];
+    const winrates = dataService.getWinrates();
+    expect(winrates.length).toEqual(3);
+    expect(winrates[0].map).toEqual('All maps');
+    expect(winrates[0].sampleSize).toEqual(3);
+    expect(winrates[0].wins).toEqual(2);
+    expect(winrates[0].winrate).toBeGreaterThan(66.66);
+    expect(winrates[0].winrate).toBeLessThan(66.67);
+    expect(winrates[1].map).toEqual('dust2');
+    expect(winrates[1].sampleSize).toEqual(1);
+    expect(winrates[1].wins).toEqual(1);
+    expect(winrates[1].winrate).toEqual(100);
+    expect(winrates[2].map).toEqual('mirage');
+    expect(winrates[2].sampleSize).toEqual(2);
+    expect(winrates[2].wins).toEqual(1);
+    expect(winrates[2].winrate).toEqual(50);
+  });
 });

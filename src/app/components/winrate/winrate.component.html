@@ -13,7 +13,7 @@
           <td>{{ winrate.map }}</td>
           <td class="sample">{{ winrate.sampleSize }}</td>
           <td class="winrate">
-            ({{ winrate.wins }}) / <strong>{{ (winrate.wins / winrate.sampleSize) * 100 | number: "0.0-2" }}%</strong>
+            ({{ winrate.wins }}) / <strong>{{ winrate.winrate | number: "0.0-2" }}%</strong>
           </td>
         </tr>
       }

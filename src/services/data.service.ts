@@ -7,6 +7,7 @@ import { UtilsService } from './utils.service';
 export interface WinrateData {
   map: string;
   wins: number;
+  winrate?: number;
   sampleSize: number;
 }
 
@@ -165,6 +166,10 @@ export class DataService {
       map: 'All maps',
       wins: wins,
       sampleSize: this.filteredMatches.length,
+    });
+
+    results.forEach((winrate) => {
+      winrate.winrate = (100 * winrate.wins) / winrate.sampleSize;
     });
 
     results.sort((a, b) => {

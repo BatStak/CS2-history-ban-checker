@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { DataService, WinrateData } from '../../../services/data.service';
+import { DataService, WinrateData as MapData } from '../../../services/data.service';
 
 @Component({
-  selector: 'winrate',
+  selector: 'map-datas',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './winrate.component.html',
-  styleUrl: './winrate.component.scss',
+  templateUrl: './map-datas.component.html',
+  styleUrl: './map-datas.component.scss',
 })
-export class WinrateComponent implements OnInit {
+export class MapDatasComponent implements OnInit {
   display = false;
-  winrateDatas: WinrateData[] = [];
+  mapDatas: MapData[] = [];
 
   get mySteamId(): string | undefined {
     return this._dataService.mySteamId;
@@ -29,12 +29,12 @@ export class WinrateComponent implements OnInit {
 
   async toggle() {
     this.display = !this.display;
-    if (this.display && !this.winrateDatas.length) {
+    if (this.display && !this.mapDatas.length) {
       this._update();
     }
   }
 
   private async _update() {
-    this.winrateDatas = await this._dataService.getMapDatas();
+    this.mapDatas = await this._dataService.getMapDatas();
   }
 }

@@ -1,3 +1,9 @@
+# v2.2.2
+
+- move winrate infos to results panel
+- rename "winrate" to "map datas"
+- add % of matches with someone ban after in map datas
+
 # v2.2.1
 
 - add winrates data on history pages

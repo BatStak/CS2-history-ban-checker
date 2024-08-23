@@ -9,15 +9,15 @@
         <th class="banrate">% with someone ban after</th>
         <th class="winrate">Winrate</th>
       </tr>
-      @for (winrate of winrateDatas; track $index) {
+      @for (mapData of mapDatas; track $index) {
         <tr>
-          <td>{{ winrate.map }}</td>
-          <td class="sample">{{ winrate.sampleSize }}</td>
+          <td>{{ mapData.map }}</td>
+          <td class="sample">{{ mapData.sampleSize }}</td>
           <td class="banrate">
-            ({{ winrate.withSomeoneBanAfter }}) / <strong>{{ winrate.banrate | number: "0.0-2" }}%</strong>
+            ({{ mapData.withSomeoneBanAfter }}) / <strong>{{ mapData.banrate | number: "0.0-2" }}%</strong>
           </td>
           <td class="winrate">
-            ({{ winrate.wins }}) / <strong>{{ winrate.winrate | number: "0.0-2" }}%</strong>
+            ({{ mapData.wins }}) / <strong>{{ mapData.winrate | number: "0.0-2" }}%</strong>
           </td>
         </tr>
       }

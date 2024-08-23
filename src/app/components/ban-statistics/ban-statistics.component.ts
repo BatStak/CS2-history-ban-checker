@@ -3,7 +3,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
-import { WinrateComponent } from '../winrate/winrate.component';
+import { MapDatasComponent } from '../map-datas/map-datas.component';
 import {
   ancientBase64,
   anubisBase64,
@@ -23,7 +23,7 @@ import {
 @Component({
   selector: 'cs2-history-ban-statistics',
   standalone: true,
-  imports: [CommonModule, WinrateComponent],
+  imports: [CommonModule, MapDatasComponent],
   templateUrl: './ban-statistics.component.html',
   styleUrl: './ban-statistics.component.scss',
 })

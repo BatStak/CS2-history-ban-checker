@@ -14,12 +14,22 @@ Read the [privacy policy](./privacy-policy.md) for more information about it.
 
 The extension is published for [Chrome](https://chromewebstore.google.com/detail/pniajbbemhplaefaikpgfipmopopjeob) and [Firefox](https://addons.mozilla.org/fr/firefox/addon/cs2-history-ban-checker/).
 
+### Menu on right click
+
 ![](./readme/capture3.png)
+
+### Main interface
 
 ![](./readme/capture1-v2.2.2.png)
 
+### See last match with a cheater
+
 ![](./readme/capture2-v2.2.2.png)
 
+### See map datas
+
 ![](./readme/capture3-v2.2.2.png)
+
+### See in friends and other "people" pages
 
 ![](./readme/capture4.png)

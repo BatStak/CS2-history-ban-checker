@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
-import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore } from '../models';
+import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore, TeamInfo } from '../models';
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
 export interface WinrateData {
   map: string;
-  wins: number;
-  winrate?: number;
   sampleSize: number;
+  wins: number;
+  withSomeoneBanAfter: number;
+  winrate?: number;
+  banrate?: number;
 }
 
 @Injectable()
@@ -135,41 +137,33 @@ export class DataService {
     }
   }
 
-  getWinrates() {
+  getMapDatas() {
     const results: WinrateData[] = [];
     let wins = 0;
+    let withSomeoneBanAfter = 0;
     this.filteredMatches.forEach((matchInfo: MatchInfo) => {
-      let winrate = results.find((winrate) => winrate.map === matchInfo.map);
-      if (!winrate) {
-        winrate = {
-          map: matchInfo.map!,
-          sampleSize: 0,
-          wins: 0,
-        };
-        results.push(winrate);
-      }
+      const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
       winrate.sampleSize++;
-      if (
-        (matchInfo.teamA?.scores &&
-          matchInfo.teamA.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) &&
-          matchInfo.teamA.win === 1) ||
-        (matchInfo.teamB?.scores &&
-          matchInfo.teamB.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) &&
-          matchInfo.teamB.win === 1)
-      ) {
+      if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
         winrate.wins++;
         wins++;
+      }
+      if (this._matchHasPlayerBanAfter(matchInfo)) {
+        winrate.withSomeoneBanAfter++;
+        withSomeoneBanAfter++;
       }
     });
 
     results.push({
       map: 'All maps',
       wins: wins,
+      withSomeoneBanAfter: withSomeoneBanAfter,
       sampleSize: this.filteredMatches.length,
     });
 
     results.forEach((winrate) => {
       winrate.winrate = (100 * winrate.wins) / winrate.sampleSize;
+      winrate.banrate = (100 * winrate.withSomeoneBanAfter) / winrate.sampleSize;
     });
 
     results.sort((a, b) => {
@@ -177,6 +171,30 @@ export class DataService {
     });
 
     return results;
+  }
+
+  private _getWinrateDataForMap(results: WinrateData[], map: string) {
+    let winrate = results.find((winrate) => winrate.map === map);
+    if (!winrate) {
+      winrate = {
+        map: map,
+        sampleSize: 0,
+        wins: 0,
+        withSomeoneBanAfter: 0,
+      };
+      results.push(winrate);
+    }
+    return winrate;
+  }
+
+  private _isPlayerWinIntoTeam(team?: TeamInfo) {
+    return (
+      team?.scores && team.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) && team.win === 1
+    );
+  }
+
+  private _matchHasPlayerBanAfter(match: MatchInfo) {
+    return this.playersBannedFiltered.some((playerBanned) => match.playersSteamID64.includes(playerBanned.steamID64));
   }
 
   parseSteamResults(results: BanInfo[]) {

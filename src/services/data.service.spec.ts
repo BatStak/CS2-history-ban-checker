@@ -256,8 +256,9 @@ describe('DataService', () => {
     expect(finished).toBeTrue();
   });
 
-  it('test getWinrates', async () => {
+  it('test getMapDatas', async () => {
     dataService.mySteamId = 'playerId';
+    dataService.playersBannedFiltered = [{ steamID64: 'cheaterId', matches: [] }];
     dataService.filteredMatches = [
       {
         map: 'dust2',
@@ -273,14 +274,14 @@ describe('DataService', () => {
             { steamID64: 'otherId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
           ],
         },
-        playersSteamID64: ['playerId'],
+        playersSteamID64: ['playerId', 'otherId'],
       },
       {
         map: 'mirage',
         teamA: {
           win: -1,
           scores: [
-            { steamID64: 'otherId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
+            { steamID64: 'cheaterId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
           ],
         },
         teamB: {
@@ -289,7 +290,7 @@ describe('DataService', () => {
             { steamID64: 'playerId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
           ],
         },
-        playersSteamID64: ['playerId'],
+        playersSteamID64: ['playerId', 'cheaterId'],
       },
       {
         map: 'mirage',
@@ -305,23 +306,28 @@ describe('DataService', () => {
             { steamID64: 'playerId', ping: 'ping', a: 'a', d: 'd', hsp: 'hsp', k: 'k', mvp: 'mvp', score: 'score' },
           ],
         },
-        playersSteamID64: ['playerId'],
+        playersSteamID64: ['playerId', 'otherId'],
       },
     ];
-    const winrates = dataService.getWinrates();
-    expect(winrates.length).toEqual(3);
-    expect(winrates[0].map).toEqual('All maps');
-    expect(winrates[0].sampleSize).toEqual(3);
-    expect(winrates[0].wins).toEqual(2);
-    expect(winrates[0].winrate).toBeGreaterThan(66.66);
-    expect(winrates[0].winrate).toBeLessThan(66.67);
-    expect(winrates[1].map).toEqual('dust2');
-    expect(winrates[1].sampleSize).toEqual(1);
-    expect(winrates[1].wins).toEqual(1);
-    expect(winrates[1].winrate).toEqual(100);
-    expect(winrates[2].map).toEqual('mirage');
-    expect(winrates[2].sampleSize).toEqual(2);
-    expect(winrates[2].wins).toEqual(1);
-    expect(winrates[2].winrate).toEqual(50);
+    const mapdatas = dataService.getMapDatas();
+    expect(mapdatas.length).toEqual(3);
+    expect(mapdatas[0].map).toEqual('All maps');
+    expect(mapdatas[0].sampleSize).toEqual(3);
+    expect(mapdatas[0].wins).toEqual(2);
+    expect(mapdatas[0].withSomeoneBanAfter).toEqual(1);
+    expect(mapdatas[0].winrate).toBeGreaterThan(66.66);
+    expect(mapdatas[0].winrate).toBeLessThan(66.67);
+    expect(mapdatas[0].banrate).toBeGreaterThan(33.33);
+    expect(mapdatas[0].banrate).toBeLessThan(33.34);
+    expect(mapdatas[1].map).toEqual('dust2');
+    expect(mapdatas[1].sampleSize).toEqual(1);
+    expect(mapdatas[1].wins).toEqual(1);
+    expect(mapdatas[1].winrate).toEqual(100);
+    expect(mapdatas[2].map).toEqual('mirage');
+    expect(mapdatas[2].sampleSize).toEqual(2);
+    expect(mapdatas[2].wins).toEqual(1);
+    expect(mapdatas[2].withSomeoneBanAfter).toEqual(1);
+    expect(mapdatas[2].winrate).toEqual(50);
+    expect(mapdatas[2].banrate).toEqual(50);
   });
 });

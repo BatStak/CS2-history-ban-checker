@@ -1,10 +1,10 @@
 table {
   width: 100%;
-  margin-top: 20px;
   border-collapse: collapse;
 
   .sample,
-  .winrate {
+  .winrate,
+  .banrate {
     text-align: right;
   }
 
@@ -16,9 +16,18 @@ table {
     width: 150px;
   }
 
+  .banrate {
+    width: 200px;
+  }
+
   th,
   td {
     border: 1px solid #7a7a7a;
     padding: 5px;
   }
+}
+
+button,
+table {
+  margin-bottom: 20px;
 }

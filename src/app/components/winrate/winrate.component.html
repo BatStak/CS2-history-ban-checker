@@ -1,17 +1,21 @@
 @if (mySteamId) {
-  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} winrates</button>
+  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} map datas</button>
 
   @if (display) {
     <table>
       <tr>
         <th>Map</th>
         <th class="sample">Sample size</th>
+        <th class="banrate">% with someone ban after</th>
         <th class="winrate">Winrate</th>
       </tr>
       @for (winrate of winrateDatas; track $index) {
         <tr>
           <td>{{ winrate.map }}</td>
           <td class="sample">{{ winrate.sampleSize }}</td>
+          <td class="banrate">
+            ({{ winrate.withSomeoneBanAfter }}) / <strong>{{ winrate.banrate | number: "0.0-2" }}%</strong>
+          </td>
           <td class="winrate">
             ({{ winrate.wins }}) / <strong>{{ winrate.winrate | number: "0.0-2" }}%</strong>
           </td>

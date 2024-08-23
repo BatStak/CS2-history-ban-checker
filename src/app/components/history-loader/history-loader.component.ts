@@ -3,12 +3,11 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
-import { WinrateComponent } from '../winrate/winrate.component';
 
 @Component({
   selector: 'cs2-history-loader',
   standalone: true,
-  imports: [CommonModule, FormsModule, WinrateComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './history-loader.component.html',
   styleUrl: './history-loader.component.scss',
 })

@@ -35,6 +35,6 @@ export class WinrateComponent implements OnInit {
   }
 
   private async _update() {
-    this.winrateDatas = await this._dataService.getWinrates();
+    this.winrateDatas = await this._dataService.getMapDatas();
   }
 }

@@ -16,10 +16,10 @@ The extension is published for [Chrome](https://chromewebstore.google.com/detail
 
 ![](./readme/capture3.png)
 
-![](./readme/capture1.png)
+![](./readme/capture1-v2.2.2.png)
 
-![](./readme/capture2.png)
+![](./readme/capture2-v2.2.2.png)
+
+![](./readme/capture3-v2.2.2.png)
 
 ![](./readme/capture4.png)
-
-![](./readme/capture5.png)

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { debounceTime } from 'rxjs';
 import { DataService, WinrateData as MapData } from '../../../services/data.service';
 
 @Component({
@@ -20,7 +21,7 @@ export class MapDatasComponent implements OnInit {
   constructor(private _dataService: DataService) {}
 
   async ngOnInit() {
-    this._dataService.onStatisticsUpdated.subscribe(async () => {
+    this._dataService.onSave.pipe(debounceTime(500)).subscribe(() => {
       if (this.display) {
         this._update();
       }

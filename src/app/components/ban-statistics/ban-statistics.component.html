@@ -38,7 +38,7 @@
       (<strong>{{ matchPourcentage }}%</strong>)*
     </p>
 
-    <map-datas></map-datas>
+    <map-datas style="margin-bottom: 20px"></map-datas>
 
     <button type="button" (click)="displayListOfBannedPlayers = !displayListOfBannedPlayers">
       {{ displayListOfBannedPlayers ? "Hide" : "Show" }} list of players banned
@@ -152,4 +152,8 @@
   }
 } @else {
   <p>No banned player</p>
+
+  @if (!displayOnlyListOfPlayers) {
+    <map-datas></map-datas>
+  }
 }

@@ -27,11 +27,11 @@ describe('ScannerComponent', async () => {
   });
 
   it('Test "matches in database" display', async () => {
-    component.isOnGCPDSection = true;
+    fixture.componentRef.setInput('isOnGCPDSection', true);
     fixture.detectChanges();
     expect(dom.textContent).toContain('matches in database for this section');
 
-    component.isOnGCPDSection = false;
+    fixture.componentRef.setInput('isOnGCPDSection', false);
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('matches in database for this section');
   });
@@ -129,28 +129,28 @@ describe('ScannerComponent', async () => {
   });
 
   it('Test doCheck', async () => {
-    component.isOnGCPDSection = true;
+    fixture.componentRef.setInput('isOnGCPDSection', true);
     dataService.newPlayersBanned = false;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeFalse();
     expect(dom.textContent).not.toContain('There are new players banned');
 
-    component.isOnGCPDSection = true;
+    fixture.componentRef.setInput('isOnGCPDSection', true);
     dataService.newPlayersBanned = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeTrue();
     expect(dom.textContent).toContain('There are new players banned');
 
-    component.isOnGCPDSection = false;
+    fixture.componentRef.setInput('isOnGCPDSection', false);
     dataService.newPlayersBanned = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showNewPlayersBannedWarning).toBeFalse();
     expect(dom.textContent).not.toContain('There are new players banned');
 
-    component.isOnGCPDSection = false;
+    fixture.componentRef.setInput('isOnGCPDSection', false);
     dataService.newPlayersBanned = false;
     component.ngDoCheck();
     fixture.detectChanges();

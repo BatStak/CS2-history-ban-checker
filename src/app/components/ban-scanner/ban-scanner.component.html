@@ -1,5 +1,5 @@
 <p>
-  @if (isOnGCPDSection) {
+  @if (isOnGCPDSection()) {
     Players in database for this section : {{ players.length || 0 }}, matches in database for this section :
     {{ matches.length || 0 }}.
   } @else {

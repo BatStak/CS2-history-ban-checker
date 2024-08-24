@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DoCheck, Input, booleanAttribute } from '@angular/core';
+import { Component, DoCheck, input } from '@angular/core';
 import { BanInfo, MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import { SteamService } from '../../../services/steam.service';
@@ -13,7 +13,7 @@ import { UtilsService } from '../../../services/utils.service';
   styleUrl: './ban-scanner.component.scss',
 })
 export class ScannerComponent implements DoCheck {
-  @Input({ transform: booleanAttribute }) isOnGCPDSection = false;
+  isOnGCPDSection = input<boolean>(false);
 
   error = '';
 
@@ -59,7 +59,7 @@ export class ScannerComponent implements DoCheck {
   ) {}
 
   ngDoCheck(): void {
-    this.showNewPlayersBannedWarning = this.isOnGCPDSection && this._dataService.newPlayersBanned;
+    this.showNewPlayersBannedWarning = this.isOnGCPDSection() && this._dataService.newPlayersBanned;
   }
 
   startScan(type: 'new' | 'all') {

@@ -1,3 +1,9 @@
+# v2.2.3
+
+- update dependencies + Angular18
+- fix maps datas not update when loading history
+- fix maps datas not availaible when no ban
+
 # v2.2.2
 
 - move winrate infos to results panel

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DoCheck, input } from '@angular/core';
+import { Component, DoCheck, inject, input } from '@angular/core';
 import { BanInfo, MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import { SteamService } from '../../../services/steam.service';
@@ -13,6 +13,10 @@ import { UtilsService } from '../../../services/utils.service';
   styleUrl: './ban-scanner.component.scss',
 })
 export class ScannerComponent implements DoCheck {
+  _utilsService = inject(UtilsService);
+  _dataService = inject(DataService);
+  _steamService = inject(SteamService);
+
   isOnGCPDSection = input<boolean>(false);
 
   error = '';
@@ -51,12 +55,6 @@ export class ScannerComponent implements DoCheck {
 
   _delayBetweenSteamCall = 500;
   _stopScan = false;
-
-  constructor(
-    public _utilsService: UtilsService,
-    public _dataService: DataService,
-    public _steamService: SteamService,
-  ) {}
 
   ngDoCheck(): void {
     this.showNewPlayersBannedWarning = this.isOnGCPDSection() && this._dataService.newPlayersBanned;

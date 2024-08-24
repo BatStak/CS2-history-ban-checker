@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
@@ -12,6 +12,9 @@ import { UtilsService } from '../../../services/utils.service';
   styleUrl: './options.component.scss',
 })
 export class OptionsComponent {
+  _utilsService = inject(UtilsService);
+  _dataService = inject(DataService);
+
   apiKey?: string;
 
   showOptions = false;
@@ -26,10 +29,7 @@ export class OptionsComponent {
     return this._utilsService.isScanning;
   }
 
-  constructor(
-    private _utilsService: UtilsService,
-    private _dataService: DataService,
-  ) {
+  constructor() {
     this.apiKey = this._dataService.database.apiKey;
   }
 

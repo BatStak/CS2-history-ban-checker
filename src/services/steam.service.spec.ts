@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { BanInfo, Database } from '../models';
 import { DataService } from './data.service';
-import { DatabaseService } from './database.service';
 import { SteamService } from './steam.service';
-import { UtilsService } from './utils.service';
 
 @Injectable()
 export class MockDataService extends DataService {
@@ -18,10 +17,9 @@ describe('SteamService', () => {
   let steamService: SteamService;
 
   beforeEach(() => {
-    const databaseService = new DatabaseService();
-    const utilsService = new UtilsService();
-    const dataService = new MockDataService(databaseService, utilsService);
-    steamService = new SteamService(dataService);
+    TestBed.runInInjectionContext(() => {
+      steamService = inject(SteamService);
+    });
   });
 
   it('scan bans OK', async () => {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
@@ -28,6 +28,8 @@ import {
   styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
+  _dataService = inject(DataService);
+
   displayListOfBannedPlayers = true;
   displayOnlyListOfPlayers = false;
 
@@ -52,7 +54,7 @@ export class BanStatisticsComponent implements OnDestroy {
 
   _onStatisticsUpdatedSubscription?: Subscription;
 
-  constructor(public _dataService: DataService) {
+  constructor() {
     this._onStatisticsUpdatedSubscription = this._dataService.onStatisticsUpdated.subscribe(() => {
       this._update();
     });

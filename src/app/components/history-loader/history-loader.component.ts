@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
@@ -12,6 +12,9 @@ import { UtilsService } from '../../../services/utils.service';
   styleUrl: './history-loader.component.scss',
 })
 export class HistoryLoaderComponent {
+  _utilsService = inject(UtilsService);
+  _dataService = inject(DataService);
+
   hideHistoryTable?: boolean;
 
   get startDate(): string | undefined {
@@ -38,10 +41,7 @@ export class HistoryLoaderComponent {
 
   _loadMoreButtonCssSelector = '#load_more_button';
 
-  constructor(
-    public _utilsService: UtilsService,
-    public _dataService: DataService,
-  ) {
+  constructor() {
     this.hideHistoryTable = this._dataService.database.hideHistoryTable;
     this._loadMoreButton = document.querySelector<HTMLButtonElement>(this._loadMoreButtonCssSelector);
   }

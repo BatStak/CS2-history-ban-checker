@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Database } from '../models';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class DatabaseService {
   async setDatabase(database: Database) {
     await chrome.storage.local.set(database);

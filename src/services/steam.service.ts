@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BanInfo } from '../models';
 import { DataService } from './data.service';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class SteamService {
-  constructor(private _dataService: DataService) {}
+  _dataService = inject(DataService);
 
   async scanPlayers(steamIds: string[]): Promise<BanInfo[]> {
     return new Promise<BanInfo[]>((resolve, reject) => {

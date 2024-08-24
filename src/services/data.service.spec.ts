@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { Database, MatchFormat, PlayerInfo } from '../models';
 import { DataService } from './data.service';
 import { DatabaseService } from './database.service';
@@ -34,14 +35,14 @@ export class MockUtilsService extends UtilsService {
 }
 
 describe('DataService', () => {
-  let databaseService: DatabaseService;
   let utilsService: UtilsService;
   let dataService: DataService;
 
   beforeEach(() => {
-    databaseService = new MockDatabaseService();
-    utilsService = new MockUtilsService();
-    dataService = new DataService(databaseService, utilsService);
+    TestBed.runInInjectionContext(() => {
+      dataService = new DataService();
+      utilsService = new UtilsService();
+    });
   });
 
   it('init', async () => {

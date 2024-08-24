@@ -1,11 +1,11 @@
-import { AfterViewInit, ApplicationRef, Component, DoCheck, HostBinding, OnDestroy } from '@angular/core';
+import { AfterViewInit, ApplicationRef, Component, DoCheck, HostBinding, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { UtilsService } from '../services/utils.service';
 
 import { CommonModule } from '@angular/common';
 import Bowser from 'bowser';
-import { Subject, Subscription, debounceTime } from 'rxjs';
+import { debounceTime, Subject, Subscription } from 'rxjs';
 import { Database, MatchFormat } from '../models';
 import { DatabaseService } from '../services/database.service';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
@@ -28,6 +28,11 @@ import { OptionsComponent } from './components/options/options.component';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
+  _databaseService = inject(DatabaseService);
+  _utilsService = inject(UtilsService);
+  _dataService = inject(DataService);
+  _applicationRef = inject(ApplicationRef);
+
   ready = false;
 
   isOnGCPDSection = false;
@@ -60,19 +65,12 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
     return this._dataService.database?.hideHistoryTable;
   }
 
-  constructor(
-    public _databaseService: DatabaseService,
-    public _utilsService: UtilsService,
-    public _dataService: DataService,
-    public _applicationRef: ApplicationRef,
-  ) {
+  async ngAfterViewInit() {
     // for some reason, change detection does not work in firefox extension
     if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
       setInterval(() => this._applicationRef.tick(), 100);
     }
-  }
 
-  async ngAfterViewInit() {
     const section = new URLSearchParams(document.location.search).get('tab') || undefined;
 
     this.isOnGCPDSection = !!section && this._validTabs.includes(section);

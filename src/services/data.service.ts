@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Subject, debounceTime } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { debounceTime, Subject } from 'rxjs';
 import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore, TeamInfo } from '../models';
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
@@ -13,8 +13,11 @@ export interface WinrateData {
   banrate?: number;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class DataService {
+  _databaseService = inject(DatabaseService);
+  _utilsService = inject(UtilsService);
+
   onSave = new Subject<void>();
   onStatisticsUpdated = new Subject<void>();
   onReset = new Subject<void>();
@@ -48,10 +51,7 @@ export class DataService {
 
   _banTitles: Record<string, string> = {};
 
-  constructor(
-    private _databaseService: DatabaseService,
-    private _utilsService: UtilsService,
-  ) {
+  constructor() {
     this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
       this.save();
     });

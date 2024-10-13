@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { formatDistance } from 'date-fns';
 import { debounceTime, Subject } from 'rxjs';
 import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore, TeamInfo } from '../models';
 import { DatabaseService } from './database.service';
@@ -343,29 +344,16 @@ export class DataService {
         if (banInfo.NumberOfGameBans) {
           infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
         }
-        if (banInfo.DaysSinceLastBan !== undefined) {
-          infos += `, last ban was ${this._getFormatedStringFromDays(banInfo.DaysSinceLastBan)}`;
+        if (banInfo.LastBanOn) {
+          infos += `, last ban was ${formatDistance(banInfo.LastBanOn, new Date(), {
+            addSuffix: true,
+          })}`;
         }
         this._banTitles[playerInfo.steamID64] = infos;
       }
     }
 
     return this._banTitles[playerInfo.steamID64];
-  }
-
-  _getFormatedStringFromDays(numberOfDays: number) {
-    if (numberOfDays === 0) {
-      return 'today';
-    }
-
-    var years = Math.floor(numberOfDays / 365);
-    var months = Math.floor((numberOfDays % 365) / 30);
-    var days = Math.floor((numberOfDays % 365) % 30);
-
-    var yearsDisplay = years > 0 ? years + (years == 1 ? ' year, ' : ' years, ') : '';
-    var monthsDisplay = months > 0 ? months + (months == 1 ? ' month, ' : ' months, ') : '';
-    var daysDisplay = days > 0 ? days + (days == 1 ? ' day' : ' days') : '';
-    return yearsDisplay + monthsDisplay + daysDisplay + ' ago';
   }
 
   _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
@@ -468,18 +456,22 @@ export class DataService {
   }
 
   /**
-   * we sort by most recent bans first
+   * we sort by most recent bans first, then steamID to ensure the order is always the same
    */
   _sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
-    const playerADaysSinceLastBan = playerA.banInfo!.DaysSinceLastBan;
-    const playerBDaysSinceLastBan = playerB.banInfo!.DaysSinceLastBan;
-    return playerADaysSinceLastBan === playerBDaysSinceLastBan
-      ? playerA.steamID64 < playerB.steamID64
-        ? -1
-        : 1
-      : playerADaysSinceLastBan < playerBDaysSinceLastBan
-        ? -1
-        : 1;
+    const playerALastBanOn = playerA.banInfo!.LastBanOn;
+    const playerBLastBanOn = playerB.banInfo!.LastBanOn;
+    const result =
+      playerALastBanOn === playerBLastBanOn
+        ? // alpha
+          playerA.steamID64 < playerB.steamID64
+          ? -1
+          : 1
+        : // more recent first
+          playerALastBanOn < playerBLastBanOn
+          ? 1
+          : -1;
+    return result;
   }
 
   _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {

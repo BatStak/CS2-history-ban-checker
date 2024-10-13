@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { subDays } from 'date-fns';
 import { Database, MatchFormat, PlayerInfo } from '../models';
 import { DataService } from './data.service';
 import { DatabaseService } from './database.service';
@@ -139,7 +140,7 @@ describe('DataService', () => {
           CommunityBanned: false,
           DaysSinceLastBan: 12,
           EconomyBan: '',
-          LastBanOn: '',
+          LastBanOn: subDays(new Date(), 12).toISOString(),
           LastFetch: '',
           NumberOfGameBans: 0,
           NumberOfVACBans: 0,
@@ -154,7 +155,7 @@ describe('DataService', () => {
           CommunityBanned: false,
           DaysSinceLastBan: 12,
           EconomyBan: '',
-          LastBanOn: '',
+          LastBanOn: subDays(new Date(), 12).toISOString(),
           LastFetch: '',
           NumberOfGameBans: 0,
           NumberOfVACBans: 0,
@@ -169,7 +170,7 @@ describe('DataService', () => {
           CommunityBanned: false,
           DaysSinceLastBan: 1,
           EconomyBan: '',
-          LastBanOn: '',
+          LastBanOn: subDays(new Date(), 1).toISOString(),
           LastFetch: '',
           NumberOfGameBans: 0,
           NumberOfVACBans: 0,

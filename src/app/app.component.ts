@@ -118,7 +118,14 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
       const observer = new MutationObserver(() => {
         this._onDomUpdated.next();
       });
-      observer.observe(results, { childList: true });
+      observer.observe(results, {
+        attributeOldValue: false,
+        attributes: false,
+        characterData: false,
+        characterDataOldValue: false,
+        childList: true,
+        subtree: false,
+      });
     }
   }
 

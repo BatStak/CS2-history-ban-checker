@@ -29,7 +29,7 @@
           },
           "configurations": {
             "production": {
-              "optimization": true,
+              "optimization": false,
               "outputHashing": "none",
               "sourceMap": false,
               "allowedCommonJsDependencies": ["bowser"]

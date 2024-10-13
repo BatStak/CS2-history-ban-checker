@@ -1,3 +1,9 @@
+# v2.2.4
+
+- remove days in last column, which was false without rescan on today
+- use of date-fns to calculate the tooltip "x ago"
+- update observer for performance
+
 # v2.2.3
 
 - update dependencies + Angular18

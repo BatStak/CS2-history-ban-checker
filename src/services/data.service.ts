@@ -54,7 +54,7 @@ export class DataService {
 
   constructor() {
     this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
-      this.save();
+      this._save();
     });
   }
 
@@ -208,10 +208,14 @@ export class DataService {
       }
     }
 
+    this.save();
+  }
+
+  save() {
     this.onSave.next();
   }
 
-  async save() {
+  private async _save() {
     this._updateStatistics();
     await this._databaseService.setDatabase(this.database);
   }

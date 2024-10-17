@@ -53,7 +53,7 @@ export class ScannerComponent implements DoCheck {
   numberOfPages = 0;
   pageNumber = 0;
 
-  _delayBetweenSteamCall = 500;
+  _delayBetweenSteamCallInMs = 500;
   _stopScan = false;
 
   ngDoCheck(): void {
@@ -95,7 +95,8 @@ export class ScannerComponent implements DoCheck {
           if (this.pageNumber >= this.numberOfPages) {
             this._stopScanning();
           } else {
-            setTimeout(() => this._scanPlayers(players), this._delayBetweenSteamCall);
+            await this._utilsService.wait(this._delayBetweenSteamCallInMs);
+            this._scanPlayers(players);
           }
         }
       } catch (e) {
@@ -111,7 +112,7 @@ export class ScannerComponent implements DoCheck {
   _stopScanning() {
     this._utilsService.isScanning = this._stopScan = false;
     this.pageNumber = this.numberOfPages = 0;
-    this._dataService.onSave.next();
+    this._dataService.save();
   }
 
   /**

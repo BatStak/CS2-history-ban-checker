@@ -1,3 +1,8 @@
+# v2.2.5
+
+- performance optimizations
+- add images for cache, train, cobblestone and italy maps
+
 # v2.2.4
 
 - remove days in last column, which was false without rescan on today

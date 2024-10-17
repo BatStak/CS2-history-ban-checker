@@ -139,6 +139,6 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
     } else {
       this._dataService.parseFriends();
     }
-    this._dataService.onSave.next();
+    this._dataService.save();
   }
 }

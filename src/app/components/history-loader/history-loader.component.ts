@@ -36,7 +36,7 @@ export class HistoryLoaderComponent {
   _loadHistoryTimer?: any;
   _loadHistoryInternvalInMs = 800;
   _buttonClickAttempts = 0;
-  _buttonClickMaxAttempts = 5;
+  _buttonClickMaxAttempts = 10;
   _loadMoreButton?: HTMLButtonElement | null;
 
   _loadMoreButtonCssSelector = '#load_more_button';

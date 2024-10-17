@@ -8,8 +8,11 @@ import {
   ancientBase64,
   anubisBase64,
   assemblyBase64,
+  cacheBase64,
+  cbblBase64,
   dust2Base64,
   infernoBase64,
+  italyBase64,
   mementoBase64,
   millsBase64,
   mirageBase64,
@@ -17,6 +20,7 @@ import {
   officeBase64,
   overpassBase64,
   theraBase64,
+  trainBase64,
   vertigoBase64,
 } from './maps.base64';
 
@@ -106,6 +110,14 @@ export class BanStatisticsComponent implements OnDestroy {
         return mementoBase64;
       case 'de_assembly':
         return assemblyBase64;
+      case 'Italy':
+        return italyBase64;
+      case 'Cache':
+        return cacheBase64;
+      case 'Train':
+        return trainBase64;
+      case 'Cobblestone':
+        return cbblBase64;
     }
 
     return '';

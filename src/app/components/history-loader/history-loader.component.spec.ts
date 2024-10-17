@@ -1,14 +1,8 @@
-import { Injectable } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataService } from '../../../services/data.service';
 import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { HistoryLoaderComponent } from './history-loader.component';
-
-@Injectable()
-class MockDataService extends DataService {
-  override async save(): Promise<void> {}
-}
 
 describe('HistoryLoaderComponent', async () => {
   let component: HistoryLoaderComponent;
@@ -20,7 +14,7 @@ describe('HistoryLoaderComponent', async () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HistoryLoaderComponent],
-      providers: [DatabaseService, UtilsService, { provide: DataService, useClass: MockDataService }],
+      providers: [DatabaseService, UtilsService],
     });
     fixture = TestBed.createComponent(HistoryLoaderComponent);
     component = fixture.componentInstance;

@@ -55,12 +55,33 @@
     <table class="results">
       <tr>
         <th class="col-avatar">Avatar</th>
-        <th class="col-name">Name</th>
+        <th
+          class="col-name sortable"
+          (click)="orderBy('name')"
+          [class.asc]="order === 'asc' && column === 'name'"
+          [class.desc]="order === 'desc' && column === 'name'"
+        >
+          Name
+        </th>
         @if (!displayOnlyListOfPlayers) {
           <th class="col-showmatch">See match</th>
-          <th class="col-lastplay">Last played with on</th>
+          <th
+            class="col-lastplay sortable"
+            (click)="orderBy('lastPlayWith')"
+            [class.asc]="order === 'asc' && column === 'lastPlayWith'"
+            [class.desc]="order === 'desc' && column === 'lastPlayWith'"
+          >
+            Last played with on
+          </th>
         }
-        <th class="col-lastban">Last ban on**</th>
+        <th
+          class="col-lastban sortable"
+          (click)="orderBy('LastBanOn')"
+          [class.asc]="order === 'asc' && column === 'LastBanOn'"
+          [class.desc]="order === 'desc' && column === 'LastBanOn'"
+        >
+          Last ban on
+        </th>
       </tr>
       @for (playerBanned of playersBanned; track $index) {
         <tr>
@@ -87,7 +108,7 @@
             </td>
           }
           <td class="col-lastban" [attr.title]="_getBanTitle(playerBanned)">
-            ~{{ playerBanned.banInfo?.LastBanOn | date: "dd/MM/y" }}
+            ~{{ playerBanned.banInfo?.LastBanOn | date: "dd/MM/y" }} *
           </td>
         </tr>
 
@@ -103,10 +124,12 @@
               <table class="match-info-table">
                 <tr>
                   <td class="map-info">
-                    @if (_getMapImage(matchInfo.map)) {
-                      <img [src]="_getMapImage(matchInfo.map)" width="200" height="112" border="0" />
+                    @let name = matchInfo.map | mapName;
+                    @let image = name | mapImage;
+                    @if (image) {
+                      <img [src]="image" width="200" height="112" border="0" />
                     }
-                    <p>{{ matchInfo.map }}</p>
+                    <p>{{ name }}</p>
                     <p>{{ matchInfo.id }}</p>
                   </td>
                   <td>
@@ -147,7 +170,7 @@
         }
       }
     </table>
-    <p class="right">** mouse over for more informations</p>
+    <p class="right">* mouse over for more informations</p>
   }
 } @else {
   <p>No banned player</p>

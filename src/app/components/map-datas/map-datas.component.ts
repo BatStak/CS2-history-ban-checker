@@ -3,6 +3,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { debounceTime } from 'rxjs';
 import { DataService, WinrateData as MapData } from '../../../services/data.service';
 
+type columnType = 'map' | 'sampleSize' | 'banrate' | 'winrate';
+
 @Component({
   selector: 'map-datas',
   standalone: true,
@@ -16,6 +18,9 @@ export class MapDatasComponent implements OnInit {
   display = false;
   mapDatas: MapData[] = [];
 
+  order = 'asc';
+  column: columnType = 'map';
+
   get mySteamId(): string | undefined {
     return this._dataService.mySteamId;
   }
@@ -25,6 +30,22 @@ export class MapDatasComponent implements OnInit {
       if (this.display) {
         this._update();
       }
+    });
+  }
+
+  orderBy(column: columnType) {
+    if (this.column === column) {
+      this.order = this.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.order = 'asc';
+    }
+    this.column = column;
+
+    this.mapDatas.sort((a, b) => {
+      if (a[this.column] === undefined || b[this.column] === undefined || a[this.column] === b[this.column]) {
+        return a.map < b.map ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+      }
+      return a[this.column]! < b[this.column]! ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
     });
   }
 

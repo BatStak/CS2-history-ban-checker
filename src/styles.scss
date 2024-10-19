@@ -33,3 +33,19 @@ tr.banned {
   padding: 15px;
   background: #ff830075;
 }
+
+.sortable {
+  cursor: pointer;
+
+  ::after {
+    padding-left: 5px;
+  }
+
+  &.asc::after {
+    content: "▲";
+  }
+
+  &.desc::after {
+    content: "▼";
+  }
+}

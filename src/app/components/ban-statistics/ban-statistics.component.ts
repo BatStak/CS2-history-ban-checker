@@ -2,32 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatchInfo, PlayerInfo } from '../../../models';
+import { MapImagePipe } from '../../../pipes/mapImage.pipe';
+import { MapNamePipe } from '../../../pipes/mapName.pipe';
 import { DataService } from '../../../services/data.service';
 import { MapDatasComponent } from '../map-datas/map-datas.component';
-import {
-  ancientBase64,
-  anubisBase64,
-  assemblyBase64,
-  cacheBase64,
-  cbblBase64,
-  dust2Base64,
-  infernoBase64,
-  italyBase64,
-  mementoBase64,
-  millsBase64,
-  mirageBase64,
-  nukeBase64,
-  officeBase64,
-  overpassBase64,
-  theraBase64,
-  trainBase64,
-  vertigoBase64,
-} from './maps.base64';
+
+type columnType = 'name' | 'lastPlayWith' | 'LastBanOn';
 
 @Component({
   selector: 'cs2-history-ban-statistics',
   standalone: true,
-  imports: [CommonModule, MapDatasComponent],
+  imports: [CommonModule, MapNamePipe, MapImagePipe, MapDatasComponent],
   templateUrl: './ban-statistics.component.html',
   styleUrl: './ban-statistics.component.scss',
 })
@@ -48,6 +33,9 @@ export class BanStatisticsComponent implements OnDestroy {
   matchInfoIndex?: number;
   matchInfo?: MatchInfo;
 
+  order = 'desc';
+  column: columnType = 'LastBanOn';
+
   get playersBanned(): PlayerInfo[] {
     return this._dataService.playersBannedFiltered;
   }
@@ -66,6 +54,37 @@ export class BanStatisticsComponent implements OnDestroy {
     this._update();
   }
 
+  orderBy(column: columnType) {
+    if (this.column === column) {
+      this.order = this.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.order = 'asc';
+    }
+    this.column = column;
+
+    this.playersBanned.sort((a, b) => {
+      switch (this.column) {
+        case 'LastBanOn':
+          if (!a.banInfo?.LastBanOn || !b.banInfo?.LastBanOn || a.banInfo.LastBanOn === b.banInfo.LastBanOn) {
+            break;
+          }
+          return a.banInfo.LastBanOn < b.banInfo.LastBanOn
+            ? this.order === 'asc'
+              ? -1
+              : 1
+            : this.order === 'asc'
+              ? 1
+              : -1;
+        case 'lastPlayWith':
+          if (!a.lastPlayWith || !b.lastPlayWith || a.lastPlayWith === b.lastPlayWith) {
+            break;
+          }
+          return a.lastPlayWith < b.lastPlayWith ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+      }
+      return (a.name || '') < (b.name || '') ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+    });
+  }
+
   ngOnDestroy(): void {
     this._onStatisticsUpdatedSubscription?.unsubscribe();
   }
@@ -80,47 +99,6 @@ export class BanStatisticsComponent implements OnDestroy {
 
   _getPlayerName(steamID64: string) {
     return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.name;
-  }
-
-  _getMapImage(map?: string) {
-    switch (map) {
-      case 'Ancient':
-        return ancientBase64;
-      case 'Anubis':
-        return anubisBase64;
-      case 'Dust II':
-        return dust2Base64;
-      case 'Inferno':
-        return infernoBase64;
-      case 'Mirage':
-        return mirageBase64;
-      case 'Nuke':
-        return nukeBase64;
-      case 'Overpass':
-        return overpassBase64;
-      case 'Vertigo':
-        return vertigoBase64;
-      case 'Office':
-        return officeBase64;
-      case 'de_thera':
-        return theraBase64;
-      case 'de_mills':
-        return millsBase64;
-      case 'de_memento':
-        return mementoBase64;
-      case 'de_assembly':
-        return assemblyBase64;
-      case 'Italy':
-        return italyBase64;
-      case 'Cache':
-        return cacheBase64;
-      case 'Train':
-        return trainBase64;
-      case 'Cobblestone':
-        return cbblBase64;
-    }
-
-    return '';
   }
 
   _playerInfo(steamID64: string) {

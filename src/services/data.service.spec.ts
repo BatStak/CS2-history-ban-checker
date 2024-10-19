@@ -263,7 +263,7 @@ describe('DataService', () => {
     dataService.playersBannedFiltered = [{ steamID64: 'cheaterId', matches: [] }];
     dataService.filteredMatches = [
       {
-        map: 'dust2',
+        map: 'Dust2',
         teamA: {
           win: 1,
           scores: [
@@ -321,11 +321,11 @@ describe('DataService', () => {
     expect(mapdatas[0].winrate).toBeLessThan(66.67);
     expect(mapdatas[0].banrate).toBeGreaterThan(33.33);
     expect(mapdatas[0].banrate).toBeLessThan(33.34);
-    expect(mapdatas[1].map).toEqual('dust2');
+    expect(mapdatas[1].map).toEqual('Dust2');
     expect(mapdatas[1].sampleSize).toEqual(1);
     expect(mapdatas[1].wins).toEqual(1);
     expect(mapdatas[1].winrate).toEqual(100);
-    expect(mapdatas[2].map).toEqual('mirage');
+    expect(mapdatas[2].map).toEqual('Mirage');
     expect(mapdatas[2].sampleSize).toEqual(2);
     expect(mapdatas[2].wins).toEqual(1);
     expect(mapdatas[2].withSomeoneBanAfter).toEqual(1);

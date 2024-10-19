@@ -4,10 +4,38 @@
   @if (display) {
     <table>
       <tr>
-        <th>Map</th>
-        <th class="sample">Sample size</th>
-        <th class="banrate">% with someone ban after</th>
-        <th class="winrate">Winrate</th>
+        <th
+          class="sortable asc"
+          (click)="orderBy('map')"
+          [class.asc]="order === 'asc' && column === 'map'"
+          [class.desc]="order === 'desc' && column === 'map'"
+        >
+          Map
+        </th>
+        <th
+          class="sample sortable"
+          (click)="orderBy('sampleSize')"
+          [class.asc]="order === 'asc' && column === 'sampleSize'"
+          [class.desc]="order === 'desc' && column === 'sampleSize'"
+        >
+          Sample size
+        </th>
+        <th
+          class="banrate sortable"
+          (click)="orderBy('banrate')"
+          [class.asc]="order === 'asc' && column === 'banrate'"
+          [class.desc]="order === 'desc' && column === 'banrate'"
+        >
+          % with someone ban after
+        </th>
+        <th
+          class="winrate sortable"
+          (click)="orderBy('winrate')"
+          [class.asc]="order === 'asc' && column === 'winrate'"
+          [class.desc]="order === 'desc' && column === 'winrate'"
+        >
+          Winrate
+        </th>
       </tr>
       @for (mapData of mapDatas; track $index) {
         <tr>

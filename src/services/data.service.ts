@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { debounceTime, Subject } from 'rxjs';
 import { BanInfo, Database, MatchFormat, MatchInfo, PlayerInfo, PlayerScore, TeamInfo } from '../models';
+import { MapNamePipe } from '../pipes/mapName.pipe';
 import { DatabaseService } from './database.service';
 import { UtilsService } from './utils.service';
 
@@ -51,6 +52,8 @@ export class DataService {
   _avatarCssSelector = '.player_avatar img';
 
   _banTitles: Record<string, string> = {};
+
+  private _mapNamePipe = new MapNamePipe();
 
   constructor() {
     this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
@@ -174,11 +177,13 @@ export class DataService {
     return results;
   }
 
+  private _mapNames: Record<string, string> = {};
   private _getWinrateDataForMap(results: WinrateData[], map: string) {
-    let winrate = results.find((winrate) => winrate.map === map);
+    this._mapNames[map] = this._mapNames[map] || this._mapNamePipe.transform(map);
+    let winrate = results.find((winrate) => winrate.map === this._mapNames[map]);
     if (!winrate) {
       winrate = {
-        map: map,
+        map: this._mapNames[map],
         sampleSize: 0,
         wins: 0,
         withSomeoneBanAfter: 0,

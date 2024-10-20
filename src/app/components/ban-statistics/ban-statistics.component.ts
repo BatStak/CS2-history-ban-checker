@@ -62,27 +62,7 @@ export class BanStatisticsComponent implements OnDestroy {
     }
     this.column = column;
 
-    this.playersBanned.sort((a, b) => {
-      switch (this.column) {
-        case 'LastBanOn':
-          if (!a.banInfo?.LastBanOn || !b.banInfo?.LastBanOn || a.banInfo.LastBanOn === b.banInfo.LastBanOn) {
-            break;
-          }
-          return a.banInfo.LastBanOn < b.banInfo.LastBanOn
-            ? this.order === 'asc'
-              ? -1
-              : 1
-            : this.order === 'asc'
-              ? 1
-              : -1;
-        case 'lastPlayWith':
-          if (!a.lastPlayWith || !b.lastPlayWith || a.lastPlayWith === b.lastPlayWith) {
-            break;
-          }
-          return a.lastPlayWith < b.lastPlayWith ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
-      }
-      return (a.name || '') < (b.name || '') ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
-    });
+    this._sort();
   }
 
   ngOnDestroy(): void {
@@ -144,5 +124,30 @@ export class BanStatisticsComponent implements OnDestroy {
     if (this.displayOnlyListOfPlayers) {
       this.displayListOfBannedPlayers = true;
     }
+    this._sort();
+  }
+
+  _sort() {
+    this.playersBanned.sort((a, b) => {
+      switch (this.column) {
+        case 'LastBanOn':
+          if (!a.banInfo?.LastBanOn || !b.banInfo?.LastBanOn || a.banInfo.LastBanOn === b.banInfo.LastBanOn) {
+            break;
+          }
+          return a.banInfo.LastBanOn < b.banInfo.LastBanOn
+            ? this.order === 'asc'
+              ? -1
+              : 1
+            : this.order === 'asc'
+              ? 1
+              : -1;
+        case 'lastPlayWith':
+          if (!a.lastPlayWith || !b.lastPlayWith || a.lastPlayWith === b.lastPlayWith) {
+            break;
+          }
+          return a.lastPlayWith < b.lastPlayWith ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+      }
+      return (a.name || '') < (b.name || '') ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+    });
   }
 }

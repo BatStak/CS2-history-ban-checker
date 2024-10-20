@@ -2,6 +2,7 @@
 
 - add possibility to order tables
 - remove `cs_` and `de_` on maps name
+- performance optimizations
 
 # v2.2.5
 

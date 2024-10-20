@@ -1,3 +1,9 @@
+# v2.2.8
+
+- fix order of map datas when loading history
+- fix order of players banned when scanning
+- fix how we get the player steamID, why the "show map data" does not appear sometimes
+
 # v2.2.7
 
 - performance optimizations

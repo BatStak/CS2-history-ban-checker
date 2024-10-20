@@ -1,6 +1,7 @@
 table.results {
   border-collapse: collapse;
   width: 100%;
+  margin-top: 20px;
 
   td,
   th {
@@ -35,9 +36,10 @@ strong {
   color: #f00 !important;
 }
 
-em {
-  display: block;
-  text-align: right;
+.disclaimer {
+  margin: 20px 0 0;
+  padding: 10px;
+  background: #080c11;
 }
 
 .left {

@@ -45,9 +45,6 @@
     </button>
   }
   @if (displayListOfBannedPlayers) {
-    @if (!displayOnlyListOfPlayers) {
-      <em> *bans can occur on other games. We only know that the bans occurred after you played with them. </em>
-    }
     @if (displayOnlyListOfPlayers && playersBanned.length > 0) {
       <p>{{ playersBanned.length }} / {{ players.length }} players have been banned in this section.</p>
     }
@@ -171,6 +168,13 @@
       }
     </table>
     <p class="right">* mouse over for more informations</p>
+
+    @if (!displayOnlyListOfPlayers) {
+      <div class="disclaimer">
+        The players banned have been banned after playing with you.<br />
+        They can be banned on other games and they may have not cheated while playing with you at the time of the match.
+      </div>
+    }
   }
 } @else {
   <p>No banned player</p>

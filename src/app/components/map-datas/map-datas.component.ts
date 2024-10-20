@@ -41,12 +41,7 @@ export class MapDatasComponent implements OnInit {
     }
     this.column = column;
 
-    this.mapDatas.sort((a, b) => {
-      if (a[this.column] === undefined || b[this.column] === undefined || a[this.column] === b[this.column]) {
-        return a.map < b.map ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
-      }
-      return a[this.column]! < b[this.column]! ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
-    });
+    this._sort();
   }
 
   async toggle() {
@@ -58,5 +53,15 @@ export class MapDatasComponent implements OnInit {
 
   private async _update() {
     this.mapDatas = await this._dataService.getMapDatas();
+    this._sort();
+  }
+
+  private _sort() {
+    this.mapDatas.sort((a, b) => {
+      if (a[this.column] === undefined || b[this.column] === undefined || a[this.column] === b[this.column]) {
+        return a.map < b.map ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+      }
+      return a[this.column]! < b[this.column]! ? (this.order === 'asc' ? -1 : 1) : this.order === 'asc' ? 1 : -1;
+    });
   }
 }

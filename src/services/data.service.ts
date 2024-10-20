@@ -21,6 +21,7 @@ export class DataService {
   _utilsService = inject(UtilsService);
 
   onSave = new Subject<void>();
+  onStatisticsUpdate = new Subject<boolean>();
   onStatisticsUpdated = new Subject<void>();
   onReset = new Subject<void>();
 
@@ -46,7 +47,7 @@ export class DataService {
 
   newPlayersBanned = false;
 
-  onSaveDebounceTimeInMs = 250;
+  refreshDebounceTimeInMs = 500;
 
   _friendsListCssSelector = '.friend_block_content';
   _avatarCssSelector = '.player_avatar img';
@@ -56,8 +57,12 @@ export class DataService {
   private _mapNamePipe = new MapNamePipe();
 
   constructor() {
-    this.onSave.pipe(debounceTime(this.onSaveDebounceTimeInMs)).subscribe(() => {
+    this.onSave.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe(() => {
       this._save();
+    });
+
+    this.onStatisticsUpdate.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe((updateFlags: boolean) => {
+      this._updateStatistics(updateFlags);
     });
   }
 
@@ -86,7 +91,7 @@ export class DataService {
     if (this.database.matches.some((m) => !m.section)) {
       this.reset();
     } else {
-      this._updateStatistics(false);
+      this.onStatisticsUpdate.next(false);
     }
   }
 
@@ -221,7 +226,7 @@ export class DataService {
   }
 
   private async _save() {
-    this._updateStatistics();
+    this.onStatisticsUpdate.next(true);
     await this._databaseService.setDatabase(this.database);
   }
 
@@ -378,7 +383,7 @@ export class DataService {
     };
   }
 
-  _updateStatistics(updateFlags = true) {
+  _updateStatistics(updateFlags: boolean) {
     this.database.players.sort((a, b) => this._sortPlayers(a, b));
     this.database.matches.sort((a, b) => this._sortMatches(a, b));
 

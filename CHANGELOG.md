@@ -1,3 +1,7 @@
+# v2.2.7
+
+- performance optimizations
+
 # v2.2.6
 
 - add possibility to order tables

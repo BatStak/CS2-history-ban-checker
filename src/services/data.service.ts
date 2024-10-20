@@ -30,7 +30,7 @@ export class DataService {
     players: [],
   };
 
-  mySteamId?: string;
+  mySteamId: string | undefined;
 
   section?: string;
   format?: MatchFormat;
@@ -57,6 +57,8 @@ export class DataService {
   private _mapNamePipe = new MapNamePipe();
 
   constructor() {
+    this.mySteamId = document.body.innerHTML?.match(/g_steamID = \"([0-9]+)\"/)?.[1];
+
     this.onSave.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe(() => {
       this._save();
     });
@@ -80,12 +82,6 @@ export class DataService {
     this.database ??= { matches: [], players: [] };
     this.database.matches ??= [];
     this.database.players ??= [];
-
-    // get my steamID
-    const profileLink = document.querySelector<HTMLLinkElement>('.profile_small_header_texture > a')?.href;
-    if (profileLink) {
-      this.mySteamId = this.database.players.find((p) => p.profileLink === profileLink)?.steamID64;
-    }
 
     // to avoid having empty results on next version because we add "section" attributes between 2 versions
     if (this.database.matches.some((m) => !m.section)) {

@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class MapNamePipe implements PipeTransform {
   transform(value?: string): string {
-    return value ? this._capitalizeFirstLetter(value.replace(/^(de_|cs_)(.*)$/, '$2')) : '';
+    return value ? this._capitalizeFirstLetter(value.replace(/^(de_|cs_)(.*)$/, '$2').trim()) : '';
   }
 
   private _capitalizeFirstLetter(string: string) {

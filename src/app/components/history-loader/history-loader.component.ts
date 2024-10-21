@@ -65,7 +65,7 @@ export class HistoryLoaderComponent {
       this.hideHistoryTable = (event.target as HTMLInputElement).checked;
       this._dataService.database.hideHistoryTable = this.hideHistoryTable;
       await this._dataService.save();
-      if (this.hideHistoryTable) {
+      if (this.hideHistoryTable && this.isLoadingHistory) {
         this._dataService.cleanParsedMatches();
       }
     }

@@ -140,6 +140,7 @@ export class DataService {
     for (let match of Array.from(matches)) {
       match.remove();
     }
+    this._utilsService.hasRemovedHistoryLoaded = true;
   }
 
   getMapDatas() {

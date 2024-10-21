@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class UtilsService {
   isLoadingHistory = false;
+  hasRemovedHistoryLoaded = false;
   isScanning = false;
 
   startDate?: string;

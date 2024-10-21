@@ -18,9 +18,9 @@
       <cs2-history-ban-statistics class="container-block"></cs2-history-ban-statistics>
     }
   </div>
-  @if (hideHistoryTable && isOnGCPDSection) {
+  @if (isOnGCPDSection && hasRemovedHistoryLoaded) {
     <div class="warning-panel">
-      We are hiding the history for better performance. We still parse all the history loaded.
+      We removed history loaded for better performance. We still parse all the history loaded.
     </div>
   }
 }

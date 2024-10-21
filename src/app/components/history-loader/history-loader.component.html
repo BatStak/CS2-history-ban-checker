@@ -7,9 +7,7 @@
     [checked]="hideHistoryTable"
     (change)="toggleHideCleanMatches($event)"
   />
-  <label for="hide-history-table">
-    Remove history from the page for better performance (tab can become very slow if you go deep).
-  </label>
+  <label for="hide-history-table"> Remove history while loading for better performance. </label>
 </div>
 
 @if (isLoadingHistory) {

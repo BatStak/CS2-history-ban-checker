@@ -33,6 +33,10 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
   _dataService = inject(DataService);
   _applicationRef = inject(ApplicationRef);
 
+  get hasRemovedHistoryLoaded(): boolean {
+    return this._utilsService.hasRemovedHistoryLoaded;
+  }
+
   ready = false;
 
   isOnGCPDSection = false;
@@ -133,7 +137,7 @@ export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
     if (this.isOnGCPDSection) {
       this._utilsService.getHistoryPeriod();
       this._dataService.parseMatches();
-      if (this.database.hideHistoryTable) {
+      if (this.database.hideHistoryTable && this._utilsService.isLoadingHistory) {
         this._dataService.cleanParsedMatches();
       }
     } else {

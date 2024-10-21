@@ -354,7 +354,7 @@ export class DataService {
         if (banInfo.NumberOfGameBans) {
           infos += `${infos ? ', ' : ''}${banInfo.NumberOfGameBans} Game ban${banInfo.NumberOfGameBans > 1 ? 's' : ''}`;
         }
-        if (banInfo.LastBanOn) {
+        if (banInfo.NumberOfVACBans || banInfo.NumberOfGameBans) {
           infos += `, last ban was ${formatDistance(banInfo.LastBanOn, new Date(), {
             addSuffix: true,
           })}`;

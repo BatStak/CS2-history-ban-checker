@@ -1,3 +1,8 @@
+# v2.2.9
+
+- remove history loaded only when loading history
+- fix a bug where we display "ban date" on mouseover on someone not banned
+
 # v2.2.8
 
 - fix order of map datas when loading history

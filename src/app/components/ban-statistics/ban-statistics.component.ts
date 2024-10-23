@@ -62,6 +62,7 @@ export class BanStatisticsComponent implements OnDestroy {
     }
     this.column = column;
 
+    this._closeMatchInfo();
     this._sort();
   }
 

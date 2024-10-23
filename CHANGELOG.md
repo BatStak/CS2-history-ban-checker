@@ -1,3 +1,7 @@
+# v2.2.10
+
+- fix a bug showing wrong match under a banned player when sorting. We close the last match opened.
+
 # v2.2.9
 
 - remove history loaded only when loading history

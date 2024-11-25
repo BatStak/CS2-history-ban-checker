@@ -1,5 +1,7 @@
 # CS2 history ban checker
 
+/!\ blocked people are limited to ~905 players. We can't check everyone.
+
 Load your match history and find if players have been banned after playing with you.
 You can check if players have been banned on friends, followed, blocked and other "people" pages.
 

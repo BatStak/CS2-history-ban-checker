@@ -14,18 +14,17 @@ import { HistoryLoaderComponent } from './components/history-loader/history-load
 import { OptionsComponent } from './components/options/options.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    OptionsComponent,
-    HistoryLoaderComponent,
-    ScannerComponent,
-    BanStatisticsComponent,
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+    selector: 'app-root',
+    imports: [
+        CommonModule,
+        FormsModule,
+        OptionsComponent,
+        HistoryLoaderComponent,
+        ScannerComponent,
+        BanStatisticsComponent,
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
   _databaseService = inject(DatabaseService);

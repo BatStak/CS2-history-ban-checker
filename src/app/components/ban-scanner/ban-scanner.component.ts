@@ -6,11 +6,10 @@ import { SteamService } from '../../../services/steam.service';
 import { UtilsService } from '../../../services/utils.service';
 
 @Component({
-  selector: 'cs2-history-ban-scanner',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './ban-scanner.component.html',
-  styleUrl: './ban-scanner.component.scss',
+    selector: 'cs2-history-ban-scanner',
+    imports: [CommonModule],
+    templateUrl: './ban-scanner.component.html',
+    styleUrl: './ban-scanner.component.scss'
 })
 export class ScannerComponent implements DoCheck {
   _utilsService = inject(UtilsService);

@@ -6,11 +6,10 @@ import { DataService, WinrateData as MapData } from '../../../services/data.serv
 type columnType = 'map' | 'sampleSize' | 'banrate' | 'winrate';
 
 @Component({
-  selector: 'map-datas',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './map-datas.component.html',
-  styleUrl: './map-datas.component.scss',
+    selector: 'map-datas',
+    imports: [CommonModule],
+    templateUrl: './map-datas.component.html',
+    styleUrl: './map-datas.component.scss'
 })
 export class MapDatasComponent implements OnInit {
   _dataService = inject(DataService);

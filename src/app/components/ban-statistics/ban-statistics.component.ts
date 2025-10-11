@@ -10,11 +10,10 @@ import { MapDatasComponent } from '../map-datas/map-datas.component';
 type columnType = 'name' | 'lastPlayWith' | 'LastBanOn';
 
 @Component({
-  selector: 'cs2-history-ban-statistics',
-  standalone: true,
-  imports: [CommonModule, MapNamePipe, MapImagePipe, MapDatasComponent],
-  templateUrl: './ban-statistics.component.html',
-  styleUrl: './ban-statistics.component.scss',
+    selector: 'cs2-history-ban-statistics',
+    imports: [CommonModule, MapNamePipe, MapImagePipe, MapDatasComponent],
+    templateUrl: './ban-statistics.component.html',
+    styleUrl: './ban-statistics.component.scss'
 })
 export class BanStatisticsComponent implements OnDestroy {
   _dataService = inject(DataService);

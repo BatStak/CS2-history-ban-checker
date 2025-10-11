@@ -5,11 +5,10 @@ import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
 
 @Component({
-  selector: 'cs2-history-options',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './options.component.html',
-  styleUrl: './options.component.scss',
+    selector: 'cs2-history-options',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './options.component.html',
+    styleUrl: './options.component.scss'
 })
 export class OptionsComponent {
   _utilsService = inject(UtilsService);

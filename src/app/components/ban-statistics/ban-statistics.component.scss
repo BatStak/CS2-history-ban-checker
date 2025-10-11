@@ -32,8 +32,12 @@ table.results {
   }
 }
 
-strong {
+.not-fine {
   color: #f00 !important;
+}
+
+.fine {
+  color: rgb(0, 99, 0) !important;
 }
 
 .disclaimer {

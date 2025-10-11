@@ -30,13 +30,26 @@
 @if (playersBanned.length) {
   @if (!displayOnlyListOfPlayers) {
     <p>
-      Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been banned after playing with you
-      (<strong>{{ bannedPourcentage }}%</strong>)*
+      Out of {{ playersCount - 1 }} players encountered, {{ bannedCount }} have been banned later (<strong
+        class="not-fine"
+        >{{ bannedPourcentage }}%</strong
+      >)*
     </p>
+
     <p>
-      Out of {{ matchesCount }} games played, {{ matchesConcerned }} have been with players banned after the game
-      (<strong>{{ matchPourcentage }}%</strong>)*
+      Out of {{ matchesCount }} games played, {{ matchesConcerned }} were played with later-banned players (<strong
+        class="not-fine"
+        >{{ matchPourcentage }}%</strong
+      >)*
     </p>
+
+    Are you unlucky ?
+    <strong [class.fine]="!unlucky" [class.not-fine]="unlucky">{{ unlucky ? "Yes" : "No" }}</strong>
+    <ul>
+      <li>{{ matchesAgainstCheatersPercentage }}% of the time, a later-banned player was on the opposing team,</li>
+      <li>{{ matchesWithCheatersPercentage }}% of the time, a later-banned player was on your team,</li>
+      <li>{{ matchesBothTeamsHasCheatersPercentage }}% of the time, a later-banned player was on both teams.</li>
+    </ul>
 
     <map-datas style="margin-bottom: 20px"></map-datas>
 
@@ -112,12 +125,6 @@
         @if (matchInfo && matchInfoIndex === $index) {
           <tr>
             <td colspan="5">
-              @if (!matchInfo.teamA?.scores?.length) {
-                <div class="warning-panel">
-                  Due to this feature being a new one, you need to reload your history to the date of the match so we
-                  can retrieve the scoreboard informations.
-                </div>
-              }
               <table class="match-info-table">
                 <tr>
                   <td class="map-info">
@@ -171,10 +178,10 @@
 
     @if (!displayOnlyListOfPlayers) {
       <div class="disclaimer">
-        The players have been banned after playing with you.<br />
-        We don't take into account any ban that occured before the last match played with them. <br />
-        However, they can be banned on other games and they may have not cheated while playing with you at the time of
-        the match.
+        We only count players who were <strong>banned after playing with you</strong>, specifically excluding any ban
+        that occurred before your last match with them. It's important to remember that they could have been banned for
+        actions in <strong>other games</strong>, and
+        <strong>they might not have been cheating at the time you played together</strong>.
       </div>
     }
   }

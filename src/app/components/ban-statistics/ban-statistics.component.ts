@@ -10,10 +10,10 @@ import { MapDatasComponent } from '../map-datas/map-datas.component';
 type columnType = 'name' | 'lastPlayWith' | 'LastBanOn';
 
 @Component({
-    selector: 'cs2-history-ban-statistics',
-    imports: [CommonModule, MapNamePipe, MapImagePipe, MapDatasComponent],
-    templateUrl: './ban-statistics.component.html',
-    styleUrl: './ban-statistics.component.scss'
+  selector: 'cs2-history-ban-statistics',
+  imports: [CommonModule, MapNamePipe, MapImagePipe, MapDatasComponent],
+  templateUrl: './ban-statistics.component.html',
+  styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
   _dataService = inject(DataService);
@@ -28,6 +28,14 @@ export class BanStatisticsComponent implements OnDestroy {
   matchesCount = 0;
   matchesConcerned = 0;
   matchPourcentage = 0;
+
+  matchesAgainstCheaters = 0;
+  matchesWithCheaters = 0;
+  matchesBothTeamsHasCheaters = 0;
+  matchesAgainstCheatersPercentage = 0;
+  matchesWithCheatersPercentage = 0;
+  matchesBothTeamsHasCheatersPercentage = 0;
+  unlucky = false;
 
   matchInfoIndex?: number;
   matchInfo?: MatchInfo;
@@ -107,6 +115,10 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   _update() {
+    this.matchesAgainstCheaters = 0;
+    this.matchesWithCheaters = 0;
+    this.matchesBothTeamsHasCheaters = 0;
+
     this.playersCount = this._dataService.filteredPlayers.length;
     this.bannedCount = this.playersBanned.length;
     this.bannedPourcentage = this.playersCount ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100 : 0;
@@ -124,7 +136,50 @@ export class BanStatisticsComponent implements OnDestroy {
     if (this.displayOnlyListOfPlayers) {
       this.displayListOfBannedPlayers = true;
     }
+
+    this._calculateUnluckyStats(filteredMatches);
+
     this._sort();
+  }
+
+  _calculateUnluckyStats(filteredMatches: MatchInfo[]) {
+    if (this.matchesConcerned > 0) {
+      filteredMatches.forEach((match) => {
+        const userTeam = match.teamA?.scores?.some((player) => player.steamID64 === this._dataService.mySteamId)
+          ? 'A'
+          : 'B';
+        const cheaterInTeamA = match.teamA?.scores?.some((player) =>
+          this.playersBanned.some((cheater) => cheater.steamID64 === player.steamID64),
+        );
+        const cheaterInTeamB = match.teamB?.scores?.some((player) =>
+          this.playersBanned.some((cheater) => cheater.steamID64 === player.steamID64),
+        );
+
+        if (cheaterInTeamA && cheaterInTeamB) {
+          this.matchesBothTeamsHasCheaters++;
+        } else if (userTeam === 'A') {
+          if (cheaterInTeamA) {
+            this.matchesWithCheaters++;
+          } else {
+            this.matchesAgainstCheaters++;
+          }
+        } else if (userTeam === 'B') {
+          if (cheaterInTeamB) {
+            this.matchesWithCheaters++;
+          } else {
+            this.matchesAgainstCheaters++;
+          }
+        }
+      });
+
+      this.matchesAgainstCheatersPercentage =
+        Math.round((this.matchesAgainstCheaters / this.matchesConcerned) * 10000) / 100;
+      this.matchesWithCheatersPercentage = Math.round((this.matchesWithCheaters / this.matchesConcerned) * 10000) / 100;
+      this.matchesBothTeamsHasCheatersPercentage =
+        Math.round((this.matchesBothTeamsHasCheaters / this.matchesConcerned) * 10000) / 100;
+
+      this.unlucky = this.matchesAgainstCheatersPercentage > this.matchesWithCheatersPercentage;
+    }
   }
 
   _sort() {

@@ -1,12 +1,14 @@
 <ng-template #disclaimer>
   <div class="disclaimer">
     <a (click)="displayDisclaimer = !displayDisclaimer">About your Steam Web API key</a>
-    <div *ngIf="displayDisclaimer">
-      We won't send it anywhere on the internet. It's your own Steam Web API key. We store it in your browser locally.
-      No one will have access to it. Your Steam Web API key does not give permission to trade or anything fishy. It's
-      only used to read public information of Steam accounts. We are only using it to check if Steam profiles are
-      banned. <a target="_blank" href="https://steamcommunity.com/dev">Click here to know more.</a>
-    </div>
+    @if (displayDisclaimer) {
+      <div>
+        We won't send it anywhere on the internet. It's your own Steam Web API key. We store it in your browser locally.
+        No one will have access to it. Your Steam Web API key does not give permission to trade or anything fishy. It's
+        only used to read public information of Steam accounts. We are only using it to check if Steam profiles are
+        banned. <a target="_blank" href="https://steamcommunity.com/dev">Click here to know more.</a>
+      </div>
+    }
   </div>
 </ng-template>
 
@@ -33,9 +35,11 @@
         </a>
         <br />
         <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
-        <div *ngIf="displayMoreOptions">
-          <button (click)="resetDatabase()">Reset Database</button>
-        </div>
+        @if (displayMoreOptions) {
+          <div>
+            <button (click)="resetDatabase()">Reset Database</button>
+          </div>
+        }
       </div>
       <div *ngTemplateOutlet="disclaimer"></div>
       <div [style.text-align]="'right'">

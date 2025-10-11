@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { UtilsService } from '../services/utils.service';
 
-import { CommonModule } from '@angular/common';
+
 import Bowser from 'bowser';
 import { debounceTime, Subject, Subscription } from 'rxjs';
 import { Database, MatchFormat } from '../models';
@@ -16,13 +16,12 @@ import { OptionsComponent } from './components/options/options.component';
 @Component({
     selector: 'app-root',
     imports: [
-        CommonModule,
-        FormsModule,
-        OptionsComponent,
-        HistoryLoaderComponent,
-        ScannerComponent,
-        BanStatisticsComponent,
-    ],
+    FormsModule,
+    OptionsComponent,
+    HistoryLoaderComponent,
+    ScannerComponent,
+    BanStatisticsComponent
+],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })

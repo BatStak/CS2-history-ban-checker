@@ -9,3 +9,5 @@ rm ./dist/cs-history-ban-checker/chrome/manifest_firefox.json
 mv ./dist/cs-history-ban-checker/firefox/manifest_firefox.json ./dist/cs-history-ban-checker/firefox/manifest.json
 rm ./dist/cs-history-ban-checker/chrome/index.html ./dist/cs-history-ban-checker/chrome/favicon.ico
 rm ./dist/cs-history-ban-checker/firefox/index.html ./dist/cs-history-ban-checker/firefox/favicon.ico
+cd ./dist/cs-history-ban-checker/chrome/ && zip ../chrome.zip ./* && cd -
+cd ./dist/cs-history-ban-checker/firefox/ && zip ../firefox.zip ./* && cd -

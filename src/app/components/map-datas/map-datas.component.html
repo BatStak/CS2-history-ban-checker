@@ -1,7 +1,12 @@
 @if (mySteamId) {
-  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} map datas</button>
+  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} personal statistics</button>
 
   @if (display) {
+    <p>
+      Winrate on last
+      <input id="winrate" type="number" [(value)]="lastMapsSamplesize" (change)="winRateUpdated.next($event)" /> maps :
+      <strong>{{ lastMapsPercentage }}% ({{ lastMapsWinCounts }} / {{ lastMapsRealSamplesize }})</strong>
+    </p>
     <table>
       <tr>
         <th

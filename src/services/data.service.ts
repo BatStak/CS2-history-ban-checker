@@ -13,6 +13,7 @@ export interface WinrateData {
   withSomeoneBanAfter: number;
   winrate?: number;
   banrate?: number;
+  mostRecentWinsCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -143,28 +144,38 @@ export class DataService {
     this._utilsService.hasRemovedHistoryLoaded = true;
   }
 
-  getMapDatas() {
+  getMapDatas(lastMapCount: number) {
     const results: WinrateData[] = [];
+    let index = 0;
+    let countWin = 0;
     let wins = 0;
     let withSomeoneBanAfter = 0;
-    this.filteredMatches.forEach((matchInfo: MatchInfo) => {
-      const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
-      winrate.sampleSize++;
-      if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
-        winrate.wins++;
-        wins++;
-      }
-      if (this._matchHasPlayerBanAfter(matchInfo)) {
-        winrate.withSomeoneBanAfter++;
-        withSomeoneBanAfter++;
-      }
-    });
+    this.filteredMatches
+      // sort by most recent first
+      .sort((a: MatchInfo, b: MatchInfo) => (a.id! > b.id! ? -1 : 1))
+      .forEach((matchInfo: MatchInfo) => {
+        const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
+        winrate.sampleSize++;
+        if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
+          winrate.wins++;
+          wins++;
+          if (index < lastMapCount) {
+            countWin++;
+          }
+        }
+        if (this._matchHasPlayerBanAfter(matchInfo)) {
+          winrate.withSomeoneBanAfter++;
+          withSomeoneBanAfter++;
+        }
+        index++;
+      });
 
     results.push({
       map: 'All maps',
       wins: wins,
       withSomeoneBanAfter: withSomeoneBanAfter,
       sampleSize: this.filteredMatches.length,
+      mostRecentWinsCount: countWin,
     });
 
     results.forEach((winrate) => {

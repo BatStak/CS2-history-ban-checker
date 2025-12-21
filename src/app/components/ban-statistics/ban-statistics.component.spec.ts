@@ -3,6 +3,7 @@ import { DataService } from '../../../services/data.service';
 import { DatabaseService } from '../../../services/database.service';
 import { UtilsService } from '../../../services/utils.service';
 import { BanStatisticsComponent } from './ban-statistics.component';
+import { parseISO } from 'date-fns';
 
 describe('BanStatisticsComponent', async () => {
   let component: BanStatisticsComponent;
@@ -38,7 +39,7 @@ describe('BanStatisticsComponent', async () => {
     component._update();
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('No banned player');
-    expect(dom.textContent).toContain('1 have been banned after playing with you');
+    expect(dom.textContent).toContain('1 have been banned later');
   });
 
   it('Test update', async () => {
@@ -130,5 +131,35 @@ describe('BanStatisticsComponent', async () => {
     expect(component.bannedCount).toEqual(10);
     expect(component.matchesConcerned).toEqual(3);
     expect(component.matchPourcentage).toEqual(0.31);
+  });
+
+  it('Test frequency', () => {
+    dataService.oldestMatch = { id: '2024-10-29 22:39:27 GMT', playersSteamID64: [] };
+
+    // 15 bans
+    dataService.playersBannedFiltered = [
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+      { matches: [], steamID64: 'a' },
+    ];
+
+    component._getFrequencyBans(parseISO('2025-10-29'));
+    expect(component.frequencyInDaysOfBans).toEqual(23);
+
+    component._getFrequencyBans(parseISO('2025-06-01'));
+    expect(component.frequencyInDaysOfBans).toEqual(13);
   });
 });

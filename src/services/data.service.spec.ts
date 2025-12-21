@@ -311,7 +311,7 @@ describe('DataService', () => {
         playersSteamID64: ['playerId', 'otherId'],
       },
     ];
-    const mapdatas = dataService.getMapDatas();
+    const mapdatas = dataService.getMapDatas(30);
     expect(mapdatas.length).toEqual(3);
     expect(mapdatas[0].map).toEqual('All maps');
     expect(mapdatas[0].sampleSize).toEqual(3);

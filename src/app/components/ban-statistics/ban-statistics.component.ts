@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { differenceInDays, parse } from 'date-fns';
 import { MatchInfo, PlayerInfo } from '../../../models';
 import { MapImagePipe } from '../../../pipes/mapImage.pipe';
 import { MapNamePipe } from '../../../pipes/mapName.pipe';
@@ -35,6 +36,7 @@ export class BanStatisticsComponent implements OnDestroy {
   matchesAgainstCheatersPercentage = 0;
   matchesWithCheatersPercentage = 0;
   matchesBothTeamsHasCheatersPercentage = 0;
+  frequencyInDaysOfBans = -1;
   unlucky = false;
 
   matchInfoIndex?: number;
@@ -124,10 +126,10 @@ export class BanStatisticsComponent implements OnDestroy {
     this.bannedPourcentage = this.playersCount ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100 : 0;
 
     this.matchesCount = this._dataService.filteredMatches.length;
-    const filteredMatches = this._dataService.filteredMatches.filter((m) =>
+    const matchWithBans = this._dataService.filteredMatches.filter((m) =>
       this.playersBanned.some((p) => m.playersSteamID64.includes(p.steamID64)),
     );
-    this.matchesConcerned = filteredMatches.length || 0;
+    this.matchesConcerned = matchWithBans.length || 0;
     this.matchPourcentage = this.matchesCount
       ? Math.round((this.matchesConcerned / this.matchesCount) * 10000) / 100
       : 0;
@@ -137,14 +139,26 @@ export class BanStatisticsComponent implements OnDestroy {
       this.displayListOfBannedPlayers = true;
     }
 
-    this._calculateUnluckyStats(filteredMatches);
+    this._calculateUnluckyStats(matchWithBans);
 
     this._sort();
+
+    this._getFrequencyBans(new Date());
   }
 
-  _calculateUnluckyStats(filteredMatches: MatchInfo[]) {
+  _getFrequencyBans(now: Date) {
+    if (this.playersBanned.length && this._dataService.oldestMatch?.id) {
+      const diffInDays = differenceInDays(
+        now,
+        parse(this._dataService.oldestMatch?.id!, "yyyy-MM-dd HH:mm:ss 'GMT'", now),
+      );
+      this.frequencyInDaysOfBans = Math.round(diffInDays / this.playersBanned.length);
+    }
+  }
+
+  _calculateUnluckyStats(matchWithBans: MatchInfo[]) {
     if (this.matchesConcerned > 0) {
-      filteredMatches.forEach((match) => {
+      matchWithBans.forEach((match) => {
         const userTeam = match.teamA?.scores?.some((player) => player.steamID64 === this._dataService.mySteamId)
           ? 'A'
           : 'B';

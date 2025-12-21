@@ -43,6 +43,13 @@
       >)*
     </p>
 
+    @if (frequencyInDaysOfBans >= 0) {
+      <p>
+        On average, you got a new ban every <strong>{{ frequencyInDaysOfBans }} days</strong> since your first match in
+        this section.
+      </p>
+    }
+
     Are you unlucky ?
     <strong [class.fine]="!unlucky" [class.not-fine]="unlucky">{{ unlucky ? "Yes" : "No" }}</strong>
     <ul>

@@ -150,25 +150,22 @@ export class DataService {
     let countWin = 0;
     let wins = 0;
     let withSomeoneBanAfter = 0;
-    this.filteredMatches
-      // sort by most recent first
-      .sort((a: MatchInfo, b: MatchInfo) => (a.id! > b.id! ? -1 : 1))
-      .forEach((matchInfo: MatchInfo) => {
-        const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
-        winrate.sampleSize++;
-        if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
-          winrate.wins++;
-          wins++;
-          if (index < lastMapCount) {
-            countWin++;
-          }
+    this.filteredMatches.forEach((matchInfo: MatchInfo) => {
+      const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
+      winrate.sampleSize++;
+      if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
+        winrate.wins++;
+        wins++;
+        if (index < lastMapCount) {
+          countWin++;
         }
-        if (this._matchHasPlayerBanAfter(matchInfo)) {
-          winrate.withSomeoneBanAfter++;
-          withSomeoneBanAfter++;
-        }
-        index++;
-      });
+      }
+      if (this._matchHasPlayerBanAfter(matchInfo)) {
+        winrate.withSomeoneBanAfter++;
+        withSomeoneBanAfter++;
+      }
+      index++;
+    });
 
     results.push({
       map: 'All maps',
@@ -400,7 +397,10 @@ export class DataService {
 
     if (this.section) {
       // filter matches from the section we are on
-      this.filteredMatches = this.database.matches.filter((m) => m.section === this.section);
+      // order by date desc
+      this.filteredMatches = this.database.matches
+        .filter((m) => m.section === this.section)
+        .sort((a: MatchInfo, b: MatchInfo) => (a.id! > b.id! ? -1 : 1));
 
       // filter players from the section we are on
       this.filteredPlayers = this.database.players.filter(
@@ -420,7 +420,9 @@ export class DataService {
     }
 
     // get oldest match of history
-    this.oldestMatch = this.filteredMatches[0];
+    if (this.filteredMatches.length) {
+      this.oldestMatch = this.filteredMatches[this.filteredMatches.length - 1];
+    }
 
     // get player banned
     const banInfosList = this.filteredPlayers

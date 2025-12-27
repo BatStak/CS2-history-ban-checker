@@ -332,4 +332,33 @@ describe('DataService', () => {
     expect(mapdatas[2].winrate).toEqual(50);
     expect(mapdatas[2].banrate).toEqual(50);
   });
+
+  it('test soloQ counter', async () => {
+    dataService.mySteamId = 'playerId';
+    dataService.database.friends = [
+      { steamID64: '111', matches: [] },
+      { steamID64: '222', matches: [] },
+      { steamID64: '333', matches: [] },
+    ];
+    dataService.filteredMatches = [
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId'] },
+      { playersSteamID64: ['playerId', '111'] },
+      { playersSteamID64: ['playerId', '222'] },
+      { playersSteamID64: ['playerId', '333'] },
+      { playersSteamID64: ['playerId', '111', '222'] },
+      { playersSteamID64: ['playerId', '111', '333'] },
+    ];
+    const mapdatas = dataService.getMapDatas(30);
+    expect(mapdatas[0].map).toEqual('All maps');
+    expect(mapdatas[0].soloQCount).toEqual(10);
+  });
 });

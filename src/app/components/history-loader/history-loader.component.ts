@@ -5,10 +5,10 @@ import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
 
 @Component({
-    selector: 'cs2-history-loader',
-    imports: [CommonModule, FormsModule],
-    templateUrl: './history-loader.component.html',
-    styleUrl: './history-loader.component.scss'
+  selector: 'cs2-history-loader',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './history-loader.component.html',
+  styleUrl: './history-loader.component.scss',
 })
 export class HistoryLoaderComponent {
   _utilsService = inject(UtilsService);

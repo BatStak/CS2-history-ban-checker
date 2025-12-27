@@ -24,8 +24,16 @@ export class MapDatasComponent implements OnInit {
 
   lastMapsSamplesize = 30;
   lastMapsRealSamplesize = 30;
+
   lastMapsPercentage = 0;
-  lastMapsWinCounts = 0;
+  lastMapsWinCount = 0;
+
+  soloQCount = 0;
+  soloQPercentage = 0;
+
+  allMapsSampleSize = 0;
+
+  hasFriends = false;
 
   get mySteamId(): string | undefined {
     return this._dataService.mySteamId;
@@ -65,12 +73,17 @@ export class MapDatasComponent implements OnInit {
   }
 
   private async _update() {
+    this.hasFriends = this._dataService.hasFriends();
     this.mapDatas = await this._dataService.getMapDatas(this.lastMapsSamplesize);
     this._sort();
     const allMapsData = this.mapDatas.find((a) => a.map === 'All maps')!;
-    this.lastMapsWinCounts = allMapsData.mostRecentWinsCount || 0;
+    this.allMapsSampleSize = allMapsData.sampleSize;
+    this.lastMapsWinCount = allMapsData.mostRecentWinsCount || 0;
     this.lastMapsRealSamplesize = Math.min(this.lastMapsSamplesize, allMapsData.sampleSize);
-    this.lastMapsPercentage = Math.round((this.lastMapsWinCounts / this.lastMapsRealSamplesize) * 10000) / 100;
+    this.lastMapsPercentage = Math.round((this.lastMapsWinCount / this.lastMapsRealSamplesize) * 10000) / 100;
+
+    this.soloQCount = allMapsData.soloQCount || 0;
+    this.soloQPercentage = Math.round((this.soloQCount / this.allMapsSampleSize) * 10000) / 100;
   }
 
   private _sort() {

@@ -5,7 +5,7 @@
     <p>
       Winrate on last
       <input id="winrate" type="number" [(value)]="lastMapsSamplesize" (change)="winRateUpdated.next($event)" /> maps :
-      <strong>{{ lastMapsPercentage }}% ({{ lastMapsWinCounts }} / {{ lastMapsRealSamplesize }})</strong>
+      <strong>{{ lastMapsPercentage }}% ({{ lastMapsWinCount }} / {{ lastMapsRealSamplesize }})</strong>
     </p>
     <table>
       <tr>
@@ -55,5 +55,10 @@
         </tr>
       }
     </table>
+    @if (hasFriends) {
+      <p>
+        SoloQ percentage : <strong>{{ soloQPercentage }}%</strong> ({{ soloQCount }} / {{ allMapsSampleSize }})
+      </p>
+    }
   }
 }

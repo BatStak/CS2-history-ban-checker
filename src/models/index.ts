@@ -42,6 +42,7 @@ export interface MatchInfo {
 export interface Database {
   apiKey?: string;
   hideHistoryTable?: boolean;
+  friends: PlayerInfo[];
   players: PlayerInfo[];
   matches: MatchInfo[];
 }

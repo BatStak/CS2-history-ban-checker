@@ -14,6 +14,7 @@ export interface WinrateData {
   winrate?: number;
   banrate?: number;
   mostRecentWinsCount?: number;
+  soloQCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +30,7 @@ export class DataService {
   database: Database = {
     matches: [],
     players: [],
+    friends: [],
   };
 
   mySteamId: string | undefined;
@@ -80,7 +82,7 @@ export class DataService {
       this.format = format;
     }
 
-    this.database ??= { matches: [], players: [] };
+    this.database ??= { matches: [], players: [], friends: [] };
     this.database.matches ??= [];
     this.database.players ??= [];
 
@@ -97,11 +99,16 @@ export class DataService {
     this.database = {
       apiKey: this.database.apiKey,
       hideHistoryTable: false,
+      friends: [],
       matches: [],
       players: [],
     };
     await this._databaseService.setDatabase(this.database);
     document.location.reload();
+  }
+
+  hasFriends() {
+    return !!this.database.friends?.length;
   }
 
   parseMatches() {
@@ -112,6 +119,10 @@ export class DataService {
   }
 
   parseFriends() {
+    const isOnFriendsList = /\/friends\/?$/.test(document.location.pathname);
+    if (isOnFriendsList) {
+      this.database.friends = [];
+    }
     this.filteredPlayers = [];
     const players = document.querySelectorAll<HTMLElement>(this._utilsService.friendsListCssSelector);
     for (let player of Array.from(players)) {
@@ -133,6 +144,9 @@ export class DataService {
         player.classList.add('banned');
         player.setAttribute('title', this.getBanTitle(playerInfo));
       }
+      if (isOnFriendsList) {
+        this.database.friends.push(playerInfo);
+      }
     }
   }
 
@@ -149,10 +163,14 @@ export class DataService {
     let index = 0;
     let countWin = 0;
     let wins = 0;
+    let soloQ = 0;
     let withSomeoneBanAfter = 0;
     this.filteredMatches.forEach((matchInfo: MatchInfo) => {
       const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
       winrate.sampleSize++;
+      if (!this._isPremade(matchInfo)) {
+        soloQ++;
+      }
       if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
         winrate.wins++;
         wins++;
@@ -173,6 +191,7 @@ export class DataService {
       withSomeoneBanAfter: withSomeoneBanAfter,
       sampleSize: this.filteredMatches.length,
       mostRecentWinsCount: countWin,
+      soloQCount: soloQ,
     });
 
     results.forEach((winrate) => {
@@ -201,6 +220,10 @@ export class DataService {
       results.push(winrate);
     }
     return winrate;
+  }
+
+  private _isPremade(matchInfo?: MatchInfo) {
+    return this.hasFriends() && this.database.friends.some((x) => matchInfo?.playersSteamID64.includes(x.steamID64));
   }
 
   private _isPlayerWinIntoTeam(team?: TeamInfo) {

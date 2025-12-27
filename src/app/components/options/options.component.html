@@ -33,15 +33,15 @@
         <a class="link" href="https://steamcommunity.com/dev/apikey" target="_blank">
           Retrieve your Steam Web API Key here
         </a>
-        <br />
-        <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
-        @if (displayMoreOptions) {
-          <div>
-            <button (click)="resetDatabase()">Reset Database</button>
-          </div>
-        }
       </div>
       <div *ngTemplateOutlet="disclaimer"></div>
+
+      <a class="link" (click)="displayMoreOptions = !displayMoreOptions">More options</a>
+      @if (displayMoreOptions) {
+        <div>
+          <button (click)="resetDatabase()">Reset Database</button>
+        </div>
+      }
       <div [style.text-align]="'right'">
         <button (click)="closeOptions()">Close</button>
       </div>

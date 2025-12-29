@@ -119,7 +119,8 @@ export class DataService {
   }
 
   parseFriends() {
-    const isOnFriendsList = /\/friends\/?$/.test(document.location.pathname);
+    const isOnFriendsList =
+      /\/friends\/?$/.test(document.location.pathname) && !document.querySelector('[data-navid="friends/common"]');
     if (isOnFriendsList) {
       this.database.friends = [];
     }

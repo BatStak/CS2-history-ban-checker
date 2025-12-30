@@ -19,8 +19,8 @@ export interface WinrateData {
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
-  _databaseService = inject(DatabaseService);
-  _utilsService = inject(UtilsService);
+  databaseService = inject(DatabaseService);
+  utilsService = inject(UtilsService);
 
   onSave = new Subject<void>();
   onStatisticsUpdate = new Subject<boolean>();
@@ -52,22 +52,22 @@ export class DataService {
 
   refreshDebounceTimeInMs = 500;
 
-  _friendsListCssSelector = '.friend_block_content';
-  _avatarCssSelector = '.player_avatar img';
+  friendsListCssSelector = '.friend_block_content';
+  avatarCssSelector = '.player_avatar img';
 
-  _banTitles: Record<string, string> = {};
+  banTitles: Record<string, string> = {};
 
-  private _mapNamePipe = new MapNamePipe();
+  private mapNamePipe = new MapNamePipe();
 
   constructor() {
     this.mySteamId = document.body.innerHTML?.match(/g_steamID = \"([0-9]+)\"/)?.[1];
 
     this.onSave.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe(() => {
-      this._save();
+      this.internalSave();
     });
 
     this.onStatisticsUpdate.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe((updateFlags: boolean) => {
-      this._updateStatistics(updateFlags);
+      this.updateStatistics(updateFlags);
     });
   }
 
@@ -103,7 +103,7 @@ export class DataService {
       matches: [],
       players: [],
     };
-    await this._databaseService.setDatabase(this.database);
+    await this.databaseService.setDatabase(this.database);
     document.location.reload();
   }
 
@@ -112,20 +112,23 @@ export class DataService {
   }
 
   parseMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesNotParsedCssSelector);
+    const matches = document.querySelectorAll<HTMLElement>(this.utilsService.matchesNotParsedCssSelector);
     for (let match of Array.from(matches)) {
-      this._parseMatch(match, this.format!);
+      this.parseMatch(match, this.format!);
     }
   }
 
+  isOnOwnFriendsList() {
+    return /\/friends\/?$/.test(document.location.pathname) && !document.querySelector('[data-navid="friends/common"]');
+  }
+
   parseFriends() {
-    const isOnFriendsList =
-      /\/friends\/?$/.test(document.location.pathname) && !document.querySelector('[data-navid="friends/common"]');
+    const isOnFriendsList = this.isOnOwnFriendsList();
     if (isOnFriendsList) {
       this.database.friends = [];
     }
     this.filteredPlayers = [];
-    const players = document.querySelectorAll<HTMLElement>(this._utilsService.friendsListCssSelector);
+    const players = document.querySelectorAll<HTMLElement>(this.utilsService.friendsListCssSelector);
     for (let player of Array.from(players)) {
       const steamID64 = player.dataset['steamid']!;
       // add playerInfo to global list
@@ -133,9 +136,9 @@ export class DataService {
       if (!playerInfo) {
         playerInfo = {
           steamID64: steamID64,
-          name: player.querySelector<HTMLElement>(this._friendsListCssSelector)?.childNodes[0]?.textContent?.trim(),
+          name: player.querySelector<HTMLElement>(this.friendsListCssSelector)?.childNodes[0]?.textContent?.trim(),
           profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
-          avatarLink: player.querySelector<HTMLImageElement>(this._avatarCssSelector)?.src,
+          avatarLink: player.querySelector<HTMLImageElement>(this.avatarCssSelector)?.src,
           matches: [],
         };
         this.database.players.push(playerInfo);
@@ -152,11 +155,11 @@ export class DataService {
   }
 
   cleanParsedMatches() {
-    const matches = document.querySelectorAll<HTMLElement>(this._utilsService.matchesParsedCssSelector);
+    const matches = document.querySelectorAll<HTMLElement>(this.utilsService.matchesParsedCssSelector);
     for (let match of Array.from(matches)) {
       match.remove();
     }
-    this._utilsService.hasRemovedHistoryLoaded = true;
+    this.utilsService.hasRemovedHistoryLoaded = true;
   }
 
   getMapDatas(lastMapCount: number) {
@@ -167,19 +170,19 @@ export class DataService {
     let soloQ = 0;
     let withSomeoneBanAfter = 0;
     this.filteredMatches.forEach((matchInfo: MatchInfo) => {
-      const winrate = this._getWinrateDataForMap(results, matchInfo.map!);
+      const winrate = this.getWinrateDataForMap(results, matchInfo.map!);
       winrate.sampleSize++;
-      if (!this._isPremade(matchInfo)) {
+      if (!this.isPremade(matchInfo)) {
         soloQ++;
       }
-      if (this._isPlayerWinIntoTeam(matchInfo.teamA) || this._isPlayerWinIntoTeam(matchInfo.teamB)) {
+      if (this.isPlayerWinIntoTeam(matchInfo.teamA) || this.isPlayerWinIntoTeam(matchInfo.teamB)) {
         winrate.wins++;
         wins++;
         if (index < lastMapCount) {
           countWin++;
         }
       }
-      if (this._matchHasPlayerBanAfter(matchInfo)) {
+      if (this.matchHasPlayerBanAfter(matchInfo)) {
         winrate.withSomeoneBanAfter++;
         withSomeoneBanAfter++;
       }
@@ -207,13 +210,13 @@ export class DataService {
     return results;
   }
 
-  private _mapNames: Record<string, string> = {};
-  private _getWinrateDataForMap(results: WinrateData[], map: string) {
-    this._mapNames[map] = this._mapNames[map] || this._mapNamePipe.transform(map);
-    let winrate = results.find((winrate) => winrate.map === this._mapNames[map]);
+  private mapNames: Record<string, string> = {};
+  private getWinrateDataForMap(results: WinrateData[], map: string) {
+    this.mapNames[map] = this.mapNames[map] || this.mapNamePipe.transform(map);
+    let winrate = results.find((winrate) => winrate.map === this.mapNames[map]);
     if (!winrate) {
       winrate = {
-        map: this._mapNames[map],
+        map: this.mapNames[map],
         sampleSize: 0,
         wins: 0,
         withSomeoneBanAfter: 0,
@@ -223,17 +226,17 @@ export class DataService {
     return winrate;
   }
 
-  private _isPremade(matchInfo?: MatchInfo) {
+  private isPremade(matchInfo?: MatchInfo) {
     return this.hasFriends() && this.database.friends.some((x) => matchInfo?.playersSteamID64.includes(x.steamID64));
   }
 
-  private _isPlayerWinIntoTeam(team?: TeamInfo) {
+  private isPlayerWinIntoTeam(team?: TeamInfo) {
     return (
       team?.scores && team.scores.some((playerScore) => playerScore.steamID64 === this.mySteamId) && team.win === 1
     );
   }
 
-  private _matchHasPlayerBanAfter(match: MatchInfo) {
+  private matchHasPlayerBanAfter(match: MatchInfo) {
     return this.playersBannedFiltered.some((playerBanned) => match.playersSteamID64.includes(playerBanned.steamID64));
   }
 
@@ -254,23 +257,23 @@ export class DataService {
     this.onSave.next();
   }
 
-  private async _save() {
+  private async internalSave() {
     this.onStatisticsUpdate.next(true);
-    await this._databaseService.setDatabase(this.database);
+    await this.databaseService.setDatabase(this.database);
   }
 
-  _parseMatch(match: HTMLElement, format: MatchFormat) {
-    const matchId = this._utilsService.getDateOfMatch(match);
+  parseMatch(match: HTMLElement, format: MatchFormat) {
+    const matchId = this.utilsService.getDateOfMatch(match);
     let matchInfo = this.database.matches.find((m) => m.id === matchId);
     if (!matchInfo) {
       matchInfo = {
         id: matchId,
         section: this.section,
-        map: this._utilsService.getMap(match),
+        map: this.utilsService.getMap(match),
         finished: true,
         format: format,
         overtime: false,
-        replayLink: this._utilsService.getReplayLink(match),
+        replayLink: this.utilsService.getReplayLink(match),
         teamA: { scores: [] },
         teamB: { scores: [] },
         playersSteamID64: [],
@@ -289,7 +292,7 @@ export class DataService {
     matchInfo.teamA.scores = [];
     matchInfo.teamB.scores = [];
 
-    const players = match.querySelectorAll<HTMLTableRowElement>(this._utilsService.playersCssSelector);
+    const players = match.querySelectorAll<HTMLTableRowElement>(this.utilsService.playersCssSelector);
 
     let isTeamA = true;
     for (let index = 0; index < players.length; index++) {
@@ -298,7 +301,7 @@ export class DataService {
         if (index) {
           // get html attributes
           const linkTitle = playerRow.querySelector<HTMLLinkElement>('.linkTitle')!;
-          const steamID64 = this._utilsService.getSteamID64FromMiniProfileId(linkTitle.dataset['miniprofile']!);
+          const steamID64 = this.utilsService.getSteamID64FromMiniProfileId(linkTitle.dataset['miniprofile']!);
 
           // add steamId to matchInfo players list
           if (!matchInfo!.playersSteamID64.includes(steamID64)) {
@@ -311,9 +314,9 @@ export class DataService {
 
           // add steamId to team X players list
           if (isTeamA) {
-            matchInfo.teamA.scores.push(this._addPlayerScore(steamID64, playerRow));
+            matchInfo.teamA.scores.push(this.addPlayerScore(steamID64, playerRow));
           } else {
-            matchInfo.teamB.scores.push(this._addPlayerScore(steamID64, playerRow));
+            matchInfo.teamB.scores.push(this.addPlayerScore(steamID64, playerRow));
           }
 
           // add playerInfo to global list
@@ -364,11 +367,11 @@ export class DataService {
           matchInfo!.teamA!.score = scoreA;
           matchInfo!.teamB!.score = scoreB;
 
-          matchInfo!.teamA!.win = this._getWin(scoreA, scoreB);
-          matchInfo!.teamB!.win = this._getWin(scoreB, scoreA);
+          matchInfo!.teamA!.win = this.getWin(scoreA, scoreB);
+          matchInfo!.teamB!.win = this.getWin(scoreB, scoreA);
 
-          matchInfo!.overtime = this._isOvertime(scoreA, scoreB, format);
-          matchInfo!.finished = this._isFinished(scoreA, scoreB, format);
+          matchInfo!.overtime = this.isOvertime(scoreA, scoreB, format);
+          matchInfo!.finished = this.isFinished(scoreA, scoreB, format);
         }
       }
     }
@@ -379,7 +382,7 @@ export class DataService {
   getBanTitle(playerInfo: PlayerInfo) {
     if (playerInfo.banInfo) {
       const banInfo = playerInfo.banInfo;
-      if (!this._banTitles[playerInfo.steamID64]) {
+      if (!this.banTitles[playerInfo.steamID64]) {
         let infos = '';
         if (banInfo.NumberOfVACBans) {
           infos += `${banInfo.NumberOfVACBans} VAC ban${banInfo.NumberOfVACBans > 1 ? 's' : ''}`;
@@ -392,14 +395,14 @@ export class DataService {
             addSuffix: true,
           })}`;
         }
-        this._banTitles[playerInfo.steamID64] = infos;
+        this.banTitles[playerInfo.steamID64] = infos;
       }
     }
 
-    return this._banTitles[playerInfo.steamID64];
+    return this.banTitles[playerInfo.steamID64];
   }
 
-  _addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
+  addPlayerScore(steamID64: string, playerRow: HTMLTableRowElement): PlayerScore {
     return {
       steamID64: steamID64,
       ping: playerRow.children[1].textContent,
@@ -412,9 +415,9 @@ export class DataService {
     };
   }
 
-  _updateStatistics(updateFlags: boolean) {
-    this.database.players.sort((a, b) => this._sortPlayers(a, b));
-    this.database.matches.sort((a, b) => this._sortMatches(a, b));
+  updateStatistics(updateFlags: boolean) {
+    this.database.players.sort((a, b) => this.sortPlayers(a, b));
+    this.database.matches.sort((a, b) => this.sortMatches(a, b));
 
     // flag to know if we need to filter players banned after playing with them
     const filterBannedAfter = !!this.section;
@@ -455,7 +458,7 @@ export class DataService {
 
     this.playersBanned = this.filteredPlayers
       ?.filter((p) => banInfosList.some((b) => b.SteamId === p.steamID64))
-      .sort((a, b) => this._sortBannedPlayers(a, b));
+      .sort((a, b) => this.sortBannedPlayers(a, b));
 
     // get players banned after playing with them
     const playersBannedFiltered = filterBannedAfter
@@ -478,7 +481,7 @@ export class DataService {
   /**
    * we sort player : the ones we did not scan yet, then the older scanned first
    */
-  _sortPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+  sortPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
     let result = 0;
 
     if (playerA.banInfo?.LastFetch || playerB.banInfo?.LastFetch) {
@@ -499,14 +502,14 @@ export class DataService {
   /**
    * we sort matchs by date ascending
    */
-  _sortMatches(matchA: MatchInfo, matchB: MatchInfo) {
+  sortMatches(matchA: MatchInfo, matchB: MatchInfo) {
     return matchA.id! < matchB.id! ? -1 : 1;
   }
 
   /**
    * we sort by most recent bans first, then steamID to ensure the order is always the same
    */
-  _sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
+  sortBannedPlayers(playerA: PlayerInfo, playerB: PlayerInfo) {
     const playerALastBanOn = playerA.banInfo!.LastBanOn;
     const playerBLastBanOn = playerB.banInfo!.LastBanOn;
     const result =
@@ -522,7 +525,7 @@ export class DataService {
     return result;
   }
 
-  _isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {
+  isOvertime(scoreA: number, scoreB: number, format: MatchFormat): boolean {
     let isOvertime = false;
     switch (format) {
       case MatchFormat.MR12:
@@ -532,7 +535,7 @@ export class DataService {
     return isOvertime;
   }
 
-  _isFinished(scoreA: number, scoreB: number, format: MatchFormat): boolean {
+  isFinished(scoreA: number, scoreB: number, format: MatchFormat): boolean {
     let drawScore: number;
     let winScore: number;
     switch (format) {
@@ -555,7 +558,7 @@ export class DataService {
     return scoreA !== scoreB && (scoreA === winScore || scoreB === winScore);
   }
 
-  _getWin(teamScore: number, oppositeTeamScore: number) {
+  getWin(teamScore: number, oppositeTeamScore: number) {
     return teamScore > oppositeTeamScore ? 1 : teamScore < oppositeTeamScore ? -1 : 0;
   }
 }

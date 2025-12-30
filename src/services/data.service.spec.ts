@@ -101,7 +101,7 @@ describe('DataService', () => {
       },
     );
 
-    players.sort((a, b) => dataService._sortPlayers(a, b));
+    players.sort((a, b) => dataService.sortPlayers(a, b));
     expect(players.length).toEqual(4);
     expect(players[0].steamID64).toEqual('noBanInfoA');
     expect(players[1].steamID64).toEqual('noBanInfoB');
@@ -122,7 +122,7 @@ describe('DataService', () => {
       { id: '2024-02-17 19:47:55 GMT', playersSteamID64: [] },
     );
 
-    matches.sort((a, b) => dataService._sortMatches(a, b));
+    matches.sort((a, b) => dataService.sortMatches(a, b));
     expect(matches.length).toEqual(3);
     expect(matches[0].id).toEqual('2024-02-15 19:47:55 GMT');
     expect(matches[1].id).toEqual('2024-02-16 19:47:55 GMT');
@@ -180,7 +180,7 @@ describe('DataService', () => {
       },
     );
 
-    players.sort((a, b) => dataService._sortBannedPlayers(a, b));
+    players.sort((a, b) => dataService.sortBannedPlayers(a, b));
     expect(players.length).toEqual(3);
     expect(players[0].steamID64).toEqual('c');
     expect(players[1].steamID64).toEqual('a');
@@ -193,7 +193,7 @@ describe('DataService', () => {
     const match = document.createElement('div');
     match.innerHTML = matchTable;
 
-    dataService._parseMatch(match, MatchFormat.MR12);
+    dataService.parseMatch(match, MatchFormat.MR12);
 
     expect(matches).toBeDefined();
     expect(matches.length).toEqual(1);
@@ -236,25 +236,25 @@ describe('DataService', () => {
   });
 
   it('test _isFinished', async () => {
-    let finished = dataService._isFinished(13, 5, MatchFormat.MR12);
+    let finished = dataService.isFinished(13, 5, MatchFormat.MR12);
     expect(finished).toBeTrue();
-    finished = dataService._isFinished(15, 12, MatchFormat.MR12);
+    finished = dataService.isFinished(15, 12, MatchFormat.MR12);
     expect(finished).toBeFalse();
-    finished = dataService._isFinished(15, 15, MatchFormat.MR12);
+    finished = dataService.isFinished(15, 15, MatchFormat.MR12);
     expect(finished).toBeTrue();
-    finished = dataService._isFinished(12, 11, MatchFormat.MR12);
+    finished = dataService.isFinished(12, 11, MatchFormat.MR12);
     expect(finished).toBeFalse();
-    finished = dataService._isFinished(16, 14, MatchFormat.MR15);
+    finished = dataService.isFinished(16, 14, MatchFormat.MR15);
     expect(finished).toBeTrue();
-    finished = dataService._isFinished(15, 15, MatchFormat.MR15);
+    finished = dataService.isFinished(15, 15, MatchFormat.MR15);
     expect(finished).toBeTrue();
-    finished = dataService._isFinished(15, 14, MatchFormat.MR15);
+    finished = dataService.isFinished(15, 14, MatchFormat.MR15);
     expect(finished).toBeFalse();
-    finished = dataService._isFinished(8, 8, MatchFormat.MR8);
+    finished = dataService.isFinished(8, 8, MatchFormat.MR8);
     expect(finished).toBeTrue();
-    finished = dataService._isFinished(8, 7, MatchFormat.MR8);
+    finished = dataService.isFinished(8, 7, MatchFormat.MR8);
     expect(finished).toBeFalse();
-    finished = dataService._isFinished(9, 7, MatchFormat.MR8);
+    finished = dataService.isFinished(9, 7, MatchFormat.MR8);
     expect(finished).toBeTrue();
   });
 

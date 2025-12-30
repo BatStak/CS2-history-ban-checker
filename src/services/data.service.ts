@@ -15,6 +15,7 @@ export interface WinrateData {
   banrate?: number;
   mostRecentWinsCount?: number;
   soloQCount?: number;
+  recentSoloQCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,6 +70,10 @@ export class DataService {
     this.onStatisticsUpdate.pipe(debounceTime(this.refreshDebounceTimeInMs)).subscribe((updateFlags: boolean) => {
       this.updateStatistics(updateFlags);
     });
+  }
+
+  getPercentage(upper: number, lower: number) {
+    return lower ? Math.round((upper / lower) * 10000) / 100 : 0;
   }
 
   init(database?: any, section?: string, format?: MatchFormat) {
@@ -162,23 +167,27 @@ export class DataService {
     this.utilsService.hasRemovedHistoryLoaded = true;
   }
 
-  getMapDatas(lastMapCount: number) {
+  getMapDatas(recentMapCount: number) {
     const results: WinrateData[] = [];
     let index = 0;
     let countWin = 0;
     let wins = 0;
     let soloQ = 0;
+    let recentSoloQ = 0;
     let withSomeoneBanAfter = 0;
     this.filteredMatches.forEach((matchInfo: MatchInfo) => {
       const winrate = this.getWinrateDataForMap(results, matchInfo.map!);
       winrate.sampleSize++;
       if (!this.isPremade(matchInfo)) {
         soloQ++;
+        if (index < recentMapCount) {
+          recentSoloQ++;
+        }
       }
       if (this.isPlayerWinIntoTeam(matchInfo.teamA) || this.isPlayerWinIntoTeam(matchInfo.teamB)) {
         winrate.wins++;
         wins++;
-        if (index < lastMapCount) {
+        if (index < recentMapCount) {
           countWin++;
         }
       }
@@ -196,6 +205,7 @@ export class DataService {
       sampleSize: this.filteredMatches.length,
       mostRecentWinsCount: countWin,
       soloQCount: soloQ,
+      recentSoloQCount: recentSoloQ,
     });
 
     results.forEach((winrate) => {

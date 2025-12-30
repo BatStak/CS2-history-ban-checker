@@ -17,7 +17,7 @@ type columnType = 'name' | 'lastPlayWith' | 'LastBanOn';
   styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
-  _dataService = inject(DataService);
+  dataService = inject(DataService);
 
   displayListOfBannedPlayers = true;
   displayOnlyListOfPlayers = false;
@@ -46,17 +46,17 @@ export class BanStatisticsComponent implements OnDestroy {
   column: columnType = 'LastBanOn';
 
   get playersBanned(): PlayerInfo[] {
-    return this._dataService.playersBannedFiltered;
+    return this.dataService.playersBannedFiltered;
   }
 
   get players(): PlayerInfo[] {
-    return this._dataService.filteredPlayers;
+    return this.dataService.filteredPlayers;
   }
 
   _onStatisticsUpdatedSubscription?: Subscription;
 
   constructor() {
-    this._onStatisticsUpdatedSubscription = this._dataService.onStatisticsUpdated.subscribe(() => {
+    this._onStatisticsUpdatedSubscription = this.dataService.onStatisticsUpdated.subscribe(() => {
       this._update();
     });
 
@@ -80,23 +80,23 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   _getPlayerLink(steamID64: string) {
-    return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.profileLink;
+    return this.dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.profileLink;
   }
 
   _getPlayerAvatar(steamID64: string) {
-    return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.avatarLink;
+    return this.dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.avatarLink;
   }
 
   _getPlayerName(steamID64: string) {
-    return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.name;
+    return this.dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)?.name;
   }
 
   _playerInfo(steamID64: string) {
-    return this._dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)!;
+    return this.dataService.filteredPlayers.find((p) => p.steamID64 === steamID64)!;
   }
 
   _playerIsBanned(steamID64: string) {
-    return this._dataService.playersBanned.some(
+    return this.dataService.playersBanned.some(
       (p) => p.steamID64 === steamID64 && p.banInfo!.LastBanOn > p.lastPlayWith!,
     );
   }
@@ -104,7 +104,7 @@ export class BanStatisticsComponent implements OnDestroy {
   _showMatch(matchId?: string, index?: number) {
     if (matchId) {
       this.matchInfoIndex = index;
-      this.matchInfo = this._dataService.filteredMatches.find((match) => match.id === matchId);
+      this.matchInfo = this.dataService.filteredMatches.find((match) => match.id === matchId);
     }
   }
 
@@ -113,7 +113,7 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   _getBanTitle(playerInfo: PlayerInfo) {
-    return this._dataService.getBanTitle(playerInfo);
+    return this.dataService.getBanTitle(playerInfo);
   }
 
   _update() {
@@ -121,20 +121,18 @@ export class BanStatisticsComponent implements OnDestroy {
     this.matchesWithCheaters = 0;
     this.matchesBothTeamsHasCheaters = 0;
 
-    this.playersCount = this._dataService.filteredPlayers.length;
+    this.playersCount = this.dataService.filteredPlayers.length;
     this.bannedCount = this.playersBanned.length;
-    this.bannedPourcentage = this.playersCount ? Math.round((this.bannedCount / this.playersCount) * 10000) / 100 : 0;
+    this.bannedPourcentage = this.dataService.getPercentage(this.bannedCount, this.playersCount);
 
-    this.matchesCount = this._dataService.filteredMatches.length;
-    const matchWithBans = this._dataService.filteredMatches.filter((m) =>
+    this.matchesCount = this.dataService.filteredMatches.length;
+    const matchWithBans = this.dataService.filteredMatches.filter((m) =>
       this.playersBanned.some((p) => m.playersSteamID64.includes(p.steamID64)),
     );
     this.matchesConcerned = matchWithBans.length || 0;
-    this.matchPourcentage = this.matchesCount
-      ? Math.round((this.matchesConcerned / this.matchesCount) * 10000) / 100
-      : 0;
+    this.matchPourcentage = this.dataService.getPercentage(this.matchesConcerned, this.matchesCount);
 
-    this.displayOnlyListOfPlayers = !this._dataService.section;
+    this.displayOnlyListOfPlayers = !this.dataService.section;
     if (this.displayOnlyListOfPlayers) {
       this.displayListOfBannedPlayers = true;
     }
@@ -147,10 +145,10 @@ export class BanStatisticsComponent implements OnDestroy {
   }
 
   _getFrequencyBans(now: Date) {
-    if (this.playersBanned.length && this._dataService.oldestMatch?.id) {
+    if (this.playersBanned.length && this.dataService.oldestMatch?.id) {
       const diffInDays = differenceInDays(
         now,
-        parse(this._dataService.oldestMatch?.id!, "yyyy-MM-dd HH:mm:ss 'GMT'", now),
+        parse(this.dataService.oldestMatch?.id!, "yyyy-MM-dd HH:mm:ss 'GMT'", now),
       );
       this.frequencyInDaysOfBans = Math.round(diffInDays / this.playersBanned.length);
     }
@@ -159,7 +157,7 @@ export class BanStatisticsComponent implements OnDestroy {
   _calculateUnluckyStats(matchWithBans: MatchInfo[]) {
     if (this.matchesConcerned > 0) {
       matchWithBans.forEach((match) => {
-        const userTeam = match.teamA?.scores?.some((player) => player.steamID64 === this._dataService.mySteamId)
+        const userTeam = match.teamA?.scores?.some((player) => player.steamID64 === this.dataService.mySteamId)
           ? 'A'
           : 'B';
         const cheaterInTeamA = match.teamA?.scores?.some((player) =>
@@ -186,11 +184,18 @@ export class BanStatisticsComponent implements OnDestroy {
         }
       });
 
-      this.matchesAgainstCheatersPercentage =
-        Math.round((this.matchesAgainstCheaters / this.matchesConcerned) * 10000) / 100;
-      this.matchesWithCheatersPercentage = Math.round((this.matchesWithCheaters / this.matchesConcerned) * 10000) / 100;
-      this.matchesBothTeamsHasCheatersPercentage =
-        Math.round((this.matchesBothTeamsHasCheaters / this.matchesConcerned) * 10000) / 100;
+      this.matchesAgainstCheatersPercentage = this.dataService.getPercentage(
+        this.matchesAgainstCheaters,
+        this.matchesConcerned,
+      );
+      this.matchesWithCheatersPercentage = this.dataService.getPercentage(
+        this.matchesWithCheaters,
+        this.matchesConcerned,
+      );
+      this.matchesBothTeamsHasCheatersPercentage = this.dataService.getPercentage(
+        this.matchesBothTeamsHasCheaters,
+        this.matchesConcerned,
+      );
 
       this.unlucky = this.matchesAgainstCheatersPercentage > this.matchesWithCheatersPercentage;
     }

@@ -4,8 +4,13 @@
   @if (display) {
     <p>
       Winrate on last
-      <input id="winrate" type="number" [(value)]="lastMapsSamplesize" (change)="winRateUpdated.next($event)" /> maps :
-      <strong>{{ lastMapsPercentage }}% ({{ lastMapsWinCount }} / {{ lastMapsRealSamplesize }})</strong>
+      <input id="winrate" type="number" [(value)]="recentMapsSamplesize" (change)="winRateUpdated.next($event)" /> maps
+      : <strong>{{ recentMapsPercentage }}% ({{ recentMapsWinCount }} / {{ recentMapsRealSamplesize }})</strong>
+
+      @if (hasFriends) {
+        , from which soloQ is
+        <strong>{{ recentSoloQPercentage }}% ({{ recentSoloQCount }} / {{ recentMapsRealSamplesize }})</strong>
+      }
     </p>
     <table>
       <tr>

@@ -48,7 +48,7 @@ export class ScannerComponent implements DoCheck {
     return this._dataService.oldestMatch;
   }
 
-  showNewPlayersBannedWarning?: boolean;
+  showListBannedChangedWarning?: boolean;
   numberOfPages = 0;
   pageNumber = 0;
 
@@ -56,7 +56,7 @@ export class ScannerComponent implements DoCheck {
   _stopScan = false;
 
   ngDoCheck(): void {
-    this.showNewPlayersBannedWarning = this.isOnGCPDSection() && this._dataService.newPlayersBanned;
+    this.showListBannedChangedWarning = this.isOnGCPDSection() && this._dataService.listPlayersBannedChanged;
   }
 
   startScan(type: 'new' | 'all') {

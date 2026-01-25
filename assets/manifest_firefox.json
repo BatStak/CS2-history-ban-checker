@@ -1,7 +1,7 @@
 {
   "name": "CS2 history ban checker",
   "description": "Check ban status of players you encountered in CS2 matchmaking.",
-  "version": "2.2.16",
+  "version": "2.2.17",
   "permissions": [
     "unlimitedStorage",
     "storage",
@@ -16,12 +16,20 @@
     "128": "icon-128.png"
   },
   "background": {
-    "scripts": ["service_worker.js"]
+    "scripts": [
+      "service_worker.js"
+    ]
   },
   "content_scripts": [
     {
-      "js": ["index.js", "polyfills.js", "main.js"],
-      "css": ["styles.css"],
+      "js": [
+        "index.js",
+        "polyfills.js",
+        "main.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_end",
       "matches": [
         "*://steamcommunity.com/id/*/friends",

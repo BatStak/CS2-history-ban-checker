@@ -49,7 +49,7 @@ export class DataService {
   playersBanned: PlayerInfo[] = [];
   playersBannedFiltered: PlayerInfo[] = [];
 
-  newPlayersBanned = false;
+  listPlayersBannedChanged = false;
 
   refreshDebounceTimeInMs = 500;
 
@@ -481,7 +481,7 @@ export class DataService {
 
     // update flag to know that there are new people banned
     if (updateFlags && playersBannedFiltered.length !== this.playersBannedFiltered.length) {
-      this.newPlayersBanned = true;
+      this.listPlayersBannedChanged = true;
     }
     this.playersBannedFiltered = playersBannedFiltered;
 

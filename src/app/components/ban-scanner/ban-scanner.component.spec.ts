@@ -130,31 +130,31 @@ describe('ScannerComponent', async () => {
 
   it('Test doCheck', async () => {
     fixture.componentRef.setInput('isOnGCPDSection', true);
-    dataService.newPlayersBanned = false;
+    dataService.listPlayersBannedChanged = false;
     component.ngDoCheck();
     fixture.detectChanges();
-    expect(component.showNewPlayersBannedWarning).toBeFalse();
+    expect(component.showListBannedChangedWarning).toBeFalse();
     expect(dom.textContent).not.toContain('There are new players banned');
 
     fixture.componentRef.setInput('isOnGCPDSection', true);
-    dataService.newPlayersBanned = true;
+    dataService.listPlayersBannedChanged = true;
     component.ngDoCheck();
     fixture.detectChanges();
-    expect(component.showNewPlayersBannedWarning).toBeTrue();
+    expect(component.showListBannedChangedWarning).toBeTrue();
     expect(dom.textContent).toContain('There are new players banned');
 
     fixture.componentRef.setInput('isOnGCPDSection', false);
-    dataService.newPlayersBanned = true;
+    dataService.listPlayersBannedChanged = true;
     component.ngDoCheck();
     fixture.detectChanges();
-    expect(component.showNewPlayersBannedWarning).toBeFalse();
+    expect(component.showListBannedChangedWarning).toBeFalse();
     expect(dom.textContent).not.toContain('There are new players banned');
 
     fixture.componentRef.setInput('isOnGCPDSection', false);
-    dataService.newPlayersBanned = false;
+    dataService.listPlayersBannedChanged = false;
     component.ngDoCheck();
     fixture.detectChanges();
-    expect(component.showNewPlayersBannedWarning).toBeFalse();
+    expect(component.showListBannedChangedWarning).toBeFalse();
     expect(dom.textContent).not.toContain('There are new players banned');
   });
 

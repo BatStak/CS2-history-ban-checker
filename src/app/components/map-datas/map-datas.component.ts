@@ -41,13 +41,13 @@ export class MapDatasComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.dataService.onSave.pipe(debounceTime(500)).subscribe(() => {
+    this.dataService.onSave.pipe(debounceTime(this.dataService.refreshDebounceTimeInMs)).subscribe(() => {
       if (this.display) {
         this._update();
       }
     });
 
-    this.winRateUpdated.pipe(debounceTime(500)).subscribe((event: Event) => {
+    this.winRateUpdated.pipe(debounceTime(this.dataService.refreshDebounceTimeInMs)).subscribe((event: Event) => {
       if (this.display) {
         this.recentMapsSamplesize = (event.target as HTMLInputElement).valueAsNumber;
         this._update();

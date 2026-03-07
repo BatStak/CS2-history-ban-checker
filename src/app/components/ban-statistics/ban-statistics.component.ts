@@ -45,6 +45,8 @@ export class BanStatisticsComponent implements OnDestroy {
   order = 'desc';
   column: columnType = 'LastBanOn';
 
+  percentageBannedInSection = 0;
+
   get playersBanned(): PlayerInfo[] {
     return this.dataService.playersBannedFiltered;
   }
@@ -142,6 +144,8 @@ export class BanStatisticsComponent implements OnDestroy {
     this._sort();
 
     this._getFrequencyBans(new Date());
+
+    this.percentageBannedInSection = this.dataService.getPercentage(this.playersBanned.length, this.players.length);
   }
 
   _getFrequencyBans(now: Date) {

@@ -66,7 +66,7 @@
   }
   @if (displayListOfBannedPlayers) {
     @if (displayOnlyListOfPlayers && playersBanned.length > 0) {
-      <p>{{ playersBanned.length }} / {{ players.length }} players have been banned in this section.</p>
+      <p>{{ playersBanned.length }} / {{ players.length }} ({{ percentageBannedInSection }}%) players have been banned in this section.</p>
     }
 
     <table class="results">

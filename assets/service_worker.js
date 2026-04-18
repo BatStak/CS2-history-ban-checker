@@ -27,7 +27,7 @@ function genericOnClick(info) {
             break;
         case "github":
             chrome.tabs.create({
-                url: "https://github.com/BatStak/CS2-history-ban-checker",
+                url: "https://github.com/BatStak/CS2-ban-checker",
             });
             break;
     }

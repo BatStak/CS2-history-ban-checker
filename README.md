@@ -13,3 +13,7 @@ CS2 ban checker does not send or share any user data to the developer of the ext
 \* you need to be logged in to Steam to access your your personal history.
 
 The extension is published for [Chrome](https://chromewebstore.google.com/detail/pniajbbemhplaefaikpgfipmopopjeob) and [Firefox](https://addons.mozilla.org/fr/firefox/addon/cs2-history-ban-checker/).
+
+![](./readme/profile.png)
+
+![](./readme/gcpd.png)

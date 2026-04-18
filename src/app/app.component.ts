@@ -6,13 +6,14 @@ import { UtilsService } from '../services/utils.service';
 
 import Bowser from 'bowser';
 import { debounceTime, Subject, Subscription } from 'rxjs';
-import { Database, MatchFormat } from '../models';
+import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { DatabaseService } from '../services/database.service';
 import { ScannerComponent } from './components/ban-scanner/ban-scanner.component';
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
 import { OptionsComponent } from './components/options/options.component';
-import { SteamService } from '../services/steam.service';
+import { PlayerSummary, SteamService } from '../services/steam.service';
+import { BanListComponent } from './components/ban-list/ban-list.component';
 
 @Component({
     selector: 'cs2-history-app-root',
@@ -21,7 +22,8 @@ import { SteamService } from '../services/steam.service';
         OptionsComponent,
         HistoryLoaderComponent,
         ScannerComponent,
-        BanStatisticsComponent
+        BanStatisticsComponent,
+        BanListComponent
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
@@ -65,6 +67,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     selfStatus = 'Scanning self status...';
     friendsStatus = 'Scanning friends status...';
+    hideList = true;
+    friendsBanned: PlayerInfo[] = [];
 
     get hideHistoryTable() {
         return this.dataService.database?.hideHistoryTable;
@@ -173,18 +177,40 @@ export class AppComponent implements AfterViewInit, OnDestroy {
             const steamIDs: string[] = data?.friendslist?.friends?.map((f: any) => f.steamid);
             if (steamIDs) {
                 const friendsCount = steamIDs.length;
-                let bannedFriendsCount = 0;
+                this.friendsBanned = [];
                 while (steamIDs.length) {
                     const chunk = steamIDs.splice(0, 100);
-                    const results = await this.steamService.scanPlayers(chunk);
-                    bannedFriendsCount += results.filter(f => f.NumberOfGameBans || f.NumberOfVACBans).length;
+                    const results: BanInfo[] = await this.steamService.scanPlayers(chunk);
+                    const banned = results.filter((ban: BanInfo) => ban.NumberOfGameBans || ban.NumberOfVACBans)
+                        .map((ban: BanInfo) => {
+                            return {
+                                steamID64: ban.SteamId,
+                                banInfo: ban,
+                                matches: [],
+                            } as PlayerInfo
+                        });
+
+                    const summaries: PlayerSummary[] = await this.steamService.getPlayerSummaries(chunk);
+                    summaries.forEach(summary => {
+                        const friend = banned.find(player => player.steamID64 === summary.steamid);
+                        if (friend) {
+                            friend.avatarLink = summary.avatar;
+                            friend.name = summary.personaname;
+                            friend.profileLink = summary.profileurl;
+                            friend.banInfo!.LastBanOn = new Date(new Date().setDate(new Date().getDate() - friend.banInfo!.DaysSinceLastBan)).toISOString();
+                        }
+                    })
+                    this.friendsBanned = [...this.friendsBanned, ...banned];
                 }
-                if (bannedFriendsCount) {
-                    const percentageBanned = this.dataService.getPercentage(bannedFriendsCount, friendsCount);
-                    this.friendsStatus = `friends status : <span class="banned">${bannedFriendsCount} / ${friendsCount} (${percentageBanned}%) friends have been banned</span>`
+                if (this.friendsBanned.length) {
+                    const percentageBanned = this.dataService.getPercentage(this.friendsBanned.length, friendsCount);
+                    this.friendsStatus = `friends status : <span class="banned">
+                        ${this.friendsBanned.length} / ${friendsCount} (${percentageBanned}%) friends have been banned
+                    </span>`;
                 } else {
                     this.friendsStatus = 'friends status : <span class="clean">clean</span>';
                 }
+
             }
         }).catch((error) => {
             this.friendsStatus = 'An error occured to retrieve friends list, maybe private ?'

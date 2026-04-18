@@ -28,7 +28,7 @@ describe('BanStatisticsComponent', async () => {
     dataService.playersBannedFiltered = [];
     dataService.section = 'test';
 
-    component._update();
+    component.update();
     fixture.detectChanges();
     expect(dom.textContent).toContain('No banned player');
 
@@ -36,7 +36,7 @@ describe('BanStatisticsComponent', async () => {
       matches: [],
       steamID64: 'test',
     });
-    component._update();
+    component.update();
     fixture.detectChanges();
     expect(dom.textContent).not.toContain('No banned player');
     expect(dom.textContent).toContain('1 have been banned later');
@@ -70,7 +70,7 @@ describe('BanStatisticsComponent', async () => {
     }
 
     // 10% of players, 0 match concerned
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(100);
     expect(component.matchesCount).toEqual(100);
     expect(component.bannedCount).toEqual(10);
@@ -80,7 +80,7 @@ describe('BanStatisticsComponent', async () => {
 
     // 1 match concerned (1%) of 100 matches
     dataService.filteredMatches[0].playersSteamID64.push('steamID0');
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(100);
     expect(component.matchesCount).toEqual(100);
     expect(component.bannedCount).toEqual(10);
@@ -91,7 +91,7 @@ describe('BanStatisticsComponent', async () => {
     dataService.filteredMatches[1].playersSteamID64.push('steamID0');
     dataService.filteredMatches[2].playersSteamID64.push('steamID0');
     dataService.filteredMatches.splice(50, 50);
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(100);
     expect(component.matchesCount).toEqual(50);
     expect(component.bannedCount).toEqual(10);
@@ -100,7 +100,7 @@ describe('BanStatisticsComponent', async () => {
 
     // 10 players out of 50 (20%)
     dataService.filteredPlayers.splice(50, 50);
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(50);
     expect(component.matchesCount).toEqual(50);
     expect(component.bannedCount).toEqual(10);
@@ -113,7 +113,7 @@ describe('BanStatisticsComponent', async () => {
         steamID64: `steamID-new-${i}`,
       });
     }
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(1050);
     expect(component.matchesCount).toEqual(50);
     expect(component.bannedCount).toEqual(10);
@@ -125,7 +125,7 @@ describe('BanStatisticsComponent', async () => {
         playersSteamID64: [],
       });
     }
-    component._update();
+    component.update();
     expect(component.playersCount).toEqual(1050);
     expect(component.matchesCount).toEqual(968);
     expect(component.bannedCount).toEqual(10);
@@ -156,10 +156,10 @@ describe('BanStatisticsComponent', async () => {
       { matches: [], steamID64: 'a' },
     ];
 
-    component._getFrequencyBans(parseISO('2025-10-29'));
+    component.getFrequencyBans(parseISO('2025-10-29'));
     expect(component.frequencyInDaysOfBans).toEqual(23);
 
-    component._getFrequencyBans(parseISO('2025-06-01'));
+    component.getFrequencyBans(parseISO('2025-06-01'));
     expect(component.frequencyInDaysOfBans).toEqual(13);
   });
 });

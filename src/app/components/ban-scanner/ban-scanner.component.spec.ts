@@ -33,19 +33,19 @@ describe('ScannerComponent', () => {
   });
 
   it('_calcNumberOfPages calculates correctly', () => {
-    component._calcNumberOfPages(new Array(250));
+    component.calcNumberOfPages(new Array(250));
     expect(component.numberOfPages).toBe(3);
 
-    component._calcNumberOfPages(new Array(100));
+    component.calcNumberOfPages(new Array(100));
     expect(component.numberOfPages).toBe(1);
 
-    component._calcNumberOfPages([]);
+    component.calcNumberOfPages([]);
     expect(component.numberOfPages).toBe(0);
   });
 
   it('stopScan sets _stopScan flag', () => {
     component.stopScan();
-    expect(component._stopScan).toBe(true);
+    expect(component.scanStopped).toBe(true);
   });
 
   it('_handleDeletedProfiles marks missing players as deleted', () => {
@@ -55,7 +55,7 @@ describe('ScannerComponent', () => {
     ];
     const apiResults = [{ SteamId: '1' }] as any;
 
-    component._handleDeletedProfiles(apiResults, ['1', '2']);
+    component.handleDeletedProfiles(apiResults, ['1', '2']);
 
     expect(dataService.database.players[1].deleted).toBe(true);
     expect(dataService.database.players[0].deleted).toBeUndefined();

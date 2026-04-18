@@ -4,11 +4,11 @@ import { Database } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
-  async setDatabase(database: Database) {
-    (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.set(database) : void 0;
-  }
+    async setDatabase(database: Database) {
+        (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.set(database) : void 0;
+    }
 
-  async getDatabase() {
-    return (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.get() : undefined;
-  }
+    async getDatabase() {
+        return (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.get() : undefined;
+    }
 }

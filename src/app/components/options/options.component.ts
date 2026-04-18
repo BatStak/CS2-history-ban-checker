@@ -11,44 +11,44 @@ import { UtilsService } from '../../../services/utils.service';
     styleUrl: './options.component.scss'
 })
 export class OptionsComponent {
-  _utilsService = inject(UtilsService);
-  _dataService = inject(DataService);
+    utilsService = inject(UtilsService);
+    dataService = inject(DataService);
 
-  apiKey?: string;
+    apiKey?: string;
 
-  showOptions = false;
-  displayDisclaimer = false;
-  displayMoreOptions = false;
+    showOptions = false;
+    displayDisclaimer = false;
+    displayMoreOptions = false;
 
-  get isLoadingHistory(): boolean {
-    return this._utilsService.isLoadingHistory;
-  }
-
-  get isScanning(): boolean {
-    return this._utilsService.isScanning;
-  }
-
-  constructor() {
-    this.apiKey = this._dataService.database.apiKey;
-  }
-
-  openOptions() {
-    this.showOptions = true;
-  }
-
-  closeOptions() {
-    this.showOptions = this.displayDisclaimer = this.displayMoreOptions = false;
-    this._dataService.database.apiKey = this.apiKey;
-    this._dataService.save();
-  }
-
-  toggleDisclaimer() {
-    this.displayDisclaimer = !this.displayDisclaimer;
-  }
-
-  resetDatabase() {
-    if (window.confirm('Do you really want to reset the database ?')) {
-      this._dataService.reset();
+    get isLoadingHistory(): boolean {
+        return this.utilsService.isLoadingHistory;
     }
-  }
+
+    get isScanning(): boolean {
+        return this.utilsService.isScanning;
+    }
+
+    constructor() {
+        this.apiKey = this.dataService.database.apiKey;
+    }
+
+    openOptions() {
+        this.showOptions = true;
+    }
+
+    closeOptions() {
+        this.showOptions = this.displayDisclaimer = this.displayMoreOptions = false;
+        this.dataService.database.apiKey = this.apiKey;
+        this.dataService.save();
+    }
+
+    toggleDisclaimer() {
+        this.displayDisclaimer = !this.displayDisclaimer;
+    }
+
+    resetDatabase() {
+        if (window.confirm('Do you really want to reset the database ?')) {
+            this.dataService.reset();
+        }
+    }
 }

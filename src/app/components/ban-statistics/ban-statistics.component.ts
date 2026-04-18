@@ -195,7 +195,7 @@ export class BanStatisticsComponent implements OnDestroy {
         this.matchesConcerned,
       );
 
-      this.unlucky = this.matchesAgainstCheatersPercentage > this.matchesWithCheatersPercentage;
+      this.unlucky = (this.matchesAgainstCheatersPercentage - this.matchesWithCheatersPercentage) > 5;
     }
   }
 

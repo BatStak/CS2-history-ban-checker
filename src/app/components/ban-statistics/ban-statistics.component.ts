@@ -20,7 +20,6 @@ export class BanStatisticsComponent implements OnDestroy {
   dataService = inject(DataService);
 
   displayListOfBannedPlayers = true;
-  displayOnlyListOfPlayers = false;
 
   playersCount = 0;
   bannedCount = 0;
@@ -133,11 +132,6 @@ export class BanStatisticsComponent implements OnDestroy {
     );
     this.matchesConcerned = matchWithBans.length || 0;
     this.matchPourcentage = this.dataService.getPercentage(this.matchesConcerned, this.matchesCount);
-
-    this.displayOnlyListOfPlayers = !this.dataService.section;
-    if (this.displayOnlyListOfPlayers) {
-      this.displayListOfBannedPlayers = true;
-    }
 
     this._calculateUnluckyStats(matchWithBans);
 

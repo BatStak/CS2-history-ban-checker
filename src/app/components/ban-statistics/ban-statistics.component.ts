@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { differenceInDays, parse } from 'date-fns';
@@ -10,7 +9,7 @@ import { PlayerSummary, SteamService } from '../../../services/steam.service';
 
 @Component({
     selector: 'cs2-history-ban-statistics',
-    imports: [CommonModule, MapDatasComponent, BanListComponent],
+    imports: [MapDatasComponent, BanListComponent],
     templateUrl: './ban-statistics.component.html',
     styleUrl: './ban-statistics.component.scss',
 })
@@ -58,25 +57,24 @@ export class BanStatisticsComponent implements OnDestroy {
         });
 
         this.update();
-
     }
 
     async updateSummaries() {
         if (!this.summariesUpdatedOnce) {
-            const steamIDs = this.playersBanned.map(player => player.steamID64);
+            const steamIDs = this.playersBanned.map((player) => player.steamID64);
             if (steamIDs.length) {
                 this.summariesUpdatedOnce = true;
                 while (steamIDs.length) {
                     const chunk = steamIDs.splice(0, 100);
                     const summaries: PlayerSummary[] = await this.steamService.getPlayerSummaries(chunk);
-                    summaries.forEach(summary => {
-                        const player = this.playersBanned.find(player => player.steamID64 === summary.steamid);
+                    summaries.forEach((summary) => {
+                        const player = this.playersBanned.find((player) => player.steamID64 === summary.steamid);
                         if (player) {
                             player.avatarLink = summary.avatarmedium;
                             player.name = summary.personaname;
                             player.profileLink = summary.profileurl;
                         }
-                    })
+                    });
                 }
 
                 this.dataService.save();
@@ -164,7 +162,7 @@ export class BanStatisticsComponent implements OnDestroy {
                 this.matchesConcerned,
             );
 
-            this.unlucky = (this.matchesAgainstCheatersPercentage - this.matchesWithCheatersPercentage) > 5;
+            this.unlucky = this.matchesAgainstCheatersPercentage - this.matchesWithCheatersPercentage > 5;
         }
     }
 }

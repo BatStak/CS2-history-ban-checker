@@ -6,6 +6,7 @@ import { MatchInfo, PlayerInfo } from '../../../models';
 import { DataService } from '../../../services/data.service';
 import { MapDatasComponent } from '../map-datas/map-datas.component';
 import { BanListComponent } from '../ban-list/ban-list.component';
+import { PlayerSummary, SteamService } from '../../../services/steam.service';
 
 @Component({
     selector: 'cs2-history-ban-statistics',
@@ -15,6 +16,7 @@ import { BanListComponent } from '../ban-list/ban-list.component';
 })
 export class BanStatisticsComponent implements OnDestroy {
     dataService = inject(DataService);
+    steamService = inject(SteamService);
 
     displayListOfBannedPlayers = true;
 
@@ -37,6 +39,8 @@ export class BanStatisticsComponent implements OnDestroy {
 
     percentageBannedInSection = 0;
 
+    summariesUpdatedOnce = false;
+
     get playersBanned(): PlayerInfo[] {
         return this.dataService.playersBannedFiltered;
     }
@@ -50,9 +54,34 @@ export class BanStatisticsComponent implements OnDestroy {
     constructor() {
         this.onStatisticsUpdatedSubscription = this.dataService.onStatisticsUpdated.subscribe(() => {
             this.update();
+            this.updateSummaries();
         });
 
         this.update();
+
+    }
+
+    async updateSummaries() {
+        if (!this.summariesUpdatedOnce) {
+            const steamIDs = this.playersBanned.map(player => player.steamID64);
+            if (steamIDs.length) {
+                this.summariesUpdatedOnce = true;
+                while (steamIDs.length) {
+                    const chunk = steamIDs.splice(0, 100);
+                    const summaries: PlayerSummary[] = await this.steamService.getPlayerSummaries(chunk);
+                    summaries.forEach(summary => {
+                        const player = this.playersBanned.find(player => player.steamID64 === summary.steamid);
+                        if (player) {
+                            player.avatarLink = summary.avatarmedium;
+                            player.name = summary.personaname;
+                            player.profileLink = summary.profileurl;
+                        }
+                    })
+                }
+
+                this.dataService.save();
+            }
+        }
     }
 
     ngOnDestroy(): void {

@@ -194,7 +194,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
                     summaries.forEach(summary => {
                         const friend = banned.find(player => player.steamID64 === summary.steamid);
                         if (friend) {
-                            friend.avatarLink = summary.avatar;
+                            friend.avatarLink = summary.avatarmedium;
                             friend.name = summary.personaname;
                             friend.profileLink = summary.profileurl;
                             friend.banInfo!.LastBanOn = new Date(new Date().setDate(new Date().getDate() - friend.banInfo!.DaysSinceLastBan)).toISOString();

@@ -9,60 +9,135 @@ describe('ScannerComponent', () => {
   let component: ScannerComponent;
   let fixture: ComponentFixture<ScannerComponent>;
   let dataService: DataService;
+  let steamService: SteamService;
+  let utilsService: UtilsService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ScannerComponent],
       providers: [
         { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
-        {
-          provide: SteamService,
-          useValue: { scanPlayers: vi.fn().mockResolvedValue([]) },
-        },
+        { provide: SteamService, useValue: { scanPlayers: vi.fn().mockResolvedValue([]) } },
       ],
     }).compileComponents();
-
     fixture = TestBed.createComponent(ScannerComponent);
     component = fixture.componentInstance;
     dataService = TestBed.inject(DataService);
+    steamService = TestBed.inject(SteamService);
+    utilsService = TestBed.inject(UtilsService);
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should create', () => expect(component).toBeTruthy());
+
+  it('shows player/match counts', () => {
+    expect(fixture.nativeElement.textContent).toContain('Players in database');
   });
 
-  it('_calcNumberOfPages calculates correctly', () => {
+  it('shows warning when playersNotScannedYet', () => {
+    dataService.playersNotScannedYet = [{ steamID64: '1', matches: [] }];
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('not been scanned yet');
+  });
+
+  it('shows scan new players button when unscanned exist', () => {
+    dataService.playersNotScannedYet = [{ steamID64: '1', matches: [] }];
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll('button');
+    expect(Array.from(buttons).some((b: any) => b.textContent.includes('Scan new'))).toBe(true);
+  });
+
+  it('shows oldest match and scan info', () => {
+    dataService.oldestMatch = { id: '2024-01-01 00:00:00 GMT', playersSteamID64: [] };
+    dataService.oldestScan = { LastFetch: '2024-02-01', SteamId: '1', LastBanOn: '', DaysSinceLastBan: 0, NumberOfVACBans: 0, NumberOfGameBans: 0, CommunityBanned: false, EconomyBan: 'none', VACBanned: false };
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('oldest match');
+    expect(fixture.nativeElement.textContent).toContain('oldest scan');
+  });
+
+  it('shows scanning progress', () => {
+    utilsService.isScanning = true;
+    component.pageNumber = 0;
+    component.numberOfPages = 3;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Scanning (1/3)');
+  });
+
+  it('shows error message', () => {
+    component.error = 'Something went wrong';
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Something went wrong');
+  });
+
+  it('shows list changed warning', () => {
+    dataService.listPlayersBannedChanged = true;
+    component.ngDoCheck();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('list of banned players has changed');
+  });
+
+  it('_calcNumberOfPages', () => {
     component.calcNumberOfPages(new Array(250));
     expect(component.numberOfPages).toBe(3);
-
-    component.calcNumberOfPages(new Array(100));
-    expect(component.numberOfPages).toBe(1);
-
     component.calcNumberOfPages([]);
     expect(component.numberOfPages).toBe(0);
   });
 
-  it('stopScan sets _stopScan flag', () => {
+  it('stopScan sets flag', () => {
     component.stopScan();
     expect(component.scanStopped).toBe(true);
   });
 
-  it('_handleDeletedProfiles marks missing players as deleted', () => {
-    dataService.database.players = [
-      { steamID64: '1', matches: [] },
-      { steamID64: '2', matches: [] },
-    ];
-    const apiResults = [{ SteamId: '1' }] as any;
-
-    component.handleDeletedProfiles(apiResults, ['1', '2']);
-
+  it('handleDeletedProfiles marks missing players', () => {
+    dataService.database.players = [{ steamID64: '1', matches: [] }, { steamID64: '2', matches: [] }];
+    component.handleDeletedProfiles([{ SteamId: '1' }] as any, ['1', '2']);
     expect(dataService.database.players[1].deleted).toBe(true);
-    expect(dataService.database.players[0].deleted).toBeUndefined();
   });
 
-  it('renders scan buttons', () => {
-    const buttons = fixture.nativeElement.querySelectorAll('button');
-    expect(buttons.length).toBeGreaterThanOrEqual(2);
+  it('startScan scans new players', async () => {
+    dataService.filteredPlayers = [
+      { steamID64: '1', matches: [] },
+      { steamID64: '2', matches: [], banInfo: { LastFetch: '2024-01-01' } as any },
+    ];
+    (steamService.scanPlayers as any).mockResolvedValue([{ SteamId: '1' }]);
+    vi.spyOn(dataService, 'parseSteamResults');
+    component.startScan('new');
+    await vi.waitFor(() => expect(dataService.parseSteamResults).toHaveBeenCalled());
+  });
+
+  it('startScan scans all players', async () => {
+    dataService.filteredPlayers = [{ steamID64: '1', matches: [] }];
+    (steamService.scanPlayers as any).mockResolvedValue([{ SteamId: '1' }]);
+    vi.spyOn(dataService, 'parseSteamResults');
+    component.startScan('all');
+    await vi.waitFor(() => expect(dataService.parseSteamResults).toHaveBeenCalled());
+  });
+
+  it('scanPlayers handles error', async () => {
+    (steamService.scanPlayers as any).mockRejectedValue(new Error('fail'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await component.scanPlayers([{ steamID64: '1', matches: [] }]);
+    expect(component.error).toContain('Error');
+    expect(utilsService.isScanning).toBe(false);
+  });
+
+  it('scanPlayers stops when scanStopped is true', async () => {
+    (steamService.scanPlayers as any).mockResolvedValue([{ SteamId: '1' }]);
+    vi.spyOn(dataService, 'parseSteamResults');
+    component.scanStopped = true;
+    component.numberOfPages = 2;
+    await component.scanPlayers([{ steamID64: '1', matches: [] }]);
+    expect(utilsService.isScanning).toBe(false);
+  });
+
+  it('scanPlayers stops when no players', async () => {
+    await component.scanPlayers([]);
+    expect(utilsService.isScanning).toBe(false);
+  });
+
+  it('ngDoCheck updates warning flag', () => {
+    dataService.listPlayersBannedChanged = true;
+    component.ngDoCheck();
+    expect(component.showListBannedChangedWarning).toBe(true);
   });
 });

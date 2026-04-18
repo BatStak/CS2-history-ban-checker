@@ -71,6 +71,54 @@ describe('UtilsService', () => {
     });
   });
 
+  describe('getHistoryPeriod', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('sets startDate and endDate from DOM', () => {
+      document.body.innerHTML = `
+        <table class="csgo_scoreboard_root"><tbody>
+          <tr><th>Header</th></tr>
+          <tr><td><table class="csgo_scoreboard_inner_left"><tbody><tr><td>map</td></tr><tr><td>2024-01-01 00:00:00 GMT</td></tr></tbody></table></td></tr>
+          <tr><td><table class="csgo_scoreboard_inner_left"><tbody><tr><td>map</td></tr><tr><td>2024-06-01 00:00:00 GMT</td></tr></tbody></table></td></tr>
+        </tbody></table>`;
+      service.getHistoryPeriod();
+      expect(service.startDate).toBe('2024-06-01 00:00:00 GMT');
+      expect(service.endDate).toBe('2024-01-01 00:00:00 GMT');
+    });
+
+    it('updates startDate if earlier date found', () => {
+      service.startDate = '2024-06-01 00:00:00 GMT';
+      document.body.innerHTML = `
+        <table class="csgo_scoreboard_root"><tbody>
+          <tr><th>Header</th></tr>
+          <tr><td><table class="csgo_scoreboard_inner_left"><tbody><tr><td>map</td></tr><tr><td>2024-01-01 00:00:00 GMT</td></tr></tbody></table></td></tr>
+        </tbody></table>`;
+      service.getHistoryPeriod();
+      expect(service.startDate).toBe('2024-01-01 00:00:00 GMT');
+    });
+
+    it('does not update endDate if already set', () => {
+      service.endDate = '2024-12-01 00:00:00 GMT';
+      document.body.innerHTML = `
+        <table class="csgo_scoreboard_root"><tbody>
+          <tr><th>Header</th></tr>
+          <tr><td><table class="csgo_scoreboard_inner_left"><tbody><tr><td>map</td></tr><tr><td>2024-01-01 00:00:00 GMT</td></tr></tbody></table></td></tr>
+        </tbody></table>`;
+      service.getHistoryPeriod();
+      expect(service.endDate).toBe('2024-12-01 00:00:00 GMT');
+    });
+
+    it('handles no matches in DOM', () => {
+      service.startDate = undefined;
+      service.endDate = undefined;
+      service.getHistoryPeriod();
+      expect(service.startDate).toBeUndefined();
+      expect(service.endDate).toBeUndefined();
+    });
+  });
+
   describe('getReplayLink', () => {
     it('extracts replay link', () => {
       const el = document.createElement('div');

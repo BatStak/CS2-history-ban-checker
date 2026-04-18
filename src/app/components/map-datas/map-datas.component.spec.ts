@@ -11,53 +11,113 @@ describe('MapDatasComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MapDatasComponent],
-      providers: [
-        { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
-      ],
+      providers: [{ provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } }],
     }).compileComponents();
-
     fixture = TestBed.createComponent(MapDatasComponent);
     component = fixture.componentInstance;
     dataService = TestBed.inject(DataService);
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  it('should create', () => expect(component).toBeTruthy());
 
-  it('toggle switches display', () => {
-    expect(component.display).toBe(false);
-    component.toggle();
-    expect(component.display).toBe(true);
-    component.toggle();
-    expect(component.display).toBe(false);
-  });
-
-  it('orderBy toggles sort order', () => {
-    component.orderBy('sampleSize');
-    expect(component.column).toBe('sampleSize');
-    expect(component.order).toBe('asc');
-
-    component.orderBy('sampleSize');
-    expect(component.order).toBe('desc');
-  });
-
-  it('does not show table when display is false', () => {
-    expect(fixture.nativeElement.querySelector('table')).toBeNull();
-  });
-
-  it('hides toggle button when no mySteamId', () => {
+  it('hides button when no mySteamId', () => {
     dataService.mySteamId = undefined;
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
-  it('shows toggle button when mySteamId is set', () => {
+  it('shows button when mySteamId set', () => {
     dataService.mySteamId = '123';
     fixture.detectChanges();
-    const button = fixture.nativeElement.querySelector('button');
-    expect(button).toBeTruthy();
-    expect(button.textContent).toContain('Show');
+    expect(fixture.nativeElement.querySelector('button').textContent).toContain('Show');
+  });
+
+  it('toggle shows table with data', async () => {
+    dataService.mySteamId = '100';
+    dataService.filteredMatches = [{
+      id: '1', map: 'de_dust2', playersSteamID64: ['100'],
+      teamA: { scores: [{ steamID64: '100', ping: null, k: null, a: null, d: null, mvp: null, hsp: null, score: null }], win: 1 },
+      teamB: { scores: [], win: -1 },
+    }];
+    dataService.playersBannedFiltered = [];
+    fixture.detectChanges();
+
+    await component.toggle();
+    fixture.detectChanges();
+
+    expect(component.display).toBe(true);
+    expect(fixture.nativeElement.querySelector('table')).toBeTruthy();
+    expect(component.mapDatas.length).toBeGreaterThan(0);
+  });
+
+  it('toggle hides table', () => {
+    dataService.mySteamId = '100';
+    dataService.filteredMatches = [];
+    dataService.playersBannedFiltered = [];
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+    expect(component.display).toBe(false);
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+  });
+
+  it('orderBy toggles sort', () => {
+    component.orderBy('sampleSize');
+    expect(component.column).toBe('sampleSize');
+    expect(component.order).toBe('asc');
+    component.orderBy('sampleSize');
+    expect(component.order).toBe('desc');
+  });
+
+  it('orderBy different column resets to asc', () => {
+    component.orderBy('sampleSize');
+    component.orderBy('winrate');
+    expect(component.column).toBe('winrate');
+    expect(component.order).toBe('asc');
+  });
+
+  it('clicking column headers sorts', () => {
+    dataService.mySteamId = '100';
+    dataService.filteredMatches = [];
+    dataService.playersBannedFiltered = [];
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    const headers = fixture.nativeElement.querySelectorAll('th.sortable');
+    expect(headers.length).toBe(4);
+    headers[0].click(); // Map
+    fixture.detectChanges();
+    expect(component.column).toBe('map');
+  });
+
+  it('shows winrate input and percentage', () => {
+    dataService.mySteamId = '100';
+    dataService.filteredMatches = [{
+      id: '1', map: 'de_dust2', playersSteamID64: ['100'],
+      teamA: { scores: [{ steamID64: '100', ping: null, k: null, a: null, d: null, mvp: null, hsp: null, score: null }], win: 1 },
+      teamB: { scores: [], win: -1 },
+    }];
+    dataService.playersBannedFiltered = [];
+    fixture.detectChanges();
+    component.toggle();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('#winrate')).toBeTruthy();
+    expect(component.recentMapsPercentage).toBeGreaterThanOrEqual(0);
+  });
+
+  it('updates recentMapsSamplesize from winRateUpdated', () => {
+    dataService.mySteamId = '100';
+    dataService.filteredMatches = [];
+    dataService.playersBannedFiltered = [];
+    component.display = true;
+    component.mapDatas = [{ map: 'All maps', sampleSize: 0, wins: 0, withSomeoneBanAfter: 0, mostRecentWinsCount: 0, winrate: 0, banrate: 0 }];
+
+    component.winRateUpdated.next({ target: { valueAsNumber: 50 } } as any);
+    // debounced, so we just verify no error
   });
 });

@@ -9,18 +9,20 @@
                 <div id="self-status">
                     <div [innerHTML]="selfStatus"></div>
                     <div [innerHTML]="friendsStatus"></div>
-                    <button (click)="hideList = !hideList">
-                        @if (hideList) {
-                            show list
-                        } @else {
-                            hide list
+                    @if (friendsBanned.length) {
+                        <button (click)="hideList = !hideList">
+                            @if (hideList) {
+                                show list
+                            } @else {
+                                hide list
+                            }
+                        </button>
+                        @if (!hideList) {
+                            <cs2-history-ban-list
+                                [displayMatchInfo]="false"
+                                [playersBanned]="friendsBanned"
+                            ></cs2-history-ban-list>
                         }
-                    </button>
-                    @if (!hideList && friendsBanned.length) {
-                        <cs2-history-ban-list
-                            [displayMatchInfo]="false"
-                            [playersBanned]="friendsBanned"
-                        ></cs2-history-ban-list>
                     }
                 </div>
             } @else {

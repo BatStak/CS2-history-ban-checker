@@ -12,7 +12,7 @@ type columnType = 'map' | 'sampleSize' | 'banrate' | 'winrate';
     styleUrl: './map-datas.component.scss',
 })
 export class MapDatasComponent implements OnInit {
-    dataService = inject(DataService);
+    readonly dataService = inject(DataService);
 
     winRateUpdated = new Subject<Event>();
 

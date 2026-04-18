@@ -11,8 +11,8 @@ import { UtilsService } from '../../../services/utils.service';
     styleUrl: './history-loader.component.scss',
 })
 export class HistoryLoaderComponent {
-    utilsService = inject(UtilsService);
-    dataService = inject(DataService);
+    readonly utilsService = inject(UtilsService);
+    readonly dataService = inject(DataService);
 
     hideHistoryTable?: boolean;
 

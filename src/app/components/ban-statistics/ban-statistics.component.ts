@@ -14,8 +14,8 @@ import { PlayerSummary, SteamService } from '../../../services/steam.service';
     styleUrl: './ban-statistics.component.scss',
 })
 export class BanStatisticsComponent implements OnDestroy {
-    dataService = inject(DataService);
-    steamService = inject(SteamService);
+    readonly dataService = inject(DataService);
+    readonly steamService = inject(SteamService);
 
     displayListOfBannedPlayers = true;
 

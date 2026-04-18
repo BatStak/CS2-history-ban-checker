@@ -12,9 +12,9 @@ import { UtilsService } from '../../../services/utils.service';
     styleUrl: './ban-scanner.component.scss'
 })
 export class ScannerComponent implements DoCheck {
-    utilsService = inject(UtilsService);
-    dataService = inject(DataService);
-    steamService = inject(SteamService);
+    readonly utilsService = inject(UtilsService);
+    readonly dataService = inject(DataService);
+    readonly steamService = inject(SteamService);
 
     error = '';
 

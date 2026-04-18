@@ -18,8 +18,8 @@ export interface WinrateData {
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
-    databaseService = inject(DatabaseService);
-    utilsService = inject(UtilsService);
+    readonly databaseService = inject(DatabaseService);
+    readonly utilsService = inject(UtilsService);
 
     onSave = new Subject<void>();
     onStatisticsUpdate = new Subject<boolean>();

@@ -11,8 +11,8 @@ import { UtilsService } from '../../../services/utils.service';
     styleUrl: './options.component.scss'
 })
 export class OptionsComponent {
-    utilsService = inject(UtilsService);
-    dataService = inject(DataService);
+    readonly utilsService = inject(UtilsService);
+    readonly dataService = inject(DataService);
 
     apiKey?: string;
 

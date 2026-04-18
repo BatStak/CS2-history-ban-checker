@@ -61,7 +61,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     gcpdCSSRootSelector = '.csgo_scoreboard_root > tbody';
 
-    profileRegex = /^\/id\/[A-Za-z0-9-_]+\/?$/;
+    profileRegex = /^\/(id|profiles)\/[A-Za-z0-9-_]+\/?$/;
 
     selfStatus = 'Scanning self status...';
     friendsStatus = 'Scanning friends status...';

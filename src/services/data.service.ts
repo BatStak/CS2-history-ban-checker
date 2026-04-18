@@ -48,7 +48,7 @@ export class DataService {
 
   listPlayersBannedChanged = false;
 
-  refreshDebounceTimeInMs = 1000;
+  refreshDebounceTimeInMs = 500;
 
   friendsListCssSelector = '.friend_block_content';
   avatarCssSelector = '.player_avatar img';

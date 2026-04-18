@@ -1,10 +1,11 @@
 {
-  "overrides": [
-    {
-      "files": "*.html",
-      "options": {
-        "parser": "angular"
-      }
-    }
-  ]
+    "overrides": [
+        {
+            "files": "*.html",
+            "options": {
+                "parser": "angular"
+            }
+        }
+    ],
+    "tabWidth": 4
 }

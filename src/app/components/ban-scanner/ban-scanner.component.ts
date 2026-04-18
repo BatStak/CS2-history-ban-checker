@@ -6,17 +6,15 @@ import { SteamService } from '../../../services/steam.service';
 import { UtilsService } from '../../../services/utils.service';
 
 @Component({
-    selector: 'cs2-history-ban-scanner',
-    imports: [CommonModule],
-    templateUrl: './ban-scanner.component.html',
-    styleUrl: './ban-scanner.component.scss'
+  selector: 'cs2-history-ban-scanner',
+  imports: [CommonModule],
+  templateUrl: './ban-scanner.component.html',
+  styleUrl: './ban-scanner.component.scss'
 })
 export class ScannerComponent implements DoCheck {
   _utilsService = inject(UtilsService);
   _dataService = inject(DataService);
   _steamService = inject(SteamService);
-
-  isOnGCPDSection = input<boolean>(false);
 
   error = '';
 
@@ -56,7 +54,7 @@ export class ScannerComponent implements DoCheck {
   _stopScan = false;
 
   ngDoCheck(): void {
-    this.showListBannedChangedWarning = this.isOnGCPDSection() && this._dataService.listPlayersBannedChanged;
+    this.showListBannedChangedWarning = this._dataService.listPlayersBannedChanged;
   }
 
   startScan(type: 'new' | 'all') {

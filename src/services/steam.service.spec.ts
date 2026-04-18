@@ -8,7 +8,6 @@ import { SteamService } from './steam.service';
 export class MockDataService extends DataService {
   override database: Database = {
     apiKey: 'test',
-    friends: [],
     players: [],
     matches: [],
   };

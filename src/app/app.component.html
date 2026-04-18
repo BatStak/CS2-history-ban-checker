@@ -1,26 +1,31 @@
 @if (ready) {
-  <div class="cs2-history-ban-checker-container">
-    <h2>CS2 History Ban Checker</h2>
+    <div>
+        <h2>CS2 History Ban Checker</h2>
 
-    <cs2-history-options></cs2-history-options>
+        <cs2-history-options></cs2-history-options>
 
-    @if (database.apiKey) {
-      @if (isOnGCPDSection) {
-        <cs2-history-loader class="container-block"></cs2-history-loader>
-      }
+        @if (database.apiKey) {
+            @if (isOnProfilePage) {
+                <div id="self-status">
+                    <div [innerHTML]="selfStatus"></div>
+                    <div [innerHTML]="friendsStatus"></div>
+                </div>
+            } @else {
+                <cs2-history-loader class="container-block"></cs2-history-loader>
 
-      <h3>Database</h3>
+                <h3>Database</h3>
 
-      <cs2-history-ban-scanner class="container-block" [isOnGCPDSection]="isOnGCPDSection"></cs2-history-ban-scanner>
+                <cs2-history-ban-scanner class="container-block"></cs2-history-ban-scanner>
 
-      <h3>Results</h3>
+                <h3>Results</h3>
 
-      <cs2-history-ban-statistics class="container-block"></cs2-history-ban-statistics>
-    }
-  </div>
-  @if (isOnGCPDSection && hasRemovedHistoryLoaded) {
-    <div class="warning-panel">
-      We removed history loaded for better performance. We still parse all the history loaded.
+                <cs2-history-ban-statistics class="container-block"></cs2-history-ban-statistics>
+            }
+        }
     </div>
-  }
+    @if (hasRemovedHistoryLoaded) {
+        <div class="warning-panel">
+            We removed history loaded for better performance. We still parse all the history loaded.
+        </div>
+    }
 }

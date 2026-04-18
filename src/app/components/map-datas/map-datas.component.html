@@ -1,69 +1,60 @@
 @if (mySteamId) {
-  <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} personal statistics</button>
+    <button (click)="toggle()" type="button">{{ display ? "Hide" : "Show" }} personal statistics</button>
 
-  @if (display) {
-    <p>
-      Winrate on last
-      <input id="winrate" type="number" [(value)]="recentMapsSamplesize" (change)="winRateUpdated.next($event)" /> maps
-      : <strong>{{ recentMapsPercentage }}% ({{ recentMapsWinCount }} / {{ recentMapsRealSamplesize }})</strong>
-
-      @if (hasFriends) {
-        , from which soloQ is
-        <strong>{{ recentSoloQPercentage }}% ({{ recentSoloQCount }} / {{ recentMapsRealSamplesize }})</strong>
-      }
-    </p>
-    <table>
-      <tr>
-        <th
-          class="sortable asc"
-          (click)="orderBy('map')"
-          [class.asc]="order === 'asc' && column === 'map'"
-          [class.desc]="order === 'desc' && column === 'map'"
-        >
-          Map
-        </th>
-        <th
-          class="sample sortable"
-          (click)="orderBy('sampleSize')"
-          [class.asc]="order === 'asc' && column === 'sampleSize'"
-          [class.desc]="order === 'desc' && column === 'sampleSize'"
-        >
-          Sample size
-        </th>
-        <th
-          class="banrate sortable"
-          (click)="orderBy('banrate')"
-          [class.asc]="order === 'asc' && column === 'banrate'"
-          [class.desc]="order === 'desc' && column === 'banrate'"
-        >
-          % with someone ban after
-        </th>
-        <th
-          class="winrate sortable"
-          (click)="orderBy('winrate')"
-          [class.asc]="order === 'asc' && column === 'winrate'"
-          [class.desc]="order === 'desc' && column === 'winrate'"
-        >
-          Winrate
-        </th>
-      </tr>
-      @for (mapData of mapDatas; track $index) {
-        <tr>
-          <td>{{ mapData.map }}</td>
-          <td class="sample">{{ mapData.sampleSize }}</td>
-          <td class="banrate">
-            ({{ mapData.withSomeoneBanAfter }}) / <strong>{{ mapData.banrate | number: "0.0-2" }}%</strong>
-          </td>
-          <td class="winrate">
-            ({{ mapData.wins }}) / <strong>{{ mapData.winrate | number: "0.0-2" }}%</strong>
-          </td>
-        </tr>
-      }
-    </table>
-    @if (hasFriends) {
-      <p>
-        SoloQ percentage : <strong>{{ soloQPercentage }}%</strong> ({{ soloQCount }} / {{ allMapsSampleSize }})
-      </p>
+    @if (display) {
+        <p>
+            Winrate on last
+            <input id="winrate" type="number" [(value)]="recentMapsSamplesize" (change)="winRateUpdated.next($event)" />
+            maps :
+            <strong>{{ recentMapsPercentage }}% ({{ recentMapsWinCount }} / {{ recentMapsRealSamplesize }})</strong>
+        </p>
+        <table>
+            <tr>
+                <th
+                    class="sortable asc"
+                    (click)="orderBy('map')"
+                    [class.asc]="order === 'asc' && column === 'map'"
+                    [class.desc]="order === 'desc' && column === 'map'"
+                >
+                    Map
+                </th>
+                <th
+                    class="sample sortable"
+                    (click)="orderBy('sampleSize')"
+                    [class.asc]="order === 'asc' && column === 'sampleSize'"
+                    [class.desc]="order === 'desc' && column === 'sampleSize'"
+                >
+                    Sample size
+                </th>
+                <th
+                    class="banrate sortable"
+                    (click)="orderBy('banrate')"
+                    [class.asc]="order === 'asc' && column === 'banrate'"
+                    [class.desc]="order === 'desc' && column === 'banrate'"
+                >
+                    % with someone ban after
+                </th>
+                <th
+                    class="winrate sortable"
+                    (click)="orderBy('winrate')"
+                    [class.asc]="order === 'asc' && column === 'winrate'"
+                    [class.desc]="order === 'desc' && column === 'winrate'"
+                >
+                    Winrate
+                </th>
+            </tr>
+            @for (mapData of mapDatas; track $index) {
+                <tr>
+                    <td>{{ mapData.map }}</td>
+                    <td class="sample">{{ mapData.sampleSize }}</td>
+                    <td class="banrate">
+                        ({{ mapData.withSomeoneBanAfter }}) / <strong>{{ mapData.banrate | number: "0.0-2" }}%</strong>
+                    </td>
+                    <td class="winrate">
+                        ({{ mapData.wins }}) / <strong>{{ mapData.winrate | number: "0.0-2" }}%</strong>
+                    </td>
+                </tr>
+            }
+        </table>
     }
-  }
 }

@@ -1,9 +1,8 @@
-const app = document.createElement("app-root");
+const app = document.createElement("cs2-history-app-root");
+const profile = document.querySelector(".profile_page .profile_content .profile_leftcol");
 const gcpd = document.querySelector("#subtabs");
-const friends = document.querySelector(".friends_container");
-if (gcpd) {
-  gcpd.after(app);
-}
-if (friends) {
-  friends.before(app);
+if (profile) {
+    profile.prepend(app);
+} else if (gcpd) {
+    gcpd.after(app);
 }

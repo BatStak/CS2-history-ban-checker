@@ -12,135 +12,182 @@ import { ScannerComponent } from './components/ban-scanner/ban-scanner.component
 import { BanStatisticsComponent } from './components/ban-statistics/ban-statistics.component';
 import { HistoryLoaderComponent } from './components/history-loader/history-loader.component';
 import { OptionsComponent } from './components/options/options.component';
+import { SteamService } from '../services/steam.service';
 
 @Component({
-    selector: 'app-root',
+    selector: 'cs2-history-app-root',
     imports: [
-    FormsModule,
-    OptionsComponent,
-    HistoryLoaderComponent,
-    ScannerComponent,
-    BanStatisticsComponent
-],
+        FormsModule,
+        OptionsComponent,
+        HistoryLoaderComponent,
+        ScannerComponent,
+        BanStatisticsComponent
+    ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
-export class AppComponent implements AfterViewInit, DoCheck, OnDestroy {
-  _databaseService = inject(DatabaseService);
-  _utilsService = inject(UtilsService);
-  _dataService = inject(DataService);
-  _applicationRef = inject(ApplicationRef);
+export class AppComponent implements AfterViewInit, OnDestroy {
+    readonly databaseService = inject(DatabaseService);
+    readonly utilsService = inject(UtilsService);
+    readonly dataService = inject(DataService);
+    readonly applicationRef = inject(ApplicationRef);
+    readonly steamService = inject(SteamService);
 
-  get hasRemovedHistoryLoaded(): boolean {
-    return this._utilsService.hasRemovedHistoryLoaded;
-  }
-
-  ready = false;
-
-  isOnGCPDSection = false;
-
-  @HostBinding('class.add-margin')
-  addMarginClass = false;
-
-  get database(): Database {
-    return this._dataService.database;
-  }
-
-  _onDomUpdated = new Subject<void>();
-  _onDomUpdatedSubscription?: Subscription;
-  _onResetSubcription?: Subscription;
-
-  _validTabs = [
-    'matchhistorypremier', // premier
-    'matchhistorycompetitivepermap', // competitive
-    'matchhistorywingman', // wingman
-    'matchhistoryscrimmage', // scrimmage
-    'matchhistorycompetitive', // csgo
-  ];
-  _format?: MatchFormat;
-  _domCheckDebounceTimeInMs = 250;
-
-  _gcpdCSSRootSelector = '.csgo_scoreboard_root > tbody';
-  _friendsCSSRootSelector = '.friends_content';
-
-  get hideHistoryTable() {
-    return this._dataService.database?.hideHistoryTable;
-  }
-
-  async ngAfterViewInit() {
-    // for some reason, change detection does not work in firefox extension
-    if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
-      setInterval(() => this._applicationRef.tick(), 100);
+    get hasRemovedHistoryLoaded(): boolean {
+        return this.utilsService.hasRemovedHistoryLoaded;
     }
 
-    const section = new URLSearchParams(document.location.search).get('tab') || undefined;
+    ready = false;
 
-    this.isOnGCPDSection = !!section && this._validTabs.includes(section);
-    if (this.isOnGCPDSection) {
-      if (section === 'matchhistorywingman') {
-        this._format = MatchFormat.MR8;
-      } else if (section === 'matchhistorycompetitive') {
-        this._format = MatchFormat.MR15;
-      } else {
-        this._format = MatchFormat.MR12;
-      }
-      this._onResetSubcription = this._dataService.onReset.subscribe(() => {
-        this._update();
-      });
+    isOnProfilePage = false;
+
+    get database(): Database {
+        return this.dataService.database;
     }
 
-    const database = await this._databaseService.getDatabase();
-    this._dataService.init(database, section, this._format);
+    onDomUpdated = new Subject<void>();
+    onDomUpdatedSubscription?: Subscription;
+    onResetSubcription?: Subscription;
 
-    this._update();
-    this._onDomUpdatedSubscription = this._onDomUpdated
-      .pipe(debounceTime(this._domCheckDebounceTimeInMs))
-      .subscribe(() => {
-        this._update();
-      });
-    this._observeDomChanges();
+    validTabs = [
+        'matchhistorypremier', // premier
+        'matchhistorycompetitivepermap', // competitive
+        'matchhistorywingman', // wingman
+        'matchhistoryscrimmage', // scrimmage
+        'matchhistorycompetitive', // csgo
+    ];
+    format?: MatchFormat;
+    domCheckDebounceTimeInMs = 250;
 
-    this.ready = true;
-  }
+    gcpdCSSRootSelector = '.csgo_scoreboard_root > tbody';
 
-  ngDoCheck(): void {
-    this.addMarginClass = !this.isOnGCPDSection;
-  }
+    profileRegex = /^\/id\/[A-Za-z0-9-_]+\/?$/;
 
-  ngOnDestroy(): void {
-    this._onDomUpdatedSubscription?.unsubscribe();
-    this._onResetSubcription?.unsubscribe();
-  }
+    selfStatus = 'Scanning self status...';
+    friendsStatus = 'Scanning friends status...';
 
-  _observeDomChanges() {
-    const results = document.querySelector<HTMLElement>(
-      this.isOnGCPDSection ? this._gcpdCSSRootSelector : this._friendsCSSRootSelector,
-    );
-    if (results) {
-      const observer = new MutationObserver(() => {
-        this._onDomUpdated.next();
-      });
-      observer.observe(results, {
-        attributeOldValue: false,
-        attributes: false,
-        characterData: false,
-        characterDataOldValue: false,
-        childList: true,
-        subtree: false,
-      });
+    get hideHistoryTable() {
+        return this.dataService.database?.hideHistoryTable;
     }
-  }
 
-  _update() {
-    if (this.isOnGCPDSection) {
-      this._utilsService.getHistoryPeriod();
-      this._dataService.parseMatches();
-      if (this.database.hideHistoryTable && this._utilsService.isLoadingHistory) {
-        this._dataService.cleanParsedMatches();
-      }
-    } else {
-      this._dataService.parseFriends();
+    constructor() {
+        this.isOnProfilePage = this.profileRegex.test(document.location.pathname);
     }
-    this._dataService.save();
-  }
+
+    async ngAfterViewInit() {
+        // for some reason, change detection does not work in firefox extension
+        if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
+            setInterval(() => this.applicationRef.tick(), 100);
+        }
+
+        const database = await this.databaseService.getDatabase();
+        const section = new URLSearchParams(document.location.search).get('tab') || undefined;
+
+        const validTab = !!section && this.validTabs.includes(section);
+        if (validTab) {
+            if (section === 'matchhistorywingman') {
+                this.format = MatchFormat.MR8;
+            } else if (section === 'matchhistorycompetitive') {
+                this.format = MatchFormat.MR15;
+            } else {
+                this.format = MatchFormat.MR12;
+            }
+            this.onResetSubcription = this.dataService.onReset.subscribe(() => {
+                this.update();
+            });
+        }
+        this.dataService.init(database, section, this.format);
+
+        this.update();
+
+        if (this.isOnProfilePage) {
+            this.scanSelf();
+        } else {
+            this.onDomUpdatedSubscription = this.onDomUpdated
+                .pipe(debounceTime(this.domCheckDebounceTimeInMs))
+                .subscribe(() => {
+                    this.update();
+                });
+            this.observeDomChanges();
+        }
+
+        this.ready = true;
+    }
+
+    ngOnDestroy(): void {
+        this.onDomUpdatedSubscription?.unsubscribe();
+        this.onResetSubcription?.unsubscribe();
+    }
+
+    observeDomChanges() {
+        const results = document.querySelector<HTMLElement>(this.gcpdCSSRootSelector);
+        if (results) {
+            const observer = new MutationObserver(() => {
+                this.onDomUpdated.next();
+            });
+            observer.observe(results, {
+                attributeOldValue: false,
+                attributes: false,
+                characterData: false,
+                characterDataOldValue: false,
+                childList: true,
+                subtree: false,
+            });
+        }
+    }
+
+    update() {
+        if (!this.isOnProfilePage) {
+            this.utilsService.getHistoryPeriod();
+            this.dataService.parseMatches();
+            if (this.database.hideHistoryTable && this.utilsService.isLoadingHistory) {
+                this.dataService.cleanParsedMatches();
+            }
+        }
+        this.dataService.save();
+    }
+
+    scanSelf() {
+        const avatar = document.querySelector<HTMLElement>('.profile_header .playerAvatar')!;
+        const currentSteamID = this.utilsService.getSteamID64FromMiniProfileId(avatar.dataset['miniprofile']!);
+        this.steamService.scanPlayers([currentSteamID]).then((results) => {
+            const values = results[0];
+            if (values.NumberOfGameBans || values.NumberOfVACBans) {
+                this.selfStatus = `<span class="banned">
+                    This player has ${values.NumberOfGameBans} game ban${values.NumberOfGameBans > 1 ? 's' : ''}
+                    and ${values.NumberOfVACBans} VAC ban${values.NumberOfVACBans > 1 ? 's' : ''},
+                    last ban was ${values.DaysSinceLastBan} days ago</span>`;
+            } else {
+                this.selfStatus = 'self status : <span class="clean">clean</span>';
+            }
+        })
+        fetch(
+            `https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${this.dataService.database.apiKey}&steamid=${currentSteamID}`,
+        ).then((res) => {
+            if (res.ok) {
+                return res.json();
+            } else {
+                throw Error(`Code ${res.status}. ${res.statusText}`);
+            }
+        }).then(async (data) => {
+            const steamIDs: string[] = data?.friendslist?.friends?.map((f: any) => f.steamid);
+            if (steamIDs) {
+                const friendsCount = steamIDs.length;
+                let bannedFriendsCount = 0;
+                while (steamIDs.length) {
+                    const chunk = steamIDs.splice(0, 100);
+                    const results = await this.steamService.scanPlayers(chunk);
+                    bannedFriendsCount += results.filter(f => f.NumberOfGameBans || f.NumberOfVACBans).length;
+                }
+                if (bannedFriendsCount) {
+                    const percentageBanned = this.dataService.getPercentage(bannedFriendsCount, friendsCount);
+                    this.friendsStatus = `friends status : <span class="banned">${bannedFriendsCount} / ${friendsCount} (${percentageBanned}%) friends have been banned</span>`
+                } else {
+                    this.friendsStatus = 'friends status : <span class="clean">clean</span>';
+                }
+            }
+        }).catch((error) => {
+            this.friendsStatus = 'An error occured to retrieve friends list, maybe private ?'
+        });
+    }
 }

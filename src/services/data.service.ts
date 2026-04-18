@@ -14,8 +14,6 @@ export interface WinrateData {
   winrate?: number;
   banrate?: number;
   mostRecentWinsCount?: number;
-  soloQCount?: number;
-  recentSoloQCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +29,6 @@ export class DataService {
   database: Database = {
     matches: [],
     players: [],
-    friends: [],
   };
 
   mySteamId: string | undefined;
@@ -51,7 +48,7 @@ export class DataService {
 
   listPlayersBannedChanged = false;
 
-  refreshDebounceTimeInMs = 2000;
+  refreshDebounceTimeInMs = 1000;
 
   friendsListCssSelector = '.friend_block_content';
   avatarCssSelector = '.player_avatar img';
@@ -87,7 +84,7 @@ export class DataService {
       this.format = format;
     }
 
-    this.database ??= { matches: [], players: [], friends: [] };
+    this.database ??= { matches: [], players: [] };
     this.database.matches ??= [];
     this.database.players ??= [];
 
@@ -104,7 +101,6 @@ export class DataService {
     this.database = {
       apiKey: this.database.apiKey,
       hideHistoryTable: false,
-      friends: [],
       matches: [],
       players: [],
     };
@@ -112,50 +108,10 @@ export class DataService {
     document.location.reload();
   }
 
-  hasFriends() {
-    return !!this.database.friends?.length;
-  }
-
   parseMatches() {
     const matches = document.querySelectorAll<HTMLElement>(this.utilsService.matchesNotParsedCssSelector);
     for (let match of Array.from(matches)) {
       this.parseMatch(match, this.format!);
-    }
-  }
-
-  isOnOwnFriendsList() {
-    return /\/friends\/?$/.test(document.location.pathname) && !document.querySelector('[data-navid="friends/common"]');
-  }
-
-  parseFriends() {
-    const isOnFriendsList = this.isOnOwnFriendsList();
-    if (isOnFriendsList) {
-      this.database.friends = [];
-    }
-    this.filteredPlayers = [];
-    const players = document.querySelectorAll<HTMLElement>(this.utilsService.friendsListCssSelector);
-    for (let player of Array.from(players)) {
-      const steamID64 = player.dataset['steamid']!;
-      // add playerInfo to global list
-      let playerInfo = this.database.players.find((p) => p.steamID64 === steamID64);
-      if (!playerInfo) {
-        playerInfo = {
-          steamID64: steamID64,
-          name: player.querySelector<HTMLElement>(this.friendsListCssSelector)?.childNodes[0]?.textContent?.trim(),
-          profileLink: player.querySelector<HTMLLinkElement>('a')?.href,
-          avatarLink: player.querySelector<HTMLImageElement>(this.avatarCssSelector)?.src,
-          matches: [],
-        };
-        this.database.players.push(playerInfo);
-      }
-      this.filteredPlayers.push(playerInfo);
-      if (playerInfo.banInfo?.NumberOfGameBans || playerInfo.banInfo?.NumberOfVACBans) {
-        player.classList.add('banned');
-        player.setAttribute('title', this.getBanTitle(playerInfo));
-      }
-      if (isOnFriendsList) {
-        this.database.friends.push(playerInfo);
-      }
     }
   }
 
@@ -172,18 +128,10 @@ export class DataService {
     let index = 0;
     let countWin = 0;
     let wins = 0;
-    let soloQ = 0;
-    let recentSoloQ = 0;
     let withSomeoneBanAfter = 0;
     this.filteredMatches.forEach((matchInfo: MatchInfo) => {
       const winrate = this.getWinrateDataForMap(results, matchInfo.map!);
       winrate.sampleSize++;
-      if (!this.isPremade(matchInfo)) {
-        soloQ++;
-        if (index < recentMapCount) {
-          recentSoloQ++;
-        }
-      }
       if (this.isPlayerWinIntoTeam(matchInfo.teamA) || this.isPlayerWinIntoTeam(matchInfo.teamB)) {
         winrate.wins++;
         wins++;
@@ -204,8 +152,6 @@ export class DataService {
       withSomeoneBanAfter: withSomeoneBanAfter,
       sampleSize: this.filteredMatches.length,
       mostRecentWinsCount: countWin,
-      soloQCount: soloQ,
-      recentSoloQCount: recentSoloQ,
     });
 
     results.forEach((winrate) => {
@@ -234,10 +180,6 @@ export class DataService {
       results.push(winrate);
     }
     return winrate;
-  }
-
-  private isPremade(matchInfo?: MatchInfo) {
-    return this.hasFriends() && this.database.friends.some((x) => matchInfo?.playersSteamID64.includes(x.steamID64));
   }
 
   private isPlayerWinIntoTeam(team?: TeamInfo) {
@@ -443,8 +385,6 @@ export class DataService {
       this.filteredPlayers = this.database.players.filter(
         (p) => !p.deleted && this.filteredMatches.some((m) => m.playersSteamID64?.includes(p.steamID64)),
       );
-    } else {
-      this.parseFriends();
     }
 
     // get players that has no ban information
@@ -473,10 +413,10 @@ export class DataService {
     // get players banned after playing with them
     const playersBannedFiltered = filterBannedAfter
       ? this.playersBanned.filter(
-          (p) =>
-            // we take only people banned after playing with them
-            p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith,
-        )
+        (p) =>
+          // we take only people banned after playing with them
+          p.banInfo && p.lastPlayWith && p.banInfo.LastBanOn > p.lastPlayWith,
+      )
       : this.playersBanned;
 
     // update flag to know that there are new people banned
@@ -525,11 +465,11 @@ export class DataService {
     const result =
       playerALastBanOn === playerBLastBanOn
         ? // alpha
-          playerA.steamID64 < playerB.steamID64
+        playerA.steamID64 < playerB.steamID64
           ? -1
           : 1
         : // more recent first
-          playerALastBanOn < playerBLastBanOn
+        playerALastBanOn < playerBLastBanOn
           ? 1
           : -1;
     return result;

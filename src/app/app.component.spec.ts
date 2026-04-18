@@ -51,56 +51,39 @@ describe('AppComponent', async () => {
     fixture.detectChanges();
     expect(dom.innerHTML).toContain('</cs2-history-ban-scanner>');
     expect(dom.innerHTML).toContain('</cs2-history-ban-statistics>');
-    expect(dom.innerHTML).not.toContain('</cs2-history-loader>');
-
-    component.isOnGCPDSection = true;
-    fixture.detectChanges();
-    expect(dom.innerHTML).toContain('</cs2-history-ban-scanner>');
-    expect(dom.innerHTML).toContain('</cs2-history-ban-statistics>');
     expect(dom.innerHTML).toContain('</cs2-history-loader>');
+
+    component.isOnProfilePage = true;
+    fixture.detectChanges();
+    expect(dom.innerHTML).toContain('id="self-status"');
+    expect(dom.innerHTML).not.toContain('</cs2-history-ban-scanner>');
+    expect(dom.innerHTML).not.toContain('</cs2-history-ban-statistics>');
+    expect(dom.innerHTML).not.toContain('</cs2-history-loader>');
   });
 
   it('Test typescript variables initialisation', async () => {
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeFalse();
-    expect(component.addMarginClass).toBeTrue();
-    expect(component._format).toBeUndefined();
+    await component.ngAfterViewInit();
+    expect(component.format).toBeUndefined();
 
     window.history.replaceState(null, '', '?tab=toto');
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeFalse();
-    expect(component.addMarginClass).toBeTrue();
-    expect(component._format).toBeUndefined();
+    await component.ngAfterViewInit();
+    expect(component.format).toBeUndefined();
 
     window.history.replaceState(null, '', '?tab=matchhistorypremier');
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeTrue();
-    expect(component.addMarginClass).toBeFalse();
-    expect(component._format).toEqual(MatchFormat.MR12);
+    await component.ngAfterViewInit();
+    expect(component.format).toEqual(MatchFormat.MR12);
 
     window.history.replaceState(null, '', '?tab=matchhistorycompetitivepermap');
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeTrue();
-    expect(component.addMarginClass).toBeFalse();
-    expect(component._format).toEqual(MatchFormat.MR12);
+    await component.ngAfterViewInit();
+    expect(component.format).toEqual(MatchFormat.MR12);
 
     window.history.replaceState(null, '', '?tab=matchhistorycompetitive');
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeTrue();
-    expect(component.addMarginClass).toBeFalse();
-    expect(component._format).toEqual(MatchFormat.MR15);
+    await component.ngAfterViewInit();
+    expect(component.format).toEqual(MatchFormat.MR15);
 
     window.history.replaceState(null, '', '?tab=matchhistorywingman');
-    component.ngAfterViewInit();
-    component.ngDoCheck();
-    expect(component.isOnGCPDSection).toBeTrue();
-    expect(component.addMarginClass).toBeFalse();
-    expect(component._format).toEqual(MatchFormat.MR8);
+    await component.ngAfterViewInit();
+    expect(component.format).toEqual(MatchFormat.MR8);
 
     window.history.replaceState(null, '', '');
   });

@@ -27,13 +27,8 @@ describe('ScannerComponent', async () => {
   });
 
   it('Test "matches in database" display', async () => {
-    fixture.componentRef.setInput('isOnGCPDSection', true);
     fixture.detectChanges();
     expect(dom.textContent).toContain('matches in database for this section');
-
-    fixture.componentRef.setInput('isOnGCPDSection', false);
-    fixture.detectChanges();
-    expect(dom.textContent).not.toContain('matches in database for this section');
   });
 
   it('Test "not been scanned yet" display', async () => {
@@ -129,33 +124,17 @@ describe('ScannerComponent', async () => {
   });
 
   it('Test doCheck', async () => {
-    fixture.componentRef.setInput('isOnGCPDSection', true);
     dataService.listPlayersBannedChanged = false;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showListBannedChangedWarning).toBeFalse();
-    expect(dom.textContent).not.toContain('There are new players banned');
+    expect(dom.textContent).not.toContain('The list of banned players has changed');
 
-    fixture.componentRef.setInput('isOnGCPDSection', true);
     dataService.listPlayersBannedChanged = true;
     component.ngDoCheck();
     fixture.detectChanges();
     expect(component.showListBannedChangedWarning).toBeTrue();
-    expect(dom.textContent).toContain('There are new players banned');
-
-    fixture.componentRef.setInput('isOnGCPDSection', false);
-    dataService.listPlayersBannedChanged = true;
-    component.ngDoCheck();
-    fixture.detectChanges();
-    expect(component.showListBannedChangedWarning).toBeFalse();
-    expect(dom.textContent).not.toContain('There are new players banned');
-
-    fixture.componentRef.setInput('isOnGCPDSection', false);
-    dataService.listPlayersBannedChanged = false;
-    component.ngDoCheck();
-    fixture.detectChanges();
-    expect(component.showListBannedChangedWarning).toBeFalse();
-    expect(dom.textContent).not.toContain('There are new players banned');
+    expect(dom.textContent).toContain('The list of banned players has changed');
   });
 
   it('Test deleted profiles', async () => {

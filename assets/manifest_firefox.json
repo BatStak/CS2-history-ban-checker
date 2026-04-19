@@ -1,7 +1,7 @@
 {
     "name": "CS2 ban checker",
     "description": "Check ban status of players you encountered in CS2 matchmaking.",
-    "version": "3.0.7",
+    "version": "3.0.8",
     "permissions": [
         "unlimitedStorage",
         "storage",

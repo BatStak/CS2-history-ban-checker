@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HistoryLoaderComponent } from './history-loader.component';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
@@ -10,16 +11,25 @@ describe('HistoryLoaderComponent', () => {
   let utilsService: UtilsService;
   let dataService: DataService;
 
+  async function detectChanges() {
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HistoryLoaderComponent],
-      providers: [{ provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } }],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(HistoryLoaderComponent);
+    fixture.autoDetectChanges();
     component = fixture.componentInstance;
     utilsService = TestBed.inject(UtilsService);
     dataService = TestBed.inject(DataService);
-    fixture.detectChanges();
+    await detectChanges();
   });
 
   it('should create', () => expect(component).toBeTruthy());
@@ -28,16 +38,16 @@ describe('HistoryLoaderComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('No history loaded');
   });
 
-  it('shows date range when dates set', () => {
+  it('shows date range when dates set', async () => {
     utilsService.startDate = '2024-01-01 00:00:00 GMT';
     utilsService.endDate = '2024-06-01 00:00:00 GMT';
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('History loaded from');
   });
 
-  it('shows Loading when isLoadingHistory', () => {
+  it('shows Loading when isLoadingHistory', async () => {
     utilsService.isLoadingHistory = true;
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Loading...');
   });
 

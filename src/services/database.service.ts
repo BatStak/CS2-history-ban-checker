@@ -5,10 +5,18 @@ import { Database } from '../models';
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
     async setDatabase(database: Database) {
-        (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.set(database) : void 0;
+        if (typeof chrome?.storage?.local === 'undefined') {
+            console.error("chrome.storage.local n'est pas disponible.");
+            return;
+        }
+        await chrome.storage.local.set(database);
     }
 
-    async getDatabase() {
-        return (await typeof chrome?.storage?.local) !== 'undefined' ? chrome.storage.local.get() : undefined;
+    async getDatabase(): Promise<Database | undefined> {
+        if (typeof chrome?.storage?.local === 'undefined') {
+            console.error("chrome.storage.local n'est pas disponible.");
+            return undefined;
+        }
+        return await chrome.storage.local.get(null) as Database;
     }
 }

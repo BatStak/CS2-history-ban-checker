@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { BanStatisticsComponent } from './ban-statistics.component';
 import { DataService } from '../../../services/data.service';
 import { SteamService } from '../../../services/steam.service';
@@ -16,19 +17,26 @@ describe('BanStatisticsComponent', () => {
     LastBanOn: '2025-01-01', LastFetch: '2025-01-01', CommunityBanned: false, EconomyBan: 'none', VACBanned: true,
   });
 
+  async function detectChanges() {
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BanStatisticsComponent],
       providers: [
+        provideZonelessChangeDetection(),
         { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
         { provide: SteamService, useValue: { getPlayerSummaries: vi.fn().mockResolvedValue([]), scanPlayers: vi.fn().mockResolvedValue([]) } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(BanStatisticsComponent);
+    fixture.autoDetectChanges();
     component = fixture.componentInstance;
     dataService = TestBed.inject(DataService);
     steamService = TestBed.inject(SteamService);
-    fixture.detectChanges();
+    await detectChanges();
   });
 
   it('should create', () => expect(component).toBeTruthy());
@@ -37,7 +45,7 @@ describe('BanStatisticsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('No banned player');
   });
 
-  it('shows statistics when banned players exist', () => {
+  it('shows statistics when banned players exist', async () => {
     const cheater: PlayerInfo = { steamID64: '200', matches: [], lastPlayWith: '2024-01-01', banInfo: makeBanInfo('200') as any };
     dataService.mySteamId = '100';
     dataService.filteredPlayers = [{ steamID64: '100', matches: [] }, cheater];
@@ -49,7 +57,7 @@ describe('BanStatisticsComponent', () => {
     dataService.playersBannedFiltered = [cheater];
     dataService.oldestMatch = { id: '2024-01-01 00:00:00 GMT', playersSteamID64: [] };
     component.update();
-    fixture.detectChanges();
+    await detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('have been banned later');
     expect(fixture.nativeElement.textContent).toContain('played with later-banned');
@@ -58,12 +66,12 @@ describe('BanStatisticsComponent', () => {
     expect(component.matchesConcerned).toBe(1);
   });
 
-  it('shows frequency of bans', () => {
+  it('shows frequency of bans', async () => {
     const cheater: PlayerInfo = { steamID64: '200', matches: [], banInfo: makeBanInfo('200') as any };
     dataService.playersBannedFiltered = [cheater];
     dataService.oldestMatch = { id: '2024-01-01 00:00:00 GMT', playersSteamID64: [] };
     component.getFrequencyBans(new Date('2024-07-01'));
-    fixture.detectChanges();
+    await detectChanges();
     expect(component.frequencyInDaysOfBans).toBeGreaterThan(0);
   });
 
@@ -145,7 +153,6 @@ describe('BanStatisticsComponent', () => {
     dataService.mySteamId = '100';
     dataService.playersBannedFiltered = [{ steamID64: '200', matches: [] } as any];
     component.matchesConcerned = 10;
-    // 10 matches all against
     const matches = Array.from({ length: 10 }, () => ({
       playersSteamID64: ['100', '200'],
       teamA: { scores: [{ steamID64: '100' }] },
@@ -155,17 +162,17 @@ describe('BanStatisticsComponent', () => {
     expect(component.unlucky).toBe(true);
   });
 
-  it('toggle list button works', () => {
+  it('toggle list button works', async () => {
     const cheater: PlayerInfo = { steamID64: '200', matches: [], banInfo: makeBanInfo('200') as any };
     dataService.playersBannedFiltered = [cheater];
     dataService.filteredPlayers = [cheater];
     component.update();
-    fixture.detectChanges();
+    await detectChanges();
 
     const btn = Array.from(fixture.nativeElement.querySelectorAll('button')).find((b: any) => b.textContent.includes('Hide')) as HTMLButtonElement;
     expect(btn).toBeTruthy();
     btn.click();
-    fixture.detectChanges();
+    await detectChanges();
     expect(component.displayListOfBannedPlayers).toBe(false);
   });
 

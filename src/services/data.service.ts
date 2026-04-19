@@ -25,6 +25,7 @@ export class DataService {
     onStatisticsUpdate = new Subject<boolean>();
     onStatisticsUpdated = new Subject<void>();
     onReset = new Subject<void>();
+    onChange = new Subject<void>();
 
     database: Database = {
         matches: [],
@@ -426,6 +427,7 @@ export class DataService {
         this.playersBannedFiltered = playersBannedFiltered;
 
         this.onStatisticsUpdated.next();
+        this.onChange.next();
     }
 
     /**

@@ -1,10 +1,9 @@
-import { AfterViewInit, ApplicationRef, Component, DoCheck, HostBinding, inject, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { UtilsService } from '../services/utils.service';
 
 
-import Bowser from 'bowser';
 import { debounceTime, Subject, Subscription } from 'rxjs';
 import { BanInfo, Database, MatchFormat, PlayerInfo } from '../models';
 import { DatabaseService } from '../services/database.service';
@@ -32,7 +31,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     readonly databaseService = inject(DatabaseService);
     readonly utilsService = inject(UtilsService);
     readonly dataService = inject(DataService);
-    readonly applicationRef = inject(ApplicationRef);
+    readonly cdr = inject(ChangeDetectorRef);
     readonly steamService = inject(SteamService);
 
     get hasRemovedHistoryLoaded(): boolean {
@@ -50,6 +49,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     onDomUpdated = new Subject<void>();
     onDomUpdatedSubscription?: Subscription;
     onResetSubcription?: Subscription;
+    onChangeSubscription?: Subscription;
 
     validTabs = [
         'matchhistorypremier', // premier
@@ -76,14 +76,10 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     constructor() {
         this.isOnProfilePage = this.profileRegex.test(document.location.pathname);
+        this.onChangeSubscription = this.dataService.onChange.subscribe(() => this.cdr.markForCheck());
     }
 
     async ngAfterViewInit() {
-        // for some reason, change detection does not work in firefox extension
-        if (Bowser.getParser(window.navigator.userAgent).getBrowserName() === 'Firefox') {
-            setInterval(() => this.applicationRef.tick(), 100);
-        }
-
         const database = await this.databaseService.getDatabase();
         const section = new URLSearchParams(document.location.search).get('tab') || undefined;
 
@@ -116,11 +112,13 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         }
 
         this.ready = true;
+        this.cdr.markForCheck();
     }
 
     ngOnDestroy(): void {
         this.onDomUpdatedSubscription?.unsubscribe();
         this.onResetSubcription?.unsubscribe();
+        this.onChangeSubscription?.unsubscribe();
     }
 
     observeDomChanges() {
@@ -164,6 +162,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
             } else {
                 this.selfStatus = 'self status : <span class="clean">clean</span>';
             }
+            this.cdr.markForCheck();
         })
         fetch(
             `https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=${this.dataService.database.apiKey}&steamid=${currentSteamID}`,
@@ -201,6 +200,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
                         }
                     })
                     this.friendsBanned = [...this.friendsBanned, ...banned];
+                    this.cdr.markForCheck();
                 }
                 if (this.friendsBanned.length) {
                     const percentageBanned = this.dataService.getPercentage(this.friendsBanned.length, friendsCount);
@@ -210,10 +210,11 @@ export class AppComponent implements AfterViewInit, OnDestroy {
                 } else {
                     this.friendsStatus = 'friends status : <span class="clean">clean</span>';
                 }
-
+                this.cdr.markForCheck();
             }
         }).catch((error) => {
             this.friendsStatus = 'An error occured to retrieve friends list, maybe private ?'
+            this.cdr.markForCheck();
         });
     }
 }

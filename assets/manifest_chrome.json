@@ -15,7 +15,7 @@
     },
     "content_scripts": [
         {
-            "js": ["index.js", "polyfills.js", "main.js"],
+            "js": ["index.js", "main.js"],
             "css": ["styles.css"],
             "run_at": "document_end",
             "matches": ["https://steamcommunity.com/id/*", "https://steamcommunity.com/profiles/*"]

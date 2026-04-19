@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ScannerComponent } from './ban-scanner.component';
 import { DataService } from '../../../services/data.service';
 import { SteamService } from '../../../services/steam.service';
@@ -12,20 +13,27 @@ describe('ScannerComponent', () => {
   let steamService: SteamService;
   let utilsService: UtilsService;
 
+  async function detectChanges() {
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ScannerComponent],
       providers: [
+        provideZonelessChangeDetection(),
         { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
         { provide: SteamService, useValue: { scanPlayers: vi.fn().mockResolvedValue([]) } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(ScannerComponent);
+    fixture.autoDetectChanges();
     component = fixture.componentInstance;
     dataService = TestBed.inject(DataService);
     steamService = TestBed.inject(SteamService);
     utilsService = TestBed.inject(UtilsService);
-    fixture.detectChanges();
+    await detectChanges();
   });
 
   it('should create', () => expect(component).toBeTruthy());
@@ -34,45 +42,45 @@ describe('ScannerComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Players in database');
   });
 
-  it('shows warning when playersNotScannedYet', () => {
+  it('shows warning when playersNotScannedYet', async () => {
     dataService.playersNotScannedYet = [{ steamID64: '1', matches: [] }];
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('not been scanned yet');
   });
 
-  it('shows scan new players button when unscanned exist', () => {
+  it('shows scan new players button when unscanned exist', async () => {
     dataService.playersNotScannedYet = [{ steamID64: '1', matches: [] }];
-    fixture.detectChanges();
+    await detectChanges();
     const buttons = fixture.nativeElement.querySelectorAll('button');
     expect(Array.from(buttons).some((b: any) => b.textContent.includes('Scan new'))).toBe(true);
   });
 
-  it('shows oldest match and scan info', () => {
+  it('shows oldest match and scan info', async () => {
     dataService.oldestMatch = { id: '2024-01-01 00:00:00 GMT', playersSteamID64: [] };
     dataService.oldestScan = { LastFetch: '2024-02-01', SteamId: '1', LastBanOn: '', DaysSinceLastBan: 0, NumberOfVACBans: 0, NumberOfGameBans: 0, CommunityBanned: false, EconomyBan: 'none', VACBanned: false };
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('oldest match');
     expect(fixture.nativeElement.textContent).toContain('oldest scan');
   });
 
-  it('shows scanning progress', () => {
+  it('shows scanning progress', async () => {
     utilsService.isScanning = true;
     component.pageNumber = 0;
     component.numberOfPages = 3;
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Scanning (1/3)');
   });
 
-  it('shows error message', () => {
+  it('shows error message', async () => {
     component.error = 'Something went wrong';
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Something went wrong');
   });
 
-  it('shows list changed warning', () => {
+  it('shows list changed warning', async () => {
     dataService.listPlayersBannedChanged = true;
     component.ngDoCheck();
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('list of banned players has changed');
   });
 
@@ -102,7 +110,8 @@ describe('ScannerComponent', () => {
     (steamService.scanPlayers as any).mockResolvedValue([{ SteamId: '1' }]);
     vi.spyOn(dataService, 'parseSteamResults');
     component.startScan('new');
-    await vi.waitFor(() => expect(dataService.parseSteamResults).toHaveBeenCalled());
+    await vi.waitFor(() => expect(utilsService.isScanning).toBe(false));
+    expect(dataService.parseSteamResults).toHaveBeenCalled();
   });
 
   it('startScan scans all players', async () => {
@@ -110,12 +119,13 @@ describe('ScannerComponent', () => {
     (steamService.scanPlayers as any).mockResolvedValue([{ SteamId: '1' }]);
     vi.spyOn(dataService, 'parseSteamResults');
     component.startScan('all');
-    await vi.waitFor(() => expect(dataService.parseSteamResults).toHaveBeenCalled());
+    await vi.waitFor(() => expect(utilsService.isScanning).toBe(false));
+    expect(dataService.parseSteamResults).toHaveBeenCalled();
   });
 
   it('scanPlayers handles error', async () => {
     (steamService.scanPlayers as any).mockRejectedValue(new Error('fail'));
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => { });
     await component.scanPlayers([{ steamID64: '1', matches: [] }]);
     expect(component.error).toContain('Error');
     expect(utilsService.isScanning).toBe(false);

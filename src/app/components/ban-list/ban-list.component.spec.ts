@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { BanListComponent } from './ban-list.component';
 import { DataService } from '../../../services/data.service';
 import { DatabaseService } from '../../../services/database.service';
@@ -29,15 +30,24 @@ describe('BanListComponent', () => {
   let host: TestHostComponent;
   let dataService: DataService;
 
+  async function detectChanges() {
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [{ provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } }],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: DatabaseService, useValue: { setDatabase: vi.fn(), getDatabase: vi.fn() } },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
+    fixture.autoDetectChanges();
     host = fixture.componentInstance;
     dataService = TestBed.inject(DataService);
-    fixture.detectChanges();
+    await detectChanges();
   });
 
   function getBanList(): BanListComponent {
@@ -56,17 +66,17 @@ describe('BanListComponent', () => {
     expect(text).toContain('Last ban');
   });
 
-  it('hides match info columns when displayMatchInfo is false', () => {
+  it('hides match info columns when displayMatchInfo is false', async () => {
     host.displayMatchInfo = false;
-    fixture.detectChanges();
+    await detectChanges();
     const text = fixture.nativeElement.textContent;
     expect(text).not.toContain('See match');
     expect(text).not.toContain('Last played');
   });
 
-  it('renders banned players', () => {
+  it('renders banned players', async () => {
     host.players = [makePlayer('123', 'Cheater', '2025-01-01', '2024-06-01')];
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Cheater');
   });
 
@@ -79,12 +89,12 @@ describe('BanListComponent', () => {
     expect(bl.order).toBe('desc');
   });
 
-  it('orderBy LastBanOn sorts', () => {
+  it('orderBy LastBanOn sorts', async () => {
     host.players = [
       makePlayer('1', 'A', '2025-01-01', '2024-01-01'),
       makePlayer('2', 'B', '2025-06-01', '2024-01-01'),
     ];
-    fixture.detectChanges();
+    await detectChanges();
     const bl = getBanList();
     bl.orderBy('LastBanOn');
     expect(bl.playersBanned()[0].name).toBe('A');
@@ -92,12 +102,12 @@ describe('BanListComponent', () => {
     expect(bl.playersBanned()[0].name).toBe('B');
   });
 
-  it('orderBy lastPlayWith sorts', () => {
+  it('orderBy lastPlayWith sorts', async () => {
     host.players = [
       makePlayer('1', 'A', '2025-01-01', '2024-06-01'),
       makePlayer('2', 'B', '2025-01-01', '2024-01-01'),
     ];
-    fixture.detectChanges();
+    await detectChanges();
     const bl = getBanList();
     bl.orderBy('lastPlayWith');
     expect(bl.playersBanned()[0].name).toBe('B');
@@ -119,7 +129,7 @@ describe('BanListComponent', () => {
     expect(bl.matchInfo).toBeUndefined();
   });
 
-  it('show match button toggles match info display', () => {
+  it('show match button toggles match info display', async () => {
     const match = {
       id: '2024-06-01', map: 'de_dust2', playersSteamID64: ['123'],
       teamA: { scores: [{ steamID64: '123', ping: '30', k: '15', a: '5', d: '8', mvp: '2', hsp: '40%', score: '35' }], score: 13 },
@@ -129,16 +139,16 @@ describe('BanListComponent', () => {
     dataService.filteredPlayers = [makePlayer('123', 'Cheater', '2025-01-01', '2024-06-01')];
     dataService.playersBanned = [makePlayer('123', 'Cheater', '2025-01-01', '2024-06-01')];
     host.players = [makePlayer('123', 'Cheater', '2025-01-01', '2024-06-01')];
-    fixture.detectChanges();
+    await detectChanges();
 
     const showBtn = fixture.nativeElement.querySelector('button');
     showBtn.click();
-    fixture.detectChanges();
+    await detectChanges();
     expect(fixture.nativeElement.textContent).toContain('13 : 10');
 
     // Click again to hide
     showBtn.click();
-    fixture.detectChanges();
+    await detectChanges();
     expect(getBanList().matchInfo).toBeUndefined();
   });
 

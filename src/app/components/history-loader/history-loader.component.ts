@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../services/data.service';
 import { UtilsService } from '../../../services/utils.service';
@@ -13,6 +13,7 @@ import { UtilsService } from '../../../services/utils.service';
 export class HistoryLoaderComponent {
     readonly utilsService = inject(UtilsService);
     readonly dataService = inject(DataService);
+    readonly appRef = inject(ChangeDetectorRef);
 
     hideHistoryTable?: boolean;
 
@@ -57,6 +58,7 @@ export class HistoryLoaderComponent {
         clearInterval(this.loadHistoryTimer);
         this.loadHistoryTimer = undefined;
         this.utilsService.isLoadingHistory = false;
+        this.appRef.markForCheck();
     }
 
     async toggleHideCleanMatches(event: Event) {

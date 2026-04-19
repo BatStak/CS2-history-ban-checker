@@ -1,10 +1,9 @@
 {
-    "name": "CS2 history ban checker",
+    "name": "CS2 ban checker",
     "description": "Check ban status of players you encountered in CS2 matchmaking.",
-    "version": "3.0.5",
+    "version": "3.0.6",
     "permissions": ["unlimitedStorage", "storage", "contextMenus"],
-    "host_permissions": ["*://steamcommunity.com/*", "https://api.steampowered.com/*"],
-    "optional_host_permissions": ["*://*/*"],
+    "host_permissions": ["https://steamcommunity.com/*", "https://api.steampowered.com/*"],
     "icons": {
         "16": "icon-16.png",
         "32": "icon-32.png",
@@ -19,20 +18,7 @@
             "js": ["index.js", "polyfills.js", "main.js"],
             "css": ["styles.css"],
             "run_at": "document_end",
-            "matches": [
-                "*://steamcommunity.com/id/*",
-                "*://steamcommunity.com/profiles/*",
-                "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorypremier",
-                "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorypremier",
-                "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitivepermap",
-                "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorycompetitivepermap",
-                "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorycompetitive",
-                "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorycompetitive",
-                "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistorywingman",
-                "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistorywingman",
-                "*://steamcommunity.com/id/*/gcpd/730*tab=matchhistoryscrimmage",
-                "*://steamcommunity.com/profiles/*/gcpd/730*tab=matchhistoryscrimmage"
-            ]
+            "matches": ["https://steamcommunity.com/id/*", "https://steamcommunity.com/profiles/*"]
         }
     ],
     "manifest_version": 3

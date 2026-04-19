@@ -175,46 +175,70 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         }).then(async (data) => {
             const steamIDs: string[] = data?.friendslist?.friends?.map((f: any) => f.steamid);
             if (steamIDs) {
-                const friendsCount = steamIDs.length;
-                this.friendsBanned = [];
-                while (steamIDs.length) {
-                    const chunk = steamIDs.splice(0, 100);
-                    const results: BanInfo[] = await this.steamService.scanPlayers(chunk);
-                    const banned = results.filter((ban: BanInfo) => ban.NumberOfGameBans || ban.NumberOfVACBans)
-                        .map((ban: BanInfo) => {
-                            return {
-                                steamID64: ban.SteamId,
-                                banInfo: ban,
-                                matches: [],
-                            } as PlayerInfo
-                        });
-
-                    const summaries: PlayerSummary[] = await this.steamService.getPlayerSummaries(chunk);
-                    summaries.forEach(summary => {
-                        const friend = banned.find(player => player.steamID64 === summary.steamid);
-                        if (friend) {
-                            friend.avatarLink = summary.avatarmedium;
-                            friend.name = summary.personaname;
-                            friend.profileLink = summary.profileurl;
-                            friend.banInfo!.LastBanOn = new Date(new Date().setDate(new Date().getDate() - friend.banInfo!.DaysSinceLastBan)).toISOString();
-                        }
-                    })
-                    this.friendsBanned = [...this.friendsBanned, ...banned];
-                    this.cdr.markForCheck();
-                }
-                if (this.friendsBanned.length) {
-                    const percentageBanned = this.dataService.getPercentage(this.friendsBanned.length, friendsCount);
-                    this.friendsStatus = `friends status : <span class="banned">
-                        ${this.friendsBanned.length} / ${friendsCount} (${percentageBanned}%) friends have been banned
-                    </span>`;
-                } else {
-                    this.friendsStatus = 'friends status : <span class="clean">clean</span>';
-                }
+                await this.scanFriends(steamIDs);
+            }
+        }).catch(async () => {
+            const steamIDs = await this.scrapeFriendsList(currentSteamID);
+            if (steamIDs) {
+                await this.scanFriends(steamIDs);
+            } else {
+                this.friendsStatus = 'Could not retrieve friends list. It may be set to private or friends-only.';
                 this.cdr.markForCheck();
             }
-        }).catch((error) => {
-            this.friendsStatus = 'An error occured to retrieve friends list, maybe private ?'
-            this.cdr.markForCheck();
         });
+    }
+
+    private async scrapeFriendsList(steamID: string): Promise<string[] | null> {
+        const friendsLink = document.querySelector<HTMLAnchorElement>('.profile_friend_links a[href*="/friends"]');
+        if (!friendsLink) return null;
+        try {
+            const res = await fetch(friendsLink.href);
+            if (!res.ok) return null;
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const blocks = doc.querySelectorAll<HTMLElement>('.friend_block_v2[data-steamid]');
+            if (!blocks.length) return null;
+            return [...new Set(Array.from(blocks).map(el => el.dataset['steamid']!))];
+        } catch {
+            return null;
+        }
+    }
+
+    private async scanFriends(steamIDs: string[]) {
+        const friendsCount = steamIDs.length;
+        this.friendsBanned = [];
+        const ids = [...steamIDs];
+        while (ids.length) {
+            const chunk = ids.splice(0, 100);
+            const results: BanInfo[] = await this.steamService.scanPlayers(chunk);
+            const banned = results.filter((ban: BanInfo) => ban.NumberOfGameBans || ban.NumberOfVACBans)
+                .map((ban: BanInfo) => ({
+                    steamID64: ban.SteamId,
+                    banInfo: ban,
+                    matches: [],
+                } as PlayerInfo));
+
+            const summaries: PlayerSummary[] = await this.steamService.getPlayerSummaries(chunk);
+            summaries.forEach(summary => {
+                const friend = banned.find(player => player.steamID64 === summary.steamid);
+                if (friend) {
+                    friend.avatarLink = summary.avatarmedium;
+                    friend.name = summary.personaname;
+                    friend.profileLink = summary.profileurl;
+                    friend.banInfo!.LastBanOn = new Date(new Date().setDate(new Date().getDate() - friend.banInfo!.DaysSinceLastBan)).toISOString();
+                }
+            });
+            this.friendsBanned = [...this.friendsBanned, ...banned];
+            this.cdr.markForCheck();
+        }
+        if (this.friendsBanned.length) {
+            const percentageBanned = this.dataService.getPercentage(this.friendsBanned.length, friendsCount);
+            this.friendsStatus = `friends status : <span class="banned">
+                ${this.friendsBanned.length} / ${friendsCount} (${percentageBanned}%) friends have been banned
+            </span>`;
+        } else {
+            this.friendsStatus = 'friends status : <span class="clean">clean</span>';
+        }
+        this.cdr.markForCheck();
     }
 }

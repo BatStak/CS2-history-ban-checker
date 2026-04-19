@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { debounceTime, Subject } from 'rxjs';
 import { DataService, WinrateData as MapData } from '../../../services/data.service';
 
@@ -13,6 +13,7 @@ type columnType = 'map' | 'sampleSize' | 'banrate' | 'winrate';
 })
 export class MapDatasComponent implements OnInit {
     readonly dataService = inject(DataService);
+    readonly cdr = inject(ChangeDetectorRef);
 
     winRateUpdated = new Subject<Event>();
 
@@ -36,14 +37,14 @@ export class MapDatasComponent implements OnInit {
     async ngOnInit() {
         this.dataService.onSave.pipe(debounceTime(this.dataService.refreshDebounceTimeInMs)).subscribe(() => {
             if (this.display) {
-                this._update();
+                this.update();
             }
         });
 
         this.winRateUpdated.pipe(debounceTime(this.dataService.refreshDebounceTimeInMs)).subscribe((event: Event) => {
             if (this.display) {
                 this.recentMapsSamplesize = (event.target as HTMLInputElement).valueAsNumber;
-                this._update();
+                this.update();
             }
         });
     }
@@ -62,11 +63,11 @@ export class MapDatasComponent implements OnInit {
     async toggle() {
         this.display = !this.display;
         if (this.display && !this.mapDatas.length) {
-            this._update();
+            this.update();
         }
     }
 
-    private async _update() {
+    private async update() {
         this.mapDatas = await this.dataService.getMapDatas(this.recentMapsSamplesize);
         this.sort();
         const allMapsData = this.mapDatas.find((a) => a.map === 'All maps')!;
@@ -76,6 +77,7 @@ export class MapDatasComponent implements OnInit {
         this.allMapsSampleSize = allMapsData.sampleSize;
         this.recentMapsWinCount = allMapsData.mostRecentWinsCount || 0;
         this.recentMapsPercentage = this.dataService.getPercentage(this.recentMapsWinCount, this.recentMapsRealSamplesize);
+        this.cdr.markForCheck();
     }
 
     private sort() {
